@@ -2,30 +2,11 @@ import {
   onAuthStateChanged,
   type User as FirebaseAuthUser,
 } from "firebase/auth";
-import {
-  doc,
-  getDoc,
-  setDoc,
-  serverTimestamp,
-  type FieldValue,
-} from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
-
-export type UserProfileBootstrap = {
-  uid: string;
-  fullName: string;
-  email: string;
-  photoURL: string;
-  role: "user";
-  accountStatus: "active";
-  isEmailVerified: boolean;
-  createdAt: FieldValue;
-  updatedAt: FieldValue;
-};
+import { auth } from "@/lib/firebase";
+import { ensureUserProfile } from "@/services/userProfileService";
 
 /**
- * When a user signs in, ensure `users/{uid}` exists.
- * Uses `getDoc` + `setDoc` with `serverTimestamp()` for first-time creation.
+ * When a user signs in, ensure `users/{uid}` exists (shared logic with auth flows).
  *
  * @returns Unsubscribe function — call on unmount (e.g. in a Client Component `useEffect`).
  */
@@ -38,26 +19,7 @@ export function subscribeEnsureUserProfile(
     }
 
     try {
-      const userRef = doc(db, "users", user.uid);
-      const snapshot = await getDoc(userRef);
-
-      if (snapshot.exists()) {
-        return;
-      }
-
-      const payload: UserProfileBootstrap = {
-        uid: user.uid,
-        fullName: user.displayName ?? "",
-        email: user.email ?? "",
-        photoURL: user.photoURL ?? "",
-        role: "user",
-        accountStatus: "active",
-        isEmailVerified: user.emailVerified,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      };
-
-      await setDoc(userRef, payload);
+      await ensureUserProfile(user);
     } catch (error) {
       onError?.(error);
     }

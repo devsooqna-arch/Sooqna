@@ -4,30 +4,31 @@ import { getFirestore, type Firestore } from "firebase/firestore";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 /**
- * Next.js exposes only `NEXT_PUBLIC_*` env vars to the browser bundle.
- * Set these in `.env.local` (see `.env.local.example`).
+ * Next.js inlines only **direct** `process.env.NEXT_PUBLIC_*` reads at build time.
+ * Do not use dynamic keys like `process.env[name]` — they become `undefined` in the browser bundle.
+ *
+ * Set values in `apps/web/.env.local` (see `.env.local.example`).
  */
-function requirePublicEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(
-      `Missing ${name}. Add it to apps/web/.env.local (see .env.local.example).`
-    );
-  }
-  return value;
-}
-
 const firebaseConfig = {
-  apiKey: requirePublicEnv("NEXT_PUBLIC_FIREBASE_API_KEY"),
-  authDomain: requirePublicEnv("NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN"),
-  projectId: requirePublicEnv("NEXT_PUBLIC_FIREBASE_PROJECT_ID"),
-  storageBucket: requirePublicEnv("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET"),
-  messagingSenderId: requirePublicEnv("NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID"),
-  appId: requirePublicEnv("NEXT_PUBLIC_FIREBASE_APP_ID"),
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
+function assertFirebaseConfig(): void {
+  if (!firebaseConfig.apiKey) {
+    throw new Error(
+      "Missing NEXT_PUBLIC_FIREBASE_API_KEY. Add apps/web/.env.local from .env.local.example and restart the dev server."
+    );
+  }
+}
+
 function getFirebaseApp(): FirebaseApp {
+  assertFirebaseConfig();
   if (!getApps().length) {
     return initializeApp(firebaseConfig);
   }
