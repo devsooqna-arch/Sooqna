@@ -9,7 +9,8 @@
     "shell": "npm run build && firebase functions:shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "seed:categories": "tsx scripts/seedCategories.ts"
+    "seed:categories": "tsx scripts/seedCategories.ts",
+    "seed:demo": "tsx scripts/seedDemoData.ts"
   },
   "engines": {
     "node": ">=20"

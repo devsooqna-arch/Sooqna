@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CategoriesList } from "@/components/test/CategoriesList";
 
 export default function HomePage() {
   return (
@@ -13,6 +14,10 @@ export default function HomePage() {
           صفحة اختبار المصادقة والملف الشخصي →
         </Link>
       </p>
+      <section className="mt-8 max-w-xl">
+        <h2 className="text-lg font-medium text-slate-900">Categories (Test)</h2>
+        <CategoriesList />
+      </section>
     </main>
   );
 }

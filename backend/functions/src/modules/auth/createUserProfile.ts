@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions/v1";
-import { FieldValue, getFirestore } from "firebase-admin/firestore";
-import { ensureAdminApp } from "../../config/admin";
+import { FieldValue } from "firebase-admin/firestore";
+import { adminDb, ensureAdminApp } from "../../config/admin";
 
 ensureAdminApp();
 
@@ -8,9 +8,8 @@ ensureAdminApp();
  * When a new Firebase Auth user is created, mirror a profile document in Firestore.
  * Server-side source of truth complements the client `subscribeEnsureUserProfile` guard.
  */
-export const createUserProfile = functions.auth.user().onCreate(async (user) => {
-  const db = getFirestore();
-  const ref = db.collection("users").doc(user.uid);
+export const onUserCreated = functions.auth.user().onCreate(async (user) => {
+  const ref = adminDb.collection("users").doc(user.uid);
 
   await ref.set(
     {
@@ -27,3 +26,8 @@ export const createUserProfile = functions.auth.user().onCreate(async (user) => 
     { merge: true }
   );
 });
+
+/**
+ * Backward-compatible export name used by current project modules.
+ */
+export const createUserProfile = onUserCreated;

@@ -1,6 +1,6 @@
 import { HttpsError, onCall } from "firebase-functions/v2/https";
-import { FieldValue, getFirestore } from "firebase-admin/firestore";
-import { ensureAdminApp } from "../../config/admin";
+import { FieldValue } from "firebase-admin/firestore";
+import { adminDb, ensureAdminApp } from "../../config/admin";
 
 ensureAdminApp();
 
@@ -35,19 +35,31 @@ export const createListing = onCall<CreateListingRequest>(async (request) => {
   }
 
   const trimmedTitle = title.trim();
-  const db = getFirestore();
-  const docRef = db.collection("listings").doc();
+  const docRef = adminDb.collection("listings").doc();
 
   await docRef.set({
     title: trimmedTitle,
     titleLower: trimmedTitle.toLowerCase(),
+    description: "",
     price,
+    currency: "JOD",
+    priceType: "fixed",
     categoryId: categoryId.trim(),
     ownerId: uid,
     status: "draft",
+    condition: "used",
+    contactPreference: "chat",
+    viewsCount: 0,
+    favoritesCount: 0,
+    messagesCount: 0,
+    isFeatured: false,
+    isApproved: false,
+    publishedAt: null,
+    expiresAt: null,
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
+    deletedAt: null,
   });
 
-  return { listingId: docRef.id };
+  return { success: true, listingId: docRef.id };
 });
