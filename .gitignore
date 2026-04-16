@@ -1,3 +1,9 @@
 .firebase/
 firebase-debug.log
 *-debug.log
+backend/api/uploads/listings/*
+backend/api/uploads/profiles/*
+!backend/api/uploads/listings/.gitkeep
+!backend/api/uploads/profiles/.gitkeep
+backend/api/.env
+backend/api/*.local

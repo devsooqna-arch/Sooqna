@@ -1,0 +1,17 @@
+{
+  "name": "sooqna-mobile",
+  "private": true,
+  "version": "1.0.0",
+  "description": "React Native foundation for Sooqna mobile client",
+  "scripts": {
+    "start": "echo \"Scaffold only: integrate with Expo/React Native CLI as next step\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "firebase": "^11.6.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
+

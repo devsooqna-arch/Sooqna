@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.uploadRouter = void 0;
+const express_1 = require("express");
+const verifyFirebaseToken_1 = require("../../middleware/verifyFirebaseToken");
+const uploads_controller_1 = require("./uploads.controller");
+const uploads_config_1 = require("./uploads.config");
+const listingUploader = (0, uploads_config_1.createImageUploader)("listings");
+exports.uploadRouter = (0, express_1.Router)();
+exports.uploadRouter.post("/listing-image", verifyFirebaseToken_1.verifyFirebaseToken, listingUploader.single("image"), uploads_controller_1.uploadListingImage);
