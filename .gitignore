@@ -1,9 +1,20 @@
 .firebase/
 firebase-debug.log
 *-debug.log
-backend/api/uploads/listings/*
-backend/api/uploads/profiles/*
-!backend/api/uploads/listings/.gitkeep
-!backend/api/uploads/profiles/.gitkeep
-backend/api/.env
-backend/api/*.local
+
+# Web
+apps/web/.env.local
+apps/web/.env.*.local
+
+# Backend
+backend/sooqna-backend/.env
+backend/sooqna-backend/*.local
+backend/sooqna-backend/uploads/listings/*
+backend/sooqna-backend/uploads/profiles/*
+!backend/sooqna-backend/uploads/listings/.gitkeep
+!backend/sooqna-backend/uploads/profiles/.gitkeep
+
+# Node / build
+**/node_modules/
+**/.next/
+**/dist/

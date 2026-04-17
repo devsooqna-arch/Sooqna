@@ -1,0 +1,35 @@
+[
+  {
+    "id": "cars",
+    "name": {
+      "ar": "سيارات",
+      "en": "Cars"
+    },
+    "slug": "cars",
+    "isActive": true,
+    "sortOrder": 1,
+    "createdAt": "2026-04-16T00:00:00.000Z"
+  },
+  {
+    "id": "real-estate",
+    "name": {
+      "ar": "عقارات",
+      "en": "Real Estate"
+    },
+    "slug": "real-estate",
+    "isActive": true,
+    "sortOrder": 2,
+    "createdAt": "2026-04-16T00:00:00.000Z"
+  },
+  {
+    "id": "electronics",
+    "name": {
+      "ar": "إلكترونيات",
+      "en": "Electronics"
+    },
+    "slug": "electronics",
+    "isActive": true,
+    "sortOrder": 3,
+    "createdAt": "2026-04-16T00:00:00.000Z"
+  }
+]

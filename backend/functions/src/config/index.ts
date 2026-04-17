@@ -1,1 +1,0 @@
-export { ensureAdminApp } from "./admin";

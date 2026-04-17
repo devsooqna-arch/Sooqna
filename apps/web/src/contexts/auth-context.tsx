@@ -24,7 +24,7 @@ function debugAuth(...args: unknown[]) {
 export type AuthContextValue = {
   currentUser: User | null;
   loading: boolean;
-  /** Create account with email/password + display name; ensures Firestore profile. */
+  /** Create account with email/password + display name; ensures backend profile. */
   register: (email: string, password: string, fullName: string) => Promise<void>;
   /** Email/password — throws on failure (handle in UI with `getAuthErrorMessage`). */
   login: (email: string, password: string) => Promise<void>;
@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearTimeout(safety);
 
       // Safety net for all providers (email/google/etc):
-      // whenever a user session exists, ensure Firestore profile exists/updated.
+      // whenever a user session exists, ensure backend profile exists/updated.
       if (user) {
         void ensureUserProfile(user)
           .then(({ created }) => {

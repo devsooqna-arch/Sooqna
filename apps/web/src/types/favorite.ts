@@ -1,8 +1,6 @@
-import type { Timestamp } from "firebase/firestore";
-
 export interface Favorite {
   listingId: string;
-  createdAt: Timestamp | null;
+  createdAt: string | null;
 }
 
 /**

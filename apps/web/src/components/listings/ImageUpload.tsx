@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { addImageToListing } from "@/services/listingImageService";
-import { uploadImage } from "@/services/storageService";
+import { attachListingImage } from "@/services/listingService";
+import { uploadImage } from "@/services/backendUploadService";
 
 type ImageUploadProps = {
   listingId: string;
@@ -39,8 +39,8 @@ export function ImageUpload({ listingId, userId, onUploaded }: ImageUploadProps)
     setSubmitting(true);
 
     try {
-      const uploaded = await uploadImage(file, userId);
-      await addImageToListing(listingId, uploaded);
+      const uploaded = await uploadImage(file);
+      await attachListingImage(listingId, uploaded);
 
       setUploadedUrl(uploaded.url);
       setUploadedPath(uploaded.path);

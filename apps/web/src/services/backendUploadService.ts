@@ -40,3 +40,5 @@ export async function uploadBackendListingImage(
   return (await response.json()) as UploadListingImageResult;
 }
 
+export { uploadBackendListingImage as uploadImage };
+

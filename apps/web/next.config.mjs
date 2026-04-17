@@ -24,8 +24,6 @@ const nextConfig = {
     "firebase",
     "@firebase/app",
     "@firebase/auth",
-    "@firebase/firestore",
-    "@firebase/storage",
     "@firebase/component",
     "@firebase/logger",
     "@firebase/util",

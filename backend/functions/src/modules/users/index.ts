@@ -1,2 +1,0 @@
-/** User domain functions. */
-export {};

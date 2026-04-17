@@ -3,7 +3,7 @@ import { UserSessionPage } from "@/components/me/UserSessionPage";
 
 export const metadata: Metadata = {
   title: "حسابي | Sooqna",
-  description: "بيانات المستخدم من Firebase و Firestore",
+  description: "بيانات المستخدم من Firebase Auth و Backend",
 };
 
 export default function MePage() {

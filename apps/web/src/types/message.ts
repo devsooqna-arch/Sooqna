@@ -1,5 +1,3 @@
-import type { Timestamp } from "firebase/firestore";
-
 export type MessageType = "text" | "image" | "system";
 
 export interface ConversationParticipant {
@@ -21,11 +19,11 @@ export interface Conversation {
   createdBy: string;
   lastMessageText: string;
   lastMessageSenderId: string;
-  lastMessageAt: Timestamp | null;
+  lastMessageAt: string | null;
   lastMessageType: MessageType;
   isActive: boolean;
-  createdAt: Timestamp | null;
-  updatedAt: Timestamp | null;
+  createdAt: string | null;
+  updatedAt: string | null;
 }
 
 export interface Message {
@@ -35,9 +33,9 @@ export interface Message {
   text: string;
   attachments: unknown[];
   isRead: boolean;
-  readAt: Timestamp | null;
-  createdAt: Timestamp | null;
-  deletedAt: Timestamp | null;
+  readAt: string | null;
+  createdAt: string | null;
+  deletedAt: string | null;
 }
 
 export interface CreateConversationInput {

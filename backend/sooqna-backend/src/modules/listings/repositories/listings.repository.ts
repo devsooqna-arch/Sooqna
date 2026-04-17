@@ -1,0 +1,185 @@
+import { prisma } from "../../../config/prisma";
+import { parseIso, toIso } from "../../../shared/utils/dates";
+import type { Listing } from "../listings.types";
+
+export interface ListingsRepository {
+  create(listing: Listing): Promise<Listing>;
+  list(): Promise<Listing[]>;
+  findById(id: string): Promise<Listing | null>;
+  update(id: string, listing: Listing): Promise<Listing>;
+}
+
+type ListingWithImages = Awaited<ReturnType<typeof prisma.listing.findFirst>> & {
+  listingImages?: Array<{ url: string; path: string; isPrimary: boolean; order: number }>;
+};
+
+function mapListing(record: ListingWithImages): Listing {
+  if (!record) {
+    throw new Error("Listing not found.");
+  }
+  const listing = record;
+  return {
+    id: listing.id,
+    title: listing.title,
+    titleLower: listing.titleLower,
+    description: listing.description,
+    price: listing.price,
+    currency: listing.currency as "JOD",
+    priceType: listing.priceType as Listing["priceType"],
+    categoryId: listing.categoryId,
+    ownerId: listing.ownerId ?? "",
+    ownerSnapshot: {
+      fullName: listing.ownerSnapshotName,
+      photoURL: listing.ownerSnapshotPhotoUrl,
+    },
+    location: {
+      country: listing.locationCountry,
+      city: listing.locationCity,
+      area: listing.locationArea,
+    },
+    images: (listing.listingImages ?? []).map((img) => ({
+      url: img.url,
+      path: img.path,
+      isPrimary: img.isPrimary,
+      order: img.order,
+    })),
+    status: listing.status as Listing["status"],
+    condition: listing.condition as Listing["condition"],
+    contactPreference: listing.contactPreference as Listing["contactPreference"],
+    viewsCount: listing.viewsCount,
+    favoritesCount: listing.favoritesCount,
+    messagesCount: listing.messagesCount,
+    isFeatured: listing.isFeatured,
+    isApproved: listing.isApproved,
+    publishedAt: toIso(listing.publishedAt),
+    expiresAt: toIso(listing.expiresAt),
+    createdAt: listing.createdAt.toISOString(),
+    updatedAt: listing.updatedAt.toISOString(),
+    deletedAt: toIso(listing.deletedAt),
+  };
+}
+
+export class PrismaListingsRepository implements ListingsRepository {
+  async create(listing: Listing): Promise<Listing> {
+    try {
+      const created = await prisma.listing.create({
+        data: {
+          id: listing.id,
+          title: listing.title,
+          titleLower: listing.titleLower,
+          description: listing.description,
+          price: listing.price,
+          currency: listing.currency,
+          priceType: listing.priceType,
+          categoryId: listing.categoryId,
+          ownerId: listing.ownerId,
+          ownerSnapshotName: listing.ownerSnapshot.fullName,
+          ownerSnapshotPhotoUrl: listing.ownerSnapshot.photoURL,
+          locationCountry: listing.location.country,
+          locationCity: listing.location.city,
+          locationArea: listing.location.area,
+          status: listing.status,
+          condition: listing.condition,
+          contactPreference: listing.contactPreference,
+          viewsCount: listing.viewsCount,
+          favoritesCount: listing.favoritesCount,
+          messagesCount: listing.messagesCount,
+          isFeatured: listing.isFeatured,
+          isApproved: listing.isApproved,
+          publishedAt: parseIso(listing.publishedAt),
+          expiresAt: parseIso(listing.expiresAt),
+          createdAt: new Date(listing.createdAt),
+          updatedAt: new Date(listing.updatedAt),
+          deletedAt: parseIso(listing.deletedAt),
+          listingImages: {
+            create: listing.images.map((image) => ({
+              url: image.url,
+              path: image.path,
+              isPrimary: image.isPrimary,
+              order: image.order,
+            })),
+          },
+        },
+        include: { listingImages: { orderBy: { order: "asc" } } },
+      });
+      return mapListing(created);
+    } catch {
+      throw new Error("Failed to create listing.");
+    }
+  }
+
+  async list(): Promise<Listing[]> {
+    try {
+      const listings = await prisma.listing.findMany({
+        where: { deletedAt: null },
+        orderBy: { createdAt: "desc" },
+        include: { listingImages: { orderBy: { order: "asc" } } },
+      });
+      return listings.map(mapListing);
+    } catch {
+      throw new Error("Failed to list listings.");
+    }
+  }
+
+  async findById(id: string): Promise<Listing | null> {
+    try {
+      const listing = await prisma.listing.findFirst({
+        where: { id, deletedAt: null },
+        include: { listingImages: { orderBy: { order: "asc" } } },
+      });
+      return listing ? mapListing(listing) : null;
+    } catch {
+      throw new Error("Failed to fetch listing.");
+    }
+  }
+
+  async update(id: string, listing: Listing): Promise<Listing> {
+    try {
+      await prisma.listingImage.deleteMany({ where: { listingId: id } });
+      const updated = await prisma.listing.update({
+        where: { id },
+        data: {
+          title: listing.title,
+          titleLower: listing.titleLower,
+          description: listing.description,
+          price: listing.price,
+          currency: listing.currency,
+          priceType: listing.priceType,
+          categoryId: listing.categoryId,
+          ownerId: listing.ownerId,
+          ownerSnapshotName: listing.ownerSnapshot.fullName,
+          ownerSnapshotPhotoUrl: listing.ownerSnapshot.photoURL,
+          locationCountry: listing.location.country,
+          locationCity: listing.location.city,
+          locationArea: listing.location.area,
+          status: listing.status,
+          condition: listing.condition,
+          contactPreference: listing.contactPreference,
+          viewsCount: listing.viewsCount,
+          favoritesCount: listing.favoritesCount,
+          messagesCount: listing.messagesCount,
+          isFeatured: listing.isFeatured,
+          isApproved: listing.isApproved,
+          publishedAt: parseIso(listing.publishedAt),
+          expiresAt: parseIso(listing.expiresAt),
+          createdAt: new Date(listing.createdAt),
+          updatedAt: new Date(listing.updatedAt),
+          deletedAt: parseIso(listing.deletedAt),
+          listingImages: {
+            create: listing.images.map((image) => ({
+              url: image.url,
+              path: image.path,
+              isPrimary: image.isPrimary,
+              order: image.order,
+            })),
+          },
+        },
+        include: { listingImages: { orderBy: { order: "asc" } } },
+      });
+      return mapListing(updated);
+    } catch {
+      throw new Error("Listing not found.");
+    }
+  }
+}
+

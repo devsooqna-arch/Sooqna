@@ -2,10 +2,9 @@
 
 import { useMemo, useState } from "react";
 import type { User } from "firebase/auth";
-import { Timestamp } from "firebase/firestore";
 import { useAuth } from "@/hooks/useAuth";
-import { useFirestoreUserDoc } from "@/hooks/useFirestoreUserDoc";
 import { getAuthErrorMessage } from "@/services/authService";
+import { apiFetch } from "@/services/apiClient";
 
 function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
@@ -22,8 +21,7 @@ function pickAuthUserFields(user: User) {
   };
 }
 
-/** Spec fields from Firestore users/{uid} with readable timestamps */
-function pickFirestoreProfileFields(data: Record<string, unknown> | null) {
+function pickProfileFields(data: Record<string, unknown> | null) {
   if (!data) return null;
   const keys = [
     "uid",
@@ -40,14 +38,7 @@ function pickFirestoreProfileFields(data: Record<string, unknown> | null) {
   const out: Record<string, unknown> = {};
   for (const k of keys) {
     const v = data[k];
-    if (v instanceof Timestamp) {
-      out[k] = v.toDate().toISOString();
-    } else if (v && typeof v === "object" && "seconds" in v) {
-      const s = (v as { seconds: number }).seconds;
-      out[k] = new Date(s * 1000).toISOString();
-    } else {
-      out[k] = v ?? null;
-    }
+    out[k] = v ?? null;
   }
   return out;
 }
@@ -75,17 +66,33 @@ export function AuthTestPanel() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const firestore = useFirestoreUserDoc(currentUser?.uid);
+  const [profileData, setProfileData] = useState<Record<string, unknown> | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
 
   const authDisplay = useMemo(
     () => (currentUser ? pickAuthUserFields(currentUser) : null),
     [currentUser]
   );
 
-  const firestoreDisplay = useMemo(
-    () => pickFirestoreProfileFields(firestore.data),
-    [firestore.data]
-  );
+  const profileDisplay = useMemo(() => pickProfileFields(profileData), [profileData]);
+
+  async function reloadProfile(): Promise<void> {
+    if (!currentUser) return;
+    setProfileLoading(true);
+    setProfileError(null);
+    try {
+      const result = await apiFetch<{ success: true; profile: Record<string, unknown> | null }>(
+        "/users/me",
+        { authenticated: true }
+      );
+      setProfileData(result.profile);
+    } catch (e) {
+      setProfileError(e instanceof Error ? e.message : "Failed to load profile.");
+    } finally {
+      setProfileLoading(false);
+    }
+  }
 
   function validateSignUp(): boolean {
     if (!signupFullName.trim()) {
@@ -130,7 +137,8 @@ export function AuthTestPanel() {
     setBusy("signup");
     try {
       await register(signupEmail, signupPassword, signupFullName);
-      setMessage("تم إنشاء الحساب، وتحديث الملف في Firestore.");
+      await reloadProfile();
+      setMessage("تم إنشاء الحساب وتحديث الملف الشخصي على السيرفر.");
     } catch (e) {
       setError(getAuthErrorMessage(e));
     } finally {
@@ -145,7 +153,8 @@ export function AuthTestPanel() {
     setBusy("login");
     try {
       await login(loginEmail, loginPassword);
-      setMessage("تم تسجيل الدخول وتحديث الملف في Firestore.");
+      await reloadProfile();
+      setMessage("تم تسجيل الدخول وتحديث الملف الشخصي على السيرفر.");
     } catch (e) {
       setError(getAuthErrorMessage(e));
     } finally {
@@ -159,7 +168,8 @@ export function AuthTestPanel() {
     setBusy("google");
     try {
       await loginWithGoogle();
-      setMessage("تم تسجيل الدخول بـ Google وتحديث الملف في Firestore.");
+      await reloadProfile();
+      setMessage("تم تسجيل الدخول بـ Google وتحديث الملف الشخصي على السيرفر.");
     } catch (e) {
       setError(getAuthErrorMessage(e));
     } finally {
@@ -190,7 +200,8 @@ export function AuthTestPanel() {
           اختبار المصادقة — /auth-test
         </h1>
         <p className="text-sm text-slate-600">
-          نماذج منفصلة للتسجيل والدخول، Google بالـ popup، وعرض بيانات Auth وFirestore.
+          نماذج منفصلة للتسجيل والدخول، Google بالـ popup، وعرض بيانات Auth والملف
+          الشخصي من Backend.
         </p>
         <a
           href="/"
@@ -371,21 +382,31 @@ export function AuthTestPanel() {
 
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
               <h3 className="mb-3 text-sm font-semibold text-slate-900">
-                B) Firestore User Document — users/{currentUser.uid}
+                B) Backend User Profile — /api/users/me
               </h3>
-              {firestore.loading ? (
+              <div className="mb-3 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => void reloadProfile()}
+                  disabled={profileLoading}
+                  className="rounded border border-slate-300 px-2 py-1 text-xs text-slate-700 disabled:opacity-60"
+                >
+                  {profileLoading ? "Loading..." : "Reload profile"}
+                </button>
+              </div>
+              {profileLoading ? (
                 <p className="text-sm text-slate-500">جاري جلب المستند…</p>
-              ) : firestore.error ? (
-                <p className="text-sm text-red-600">{firestore.error.message}</p>
-              ) : !firestore.exists ? (
+              ) : profileError ? (
+                <p className="text-sm text-red-600">{profileError}</p>
+              ) : !profileData ? (
                 <p className="text-sm text-amber-800">
-                  لا يوجد مستند بعد. بعد الضغط على تسجيل/دخول يجب أن يُنشأ عبر{" "}
+                  لا يوجد ملف بعد. بعد الضغط على تسجيل/دخول يجب أن يُنشأ عبر{" "}
                   <code className="rounded bg-slate-100 px-1">ensureUserProfile</code>.
                 </p>
               ) : (
                 <dl className="space-y-2 text-sm">
-                  {firestoreDisplay &&
-                    Object.entries(firestoreDisplay).map(([k, v]) => (
+                  {profileDisplay &&
+                    Object.entries(profileDisplay).map(([k, v]) => (
                       <div
                         key={k}
                         className="grid grid-cols-[8rem_1fr] gap-2 border-b border-slate-100 py-1 last:border-0"

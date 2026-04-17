@@ -1,0 +1,159 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id              String   @id
+  firebaseUid     String   @unique
+  email           String
+  name            String
+  avatarUrl       String?
+  role            String
+  accountStatus   String
+  isEmailVerified Boolean
+  createdAt       DateTime
+  updatedAt       DateTime
+
+  listings  Listing[]
+  favorites Favorite[]
+}
+
+model Listing {
+  id                    String    @id
+  title                 String
+  titleLower            String
+  description           String
+  price                 Float
+  currency              String
+  priceType             String
+  categoryId            String
+  ownerId               String?
+  ownerSnapshotName     String
+  ownerSnapshotPhotoUrl String
+  locationCountry       String
+  locationCity          String
+  locationArea          String
+  status                String
+  condition             String
+  contactPreference     String
+  viewsCount            Int
+  favoritesCount        Int
+  messagesCount         Int
+  isFeatured            Boolean
+  isApproved            Boolean
+  publishedAt           DateTime?
+  expiresAt             DateTime?
+  createdAt             DateTime
+  updatedAt             DateTime
+  deletedAt             DateTime?
+
+  owner         User?          @relation(fields: [ownerId], references: [firebaseUid], onDelete: SetNull)
+  favorites     Favorite[]
+  uploads       Upload[]
+  listingImages ListingImage[]
+}
+
+model ListingImage {
+  id        String  @id @default(cuid())
+  listingId String
+  url       String
+  path      String
+  isPrimary Boolean
+  order     Int
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  listingId String?
+  createdAt DateTime
+
+  user    User     @relation(fields: [userId], references: [firebaseUid], onDelete: Cascade)
+  listing Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, listingId], map: "favorites_user_listing_unique")
+  @@index([userId])
+}
+
+model Conversation {
+  id                             String    @id
+  listingId                      String
+  listingSnapshotTitle           String
+  listingSnapshotPrimaryImageURL String
+  createdBy                      String
+  lastMessageText                String
+  lastMessageSenderId            String
+  lastMessageAt                  DateTime?
+  lastMessageType                String
+  isActive                       Boolean
+  createdAt                      DateTime
+  updatedAt                      DateTime
+
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+model ConversationParticipant {
+  id             String @id @default(cuid())
+  conversationId String
+  userId         String
+  fullName       String
+  photoURL       String
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String    @id
+  conversationId String
+  senderId       String
+  type           String
+  text           String
+  attachments    Json
+  isRead         Boolean
+  readAt         DateTime?
+  createdAt      DateTime
+  deletedAt      DateTime?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+}
+
+model Category {
+  id        String    @id
+  nameAr    String
+  nameEn    String
+  slug      String
+  isActive  Boolean
+  sortOrder Int
+  createdAt DateTime?
+  updatedAt DateTime?
+}
+
+model Upload {
+  id        String   @id @default(cuid())
+  url       String
+  path      String
+  listingId String?
+  createdAt DateTime
+
+  listing Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+}

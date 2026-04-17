@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { User } from "firebase/auth";
-import { Timestamp } from "firebase/firestore";
 import { useAuth } from "@/hooks/useAuth";
-import { useFirestoreUserDoc } from "@/hooks/useFirestoreUserDoc";
+import { apiFetch } from "@/services/apiClient";
 
 const AFTER_LOGIN_PATH = "/me";
 
@@ -20,7 +19,7 @@ function authFields(user: User) {
   };
 }
 
-function formatFirestoreForDisplay(data: Record<string, unknown> | null) {
+function formatProfileForDisplay(data: Record<string, unknown> | null) {
   if (!data) return null;
   const keys = [
     "uid",
@@ -36,14 +35,7 @@ function formatFirestoreForDisplay(data: Record<string, unknown> | null) {
   const out: Record<string, unknown> = {};
   for (const k of keys) {
     const v = data[k];
-    if (v instanceof Timestamp) {
-      out[k] = v.toDate().toISOString();
-    } else if (v && typeof v === "object" && "seconds" in v) {
-      const s = (v as { seconds: number }).seconds;
-      out[k] = new Date(s * 1000).toISOString();
-    } else {
-      out[k] = v ?? null;
-    }
+    out[k] = v ?? null;
   }
   return out;
 }
@@ -51,7 +43,9 @@ function formatFirestoreForDisplay(data: Record<string, unknown> | null) {
 export function UserSessionPage() {
   const router = useRouter();
   const { currentUser, loading, logout } = useAuth();
-  const firestore = useFirestoreUserDoc(currentUser?.uid);
+  const [profileData, setProfileData] = useState<Record<string, unknown> | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !currentUser) {
@@ -75,14 +69,39 @@ export function UserSessionPage() {
     );
   }
 
-  const fsDisplay = formatFirestoreForDisplay(firestore.data);
+  useEffect(() => {
+    if (!currentUser) return;
+    let mounted = true;
+    setProfileLoading(true);
+    setProfileError(null);
+    void apiFetch<{ success: true; profile: Record<string, unknown> | null }>("/users/me", {
+      authenticated: true,
+    })
+      .then((result) => {
+        if (!mounted) return;
+        setProfileData(result.profile);
+      })
+      .catch((e) => {
+        if (!mounted) return;
+        setProfileError(e instanceof Error ? e.message : "Failed to load profile.");
+      })
+      .finally(() => {
+        if (!mounted) return;
+        setProfileLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [currentUser]);
+
+  const profileDisplay = useMemo(() => formatProfileForDisplay(profileData), [profileData]);
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-8">
       <div className="w-full text-center">
         <h1 className="text-2xl font-semibold text-slate-900">بيانات حسابك</h1>
         <p className="mt-1 text-sm text-slate-500">
-          معلومات من Firebase Auth ومستند Firestore
+          معلومات من Firebase Auth وملف المستخدم من Backend
         </p>
       </div>
 
@@ -108,11 +127,11 @@ export function UserSessionPage() {
       <section className="w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-semibold text-slate-800">
-            Firestore — users/{currentUser.uid}
+            Backend Profile — /api/users/me
           </h2>
-          {firestore.loading ? (
+          {profileLoading ? (
             <span className="text-xs text-slate-400">جاري الجلب…</span>
-          ) : firestore.exists ? (
+          ) : profileData ? (
             <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-800">
               موجود
             </span>
@@ -122,12 +141,12 @@ export function UserSessionPage() {
             </span>
           )}
         </div>
-        {firestore.error && (
-          <p className="mb-3 text-xs text-red-600">{firestore.error.message}</p>
+        {profileError && (
+          <p className="mb-3 text-xs text-red-600">{profileError}</p>
         )}
-        {fsDisplay ? (
+        {profileDisplay ? (
           <dl className="space-y-2 text-sm">
-            {Object.entries(fsDisplay).map(([k, v]) => (
+            {Object.entries(profileDisplay).map(([k, v]) => (
               <div
                 key={k}
                 className="grid grid-cols-[7.5rem_1fr] gap-2 border-b border-slate-100 py-1.5 last:border-0 sm:grid-cols-[9rem_1fr]"
@@ -141,7 +160,7 @@ export function UserSessionPage() {
           </dl>
         ) : (
           <p className="text-sm text-slate-500">
-            لا يوجد مستند بعد — سيتم إنشاؤه تلقائياً بعد تسجيل الدخول.
+            لا يوجد ملف بعد — سيتم إنشاؤه تلقائياً بعد تسجيل الدخول.
           </p>
         )}
       </section>

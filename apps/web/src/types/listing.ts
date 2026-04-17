@@ -1,5 +1,3 @@
-import type { Timestamp } from "firebase/firestore";
-
 export type ListingPriceType = "fixed" | "negotiable" | "contact";
 export type ListingStatus =
   | "draft"
@@ -50,16 +48,15 @@ export interface Listing {
   messagesCount: number;
   isFeatured: boolean;
   isApproved: boolean;
-  publishedAt: Timestamp | null;
-  expiresAt: Timestamp | null;
-  createdAt: Timestamp | null;
-  updatedAt: Timestamp | null;
-  deletedAt: Timestamp | null;
+  publishedAt: string | null;
+  expiresAt: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+  deletedAt: string | null;
 }
 
 /**
- * Milestone 1: only these fields are currently validated by the callable function.
- * Extra form fields are captured client-side and ready for future expansion.
+ * Milestone 1 input accepted by backend REST API.
  */
 export interface CreateListingInput {
   title: string;

@@ -186,8 +186,8 @@ export function CreateListingForm() {
       </div>
 
       <p className="text-xs text-slate-500">
-        Milestone 1 note: callable function currently accepts only title, price, and categoryId.
-        Other fields are captured for upcoming schema expansion.
+        Milestone 1 note: backend listing creation currently requires title, price, and
+        categoryId. Other fields are captured for upcoming schema expansion.
       </p>
 
       <button

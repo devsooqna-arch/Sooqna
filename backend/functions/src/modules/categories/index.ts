@@ -1,2 +1,0 @@
-export { reseedCategories } from "./seedCategoriesCallable";
-

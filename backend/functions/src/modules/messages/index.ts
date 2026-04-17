@@ -1,2 +1,0 @@
-/** Messaging domain functions. */
-export {};
