@@ -20,8 +20,8 @@ Production-focused monorepo with strict separation:
 
 - GitHub Actions workflow: `.github/workflows/ci.yml`
 - Triggered on:
-  - Pull requests to `master`
-  - Pushes to `master`
+  - Pull requests to `main`
+  - Pushes to `main`
 - CI checks:
   - Backend: install, `typecheck`, `build`
   - Web: install, `lint`, `build`
@@ -31,7 +31,7 @@ Production-focused monorepo with strict separation:
 ## Deployment (After CI)
 
 - GitHub Actions workflow: `.github/workflows/deploy.yml`
-- Trigger: automatically after CI finishes successfully on branch `master`
+- Trigger: automatically after CI finishes successfully on branch `main`
 - Target domain: `https://UN.flashpointjordan.com`
 - Deploy target: same server for backend + web via SSH
 
@@ -134,7 +134,7 @@ Run these checks on the production server before first deployment:
 
 11) Final dry-run
 
-- Push a small commit to `master`.
+- Push a small commit to `main`.
 - Confirm `CI` passes first.
 - Confirm `Deploy` runs automatically after CI success.
 - Confirm PM2 processes are healthy:
