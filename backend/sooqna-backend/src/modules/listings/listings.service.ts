@@ -1,5 +1,6 @@
 import { generateId } from "../../utils/ids";
 import { nowIso } from "../../utils/time";
+import { AppError } from "../../shared/errors/appError";
 import { PrismaUsersRepository } from "../users/repositories/users.repository";
 import type { ListingsRepository } from "./repositories/listings.repository";
 import type { Listing } from "./listings.types";
@@ -56,10 +57,11 @@ export class ListingsService {
   }
 
   async create(input: CreateListingInput): Promise<Listing> {
-    if (!input.title.trim()) throw new Error("title is required");
+    if (!input.title.trim()) throw new AppError(400, "title is required", "VALIDATION_ERROR");
     if (!Number.isFinite(input.price) || input.price < 0)
-      throw new Error("price must be non-negative");
-    if (!input.categoryId.trim()) throw new Error("categoryId is required");
+      throw new AppError(400, "price must be non-negative", "VALIDATION_ERROR");
+    if (!input.categoryId.trim())
+      throw new AppError(400, "categoryId is required", "VALIDATION_ERROR");
     await this.ensureOwnerUser({
       uid: input.ownerId,
       email: "",
@@ -119,8 +121,8 @@ export class ListingsService {
     patch: Partial<Pick<Listing, "title" | "description" | "price" | "status">>
   ): Promise<Listing> {
     const existing = await this.repo.findById(listingId);
-    if (!existing) throw new Error("Listing not found");
-    if (existing.ownerId !== userId) throw new Error("Forbidden");
+    if (!existing) throw new AppError(404, "Listing not found", "NOT_FOUND");
+    if (existing.ownerId !== userId) throw new AppError(403, "Forbidden", "FORBIDDEN");
 
     const next: Listing = {
       ...existing,
@@ -139,8 +141,8 @@ export class ListingsService {
 
   async softDelete(listingId: string, userId: string): Promise<Listing> {
     const existing = await this.repo.findById(listingId);
-    if (!existing) throw new Error("Listing not found");
-    if (existing.ownerId !== userId) throw new Error("Forbidden");
+    if (!existing) throw new AppError(404, "Listing not found", "NOT_FOUND");
+    if (existing.ownerId !== userId) throw new AppError(403, "Forbidden", "FORBIDDEN");
 
     const next: Listing = {
       ...existing,
@@ -152,8 +154,8 @@ export class ListingsService {
 
   async attachImage(input: AttachImageInput): Promise<Listing> {
     const listing = await this.repo.findById(input.listingId);
-    if (!listing) throw new Error("Listing not found");
-    if (listing.ownerId !== input.ownerId) throw new Error("Forbidden");
+    if (!listing) throw new AppError(404, "Listing not found", "NOT_FOUND");
+    if (listing.ownerId !== input.ownerId) throw new AppError(403, "Forbidden", "FORBIDDEN");
 
     const nextImages = [
       ...listing.images,

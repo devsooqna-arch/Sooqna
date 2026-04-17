@@ -1,5 +1,6 @@
 import { generateId } from "../../utils/ids";
 import { nowIso } from "../../utils/time";
+import { AppError } from "../../shared/errors/appError";
 import type { MessagesRepository } from "./repositories/messages.repository";
 import type { Conversation, Message, MessageType } from "./messages.types";
 
@@ -23,10 +24,24 @@ export class MessagesService {
   constructor(private readonly repo: MessagesRepository) {}
 
   async createConversation(input: CreateConversationInput): Promise<Conversation> {
+    if (!input.listingId.trim()) {
+      throw new AppError(400, "listingId is required", "VALIDATION_ERROR");
+    }
+    if (!input.listingSnapshot.title.trim()) {
+      throw new AppError(400, "listingSnapshot.title is required", "VALIDATION_ERROR");
+    }
+
+    const participantIds = Array.from(
+      new Set(input.participantIds.map((participantId) => participantId.trim()).filter(Boolean))
+    );
+    if (!participantIds.length) {
+      throw new AppError(400, "participantIds must contain at least one id", "VALIDATION_ERROR");
+    }
+
     const now = nowIso();
     const conversation: Conversation = {
       id: generateId("conv"),
-      participantIds: input.participantIds,
+      participantIds,
       participants: input.participants,
       listingId: input.listingId,
       listingSnapshot: input.listingSnapshot,
@@ -45,7 +60,17 @@ export class MessagesService {
   async createMessage(input: CreateMessageInput): Promise<Message> {
     const now = nowIso();
     const conversation = await this.repo.findConversationById(input.conversationId);
-    if (!conversation) throw new Error("Conversation not found");
+    if (!conversation) throw new AppError(404, "Conversation not found", "NOT_FOUND");
+    if (!conversation.participantIds.includes(input.senderId)) {
+      throw new AppError(
+        403,
+        "You are not a participant in this conversation.",
+        "FORBIDDEN"
+      );
+    }
+    if (input.type === "text" && !input.text.trim()) {
+      throw new AppError(400, "text is required for text messages", "VALIDATION_ERROR");
+    }
 
     const message: Message = {
       id: generateId("msg"),
@@ -77,7 +102,23 @@ export class MessagesService {
     return this.repo.findConversationById(id);
   }
 
-  async getMessages(conversationId: string): Promise<Message[]> {
+  async getConversationForUser(id: string, userId: string): Promise<Conversation> {
+    const conversation = await this.repo.findConversationById(id);
+    if (!conversation) {
+      throw new AppError(404, "Conversation not found", "NOT_FOUND");
+    }
+    if (!conversation.participantIds.includes(userId)) {
+      throw new AppError(
+        403,
+        "You are not a participant in this conversation.",
+        "FORBIDDEN"
+      );
+    }
+    return conversation;
+  }
+
+  async getMessages(conversationId: string, userId: string): Promise<Message[]> {
+    await this.getConversationForUser(conversationId, userId);
     return this.repo.listMessages(conversationId);
   }
 }

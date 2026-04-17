@@ -1,5 +1,6 @@
 import type { DecodedIdToken } from "firebase-admin/auth";
 import { nowIso } from "../../utils/time";
+import { AppError } from "../../shared/errors/appError";
 import type { UserProfile } from "./users.types";
 import type { UsersRepository } from "./repositories/users.repository";
 
@@ -10,6 +11,10 @@ export class UsersService {
     authUser: DecodedIdToken,
     input?: Partial<Pick<UserProfile, "fullName" | "photoURL">>
   ): Promise<UserProfile> {
+    if (!authUser.uid) {
+      throw new AppError(400, "uid is required", "VALIDATION_ERROR");
+    }
+
     const now = nowIso();
     const existing = await this.repo.findByUid(authUser.uid);
 
@@ -29,6 +34,9 @@ export class UsersService {
   }
 
   async getMe(uid: string): Promise<UserProfile | null> {
+    if (!uid.trim()) {
+      throw new AppError(400, "uid is required", "VALIDATION_ERROR");
+    }
     return this.repo.findByUid(uid);
   }
 }

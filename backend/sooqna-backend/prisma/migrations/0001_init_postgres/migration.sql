@@ -4,7 +4,7 @@ CREATE TABLE "User" (
   "firebaseUid" TEXT NOT NULL,
   "email" TEXT NOT NULL,
   "name" TEXT NOT NULL,
-  "avatarUrl" TEXT NOT NULL,
+  "avatarUrl" TEXT,
   "role" TEXT NOT NULL,
   "accountStatus" TEXT NOT NULL,
   "isEmailVerified" BOOLEAN NOT NULL,
@@ -116,6 +116,7 @@ CREATE TABLE "Category" (
   "isActive" BOOLEAN NOT NULL,
   "sortOrder" INTEGER NOT NULL,
   "createdAt" TIMESTAMP(3),
+  "updatedAt" TIMESTAMP(3),
   CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
 );
 
@@ -124,7 +125,7 @@ CREATE TABLE "Upload" (
   "id" TEXT NOT NULL,
   "url" TEXT NOT NULL,
   "path" TEXT NOT NULL,
-  "listingId" TEXT NOT NULL,
+  "listingId" TEXT,
   "createdAt" TIMESTAMP(3) NOT NULL,
   CONSTRAINT "Upload_pkey" PRIMARY KEY ("id")
 );
@@ -172,5 +173,5 @@ ADD CONSTRAINT "Message_conversationId_fkey" FOREIGN KEY ("conversationId") REFE
 
 -- AddForeignKey
 ALTER TABLE "Upload"
-ADD CONSTRAINT "Upload_listingId_fkey" FOREIGN KEY ("listingId") REFERENCES "Listing"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ADD CONSTRAINT "Upload_listingId_fkey" FOREIGN KEY ("listingId") REFERENCES "Listing"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 

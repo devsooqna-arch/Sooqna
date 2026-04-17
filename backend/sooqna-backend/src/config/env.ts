@@ -12,5 +12,6 @@ export const env = {
   firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL ?? "",
   firebasePrivateKey: (process.env.FIREBASE_PRIVATE_KEY ?? "").replace(/\\n/g, "\n"),
   firebaseServiceAccountPath: process.env.FIREBASE_SERVICE_ACCOUNT_PATH ?? "",
+  enableCategoriesJsonFallback: process.env.ENABLE_CATEGORIES_JSON_FALLBACK ?? "false",
 };
 

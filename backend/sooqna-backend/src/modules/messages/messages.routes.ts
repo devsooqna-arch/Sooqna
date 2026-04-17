@@ -1,5 +1,11 @@
 import { Router } from "express";
 import { verifyFirebaseToken } from "../../middleware/verifyFirebaseToken";
+import { validateRequest } from "../../middleware/validateRequest";
+import {
+  conversationIdParamsSchema,
+  createConversationBodySchema,
+  createMessageBodySchema,
+} from "../../shared/validation/schemas";
 import {
   createConversation,
   createMessage,
@@ -9,12 +15,31 @@ import {
 
 export const messagesRouter = Router();
 
-messagesRouter.post("/conversations", verifyFirebaseToken, createConversation);
+messagesRouter.post(
+  "/conversations",
+  verifyFirebaseToken,
+  validateRequest({ body: createConversationBodySchema }),
+  createConversation
+);
 messagesRouter.post(
   "/conversations/:conversationId/messages",
   verifyFirebaseToken,
+  validateRequest({
+    params: conversationIdParamsSchema,
+    body: createMessageBodySchema,
+  }),
   createMessage
 );
-messagesRouter.get("/conversations/:conversationId", getConversation);
-messagesRouter.get("/conversations/:conversationId/messages", getConversationMessages);
+messagesRouter.get(
+  "/conversations/:conversationId",
+  verifyFirebaseToken,
+  validateRequest({ params: conversationIdParamsSchema }),
+  getConversation
+);
+messagesRouter.get(
+  "/conversations/:conversationId/messages",
+  verifyFirebaseToken,
+  validateRequest({ params: conversationIdParamsSchema }),
+  getConversationMessages
+);
 

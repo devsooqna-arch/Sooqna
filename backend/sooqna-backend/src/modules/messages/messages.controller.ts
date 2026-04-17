@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { AppError } from "../../shared/errors/appError";
 import { PrismaMessagesRepository } from "./repositories/messages.repository";
 import { MessagesService } from "./messages.service";
 
@@ -11,31 +12,34 @@ export async function createConversation(req: Request, res: Response): Promise<v
     return;
   }
 
-  try {
-    const conversation = await service.createConversation({
-      participantIds: Array.isArray(req.body?.participantIds)
-        ? req.body.participantIds.map(String)
-        : [uid],
-      participants:
-        req.body?.participants && typeof req.body.participants === "object"
-          ? req.body.participants
-          : {
-              [uid]: {
-                fullName: req.authUser?.name ?? "",
-                photoURL: req.authUser?.picture ?? "",
-              },
-            },
-      listingId: String(req.body?.listingId ?? ""),
-      listingSnapshot: {
-        title: String(req.body?.listingSnapshot?.title ?? ""),
-        primaryImageURL: String(req.body?.listingSnapshot?.primaryImageURL ?? ""),
-      },
-      createdBy: uid,
-    });
-    res.status(201).json({ success: true, conversation });
-  } catch (error) {
-    res.status(400).json({ success: false, message: String((error as Error).message) });
+  const participantIds = Array.isArray(req.body?.participantIds)
+    ? req.body.participantIds.map(String)
+    : [uid];
+  if (!participantIds.includes(uid)) {
+    participantIds.push(uid);
   }
+
+  const participants =
+    req.body?.participants && typeof req.body.participants === "object"
+      ? req.body.participants
+      : {
+          [uid]: {
+            fullName: req.authUser?.name ?? "",
+            photoURL: req.authUser?.picture ?? "",
+          },
+        };
+
+  const conversation = await service.createConversation({
+    participantIds,
+    participants,
+    listingId: String(req.body?.listingId ?? ""),
+    listingSnapshot: {
+      title: String(req.body?.listingSnapshot?.title ?? ""),
+      primaryImageURL: String(req.body?.listingSnapshot?.primaryImageURL ?? ""),
+    },
+    createdBy: uid,
+  });
+  res.status(201).json({ success: true, conversation });
 }
 
 export async function createMessage(req: Request, res: Response): Promise<void> {
@@ -45,31 +49,37 @@ export async function createMessage(req: Request, res: Response): Promise<void> 
     return;
   }
 
-  try {
-    const message = await service.createMessage({
-      conversationId: req.params.conversationId,
-      senderId: uid,
-      type: (req.body?.type as "text" | "image" | "system") ?? "text",
-      text: String(req.body?.text ?? ""),
-      attachments: Array.isArray(req.body?.attachments) ? req.body.attachments : [],
-    });
-    res.status(201).json({ success: true, message });
-  } catch (error) {
-    res.status(400).json({ success: false, message: String((error as Error).message) });
-  }
+  const message = await service.createMessage({
+    conversationId: req.params.conversationId,
+    senderId: uid,
+    type: (req.body?.type as "text" | "image" | "system") ?? "text",
+    text: String(req.body?.text ?? ""),
+    attachments: Array.isArray(req.body?.attachments) ? req.body.attachments : [],
+  });
+  res.status(201).json({ success: true, message });
 }
 
 export async function getConversation(req: Request, res: Response): Promise<void> {
-  const conversation = await service.getConversation(req.params.conversationId);
+  const uid = req.authUser?.uid;
+  if (!uid) {
+    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
+  }
+
+  const conversation = await service.getConversationForUser(req.params.conversationId, uid);
   if (!conversation) {
-    res.status(404).json({ success: false, message: "Conversation not found" });
+    throw new AppError(404, "Conversation not found", "NOT_FOUND");
     return;
   }
   res.json({ success: true, conversation });
 }
 
 export async function getConversationMessages(req: Request, res: Response): Promise<void> {
-  const messages = await service.getMessages(req.params.conversationId);
+  const uid = req.authUser?.uid;
+  if (!uid) {
+    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
+  }
+
+  const messages = await service.getMessages(req.params.conversationId, uid);
   res.json({ success: true, messages });
 }
 
