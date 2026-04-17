@@ -79,9 +79,21 @@ jobs:
 
             # Full monorepo path on production server.
             cd "${{ secrets.DEPLOY_APP_DIR }}"
+            git config --global --add safe.directory "${{ secrets.DEPLOY_APP_DIR }}"
+            if ! git remote get-url origin >/dev/null 2>&1; then
+              echo "Missing git remote 'origin' in ${{ secrets.DEPLOY_APP_DIR }}."
+              echo "Set it once on server: git remote add origin git@github.com:devsooqna-arch/Sooqna.git"
+              exit 1
+            fi
 
+            # Clean conflicting untracked files from one-time extracted archives.
+            # Keep backend env and uploads directory across deploys.
+            git clean -fd \
+              -e backend/sooqna-backend/.env \
+              -e backend/sooqna-backend/uploads/ \
+              -e apps/web/.env.local
             git fetch origin
-            git checkout main
+            git checkout -B main origin/main
             git reset --hard origin/main
 
             # Backend deployment
