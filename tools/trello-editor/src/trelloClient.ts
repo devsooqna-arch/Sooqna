@@ -53,7 +53,9 @@ export class TrelloClient {
       name?: string;
       desc?: string;
       due?: string | null;
+      dueComplete?: boolean;
       closed?: boolean;
+      pos?: "top" | "bottom" | number;
     }
   ) {
     return this.request(`/cards/${cardId}`, "PUT", input);

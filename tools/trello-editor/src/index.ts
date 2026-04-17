@@ -109,7 +109,9 @@ app.put("/cards/:cardId", async (req, res, next) => {
       name: req.body?.name,
       desc: req.body?.desc,
       due: req.body?.due,
+      dueComplete: req.body?.dueComplete,
       closed: req.body?.closed,
+      pos: req.body?.pos,
     });
     res.json({ success: true, data });
   } catch (error) {
