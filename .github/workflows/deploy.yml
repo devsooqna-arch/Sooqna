@@ -18,6 +18,54 @@ jobs:
     environment: production
 
     steps:
+      - name: Validate deployment secrets
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_APP_DIR: ${{ secrets.DEPLOY_APP_DIR }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          NEXT_PUBLIC_BACKEND_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_BACKEND_API_BASE_URL }}
+          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+          NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+          NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID }}
+        run: |
+          set -e
+          required_vars=(
+            DEPLOY_HOST
+            DEPLOY_USER
+            DEPLOY_PORT
+            DEPLOY_APP_DIR
+            DEPLOY_SSH_KEY
+            NEXT_PUBLIC_BACKEND_API_BASE_URL
+            NEXT_PUBLIC_FIREBASE_API_KEY
+            NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+            NEXT_PUBLIC_FIREBASE_PROJECT_ID
+            NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+            NEXT_PUBLIC_FIREBASE_APP_ID
+            NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+          )
+
+          missing=0
+          for var_name in "${required_vars[@]}"; do
+            if [ -z "${!var_name}" ]; then
+              echo "::error::Missing required secret: ${var_name}"
+              missing=1
+            fi
+          done
+
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
+          if [[ "$DEPLOY_SSH_KEY" != *"BEGIN "* ]] || [[ "$DEPLOY_SSH_KEY" != *"PRIVATE KEY"* ]]; then
+            echo "::error::DEPLOY_SSH_KEY does not look like a private key. Paste full private key including BEGIN/END lines."
+            exit 1
+          fi
+
       - name: Deploy backend and web to production server
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -47,6 +95,16 @@ jobs:
 
             # Web deployment
             cd apps/web
+            cat > .env.local <<EOF
+            NEXT_PUBLIC_BACKEND_API_BASE_URL=${{ secrets.NEXT_PUBLIC_BACKEND_API_BASE_URL }}
+            NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+            NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+            NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+            NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+            NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+            NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID }}
+            NEXT_PUBLIC_AUTH_DEBUG=false
+            EOF
             npm ci
             npm run build
             pm2 restart sooqna-web || pm2 start "npm run start -- -p 3000" --name sooqna-web
