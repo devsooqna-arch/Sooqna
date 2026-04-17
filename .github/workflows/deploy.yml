@@ -1,0 +1,57 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+concurrency:
+  group: deploy-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: true
+
+jobs:
+  deploy_production:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'master'
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Deploy backend and web to production server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          script_stop: true
+          script: |
+            set -e
+
+            # Full monorepo path on production server.
+            cd "${{ secrets.DEPLOY_APP_DIR }}"
+
+            git fetch origin
+            git checkout master
+            git reset --hard origin/master
+
+            # Backend deployment
+            cd backend/sooqna-backend
+            npm ci
+            npm run prisma:generate
+            npm run build
+            npm run prisma:migrate
+            pm2 restart sooqna-backend || pm2 start dist/server.js --name sooqna-backend
+            cd ../..
+
+            # Web deployment
+            cd apps/web
+            npm ci
+            npm run build
+            pm2 restart sooqna-web || pm2 start "npm run start -- -p 3000" --name sooqna-web
+            cd ../..
+
+      - name: Health check backend
+        run: |
+          curl --fail --show-error --silent "https://UN.flashpointjordan.com/api/health" > /dev/null
