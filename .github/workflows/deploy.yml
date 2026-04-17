@@ -105,11 +105,13 @@ jobs:
             # Keep devDependencies even when server NODE_ENV is set to production.
             npm ci --production=false --include=dev
             npm run prisma:generate
-            npm run build -- --pretty false || {
-              echo "Backend build failed. Running explicit typecheck for full diagnostics..."
-              npx tsc -p tsconfig.json --noEmit --pretty false
-              exit 1
-            }
+            build_exit=0
+            npm run build -- --pretty false || build_exit=$?
+            if [ "$build_exit" -ne 0 ]; then
+              echo "Backend build failed (exit ${build_exit}). Running explicit typecheck for full diagnostics..."
+              ./node_modules/.bin/tsc -p tsconfig.json --noEmit --pretty false
+              exit "$build_exit"
+            fi
             if [ -n "${{ secrets.BACKEND_DATABASE_URL }}" ]; then
               export DATABASE_URL="${{ secrets.BACKEND_DATABASE_URL }}"
               npx prisma migrate deploy
