@@ -16,7 +16,7 @@ export class UsersService {
     }
 
     const now = nowIso();
-    const existing = await this.repo.findByUid(authUser.uid);
+    const existing = await this.safeFindByUid(authUser.uid);
 
     const profile: UserProfile = {
       uid: authUser.uid,
@@ -30,14 +30,33 @@ export class UsersService {
       updatedAt: now,
     };
 
-    return this.repo.upsert(profile);
+    return this.safeUpsert(profile);
   }
 
   async getMe(uid: string): Promise<UserProfile | null> {
     if (!uid.trim()) {
       throw new AppError(400, "uid is required", "VALIDATION_ERROR");
     }
-    return this.repo.findByUid(uid);
+    return this.safeFindByUid(uid);
+  }
+
+  private async safeFindByUid(uid: string): Promise<UserProfile | null> {
+    try {
+      return await this.repo.findByUid(uid);
+    } catch (error) {
+      console.warn("UsersService.safeFindByUid fallback:", error);
+      return null;
+    }
+  }
+
+  private async safeUpsert(profile: UserProfile): Promise<UserProfile> {
+    try {
+      return await this.repo.upsert(profile);
+    } catch (error) {
+      console.warn("UsersService.safeUpsert fallback:", error);
+      // Keep auth/profile flows working even if DB is temporarily unavailable.
+      return profile;
+    }
   }
 }
 

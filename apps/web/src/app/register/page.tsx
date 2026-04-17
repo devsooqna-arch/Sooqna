@@ -3,14 +3,14 @@ import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { LoginForm } from "@/components/auth/LoginForm";
 
 export const metadata: Metadata = {
-  title: "تسجيل الدخول | Sooqna",
-  description: "تسجيل الدخول إلى سوقنا",
+  title: "إنشاء حساب | Sooqna",
+  description: "إنشاء حساب جديد في سوقنا",
 };
 
-export default function LoginPage() {
+export default function RegisterPage() {
   return (
-    <AuthPageShell activeTab="login">
-      <LoginForm mode="login" />
+    <AuthPageShell activeTab="register">
+      <LoginForm mode="signup" />
     </AuthPageShell>
   );
 }

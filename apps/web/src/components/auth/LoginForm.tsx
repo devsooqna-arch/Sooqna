@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { getAuthErrorMessage } from "@/services/authService";
@@ -16,9 +17,14 @@ function readNextPathFromUrl(): string {
   return "/me";
 }
 
-export function LoginForm() {
+type LoginFormProps = {
+  mode?: "login" | "signup";
+};
+
+export function LoginForm({ mode = "login" }: LoginFormProps) {
   const router = useRouter();
   const [nextPath, setNextPath] = useState("/me");
+  const isSignup = mode === "signup";
 
   const { currentUser, loading: authLoading, register, login, loginWithGoogle } =
     useAuth();
@@ -27,11 +33,11 @@ export function LoginForm() {
     setNextPath(readNextPathFromUrl());
   }, []);
 
-  const [mode, setMode] = useState<"login" | "signup">("login");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<{
+    fullName?: string;
     email?: string;
     password?: string;
   }>({});
@@ -48,9 +54,9 @@ export function LoginForm() {
   }, [authLoading, currentUser, router, nextPath]);
 
   function validateForm(): boolean {
-    const next: { email?: string; password?: string } = {};
-    if (mode === "signup" && !fullName.trim()) {
-      next.email = "الاسم الكامل مطلوب.";
+    const next: { fullName?: string; email?: string; password?: string } = {};
+    if (isSignup && !fullName.trim()) {
+      next.fullName = "الاسم الكامل مطلوب.";
     }
     if (!email.trim()) {
       next.email = "البريد الإلكتروني مطلوب.";
@@ -59,7 +65,7 @@ export function LoginForm() {
     }
     if (!password) {
       next.password = "كلمة المرور مطلوبة.";
-    } else if (mode === "signup" && password.length < 6) {
+    } else if (isSignup && password.length < 6) {
       next.password = "كلمة المرور يجب أن تكون 6 أحرف على الأقل.";
     }
     setFieldErrors(next);
@@ -73,7 +79,7 @@ export function LoginForm() {
 
     setSubmitting(true);
     try {
-      if (mode === "signup") {
+      if (isSignup) {
         await register(email, password, fullName);
       } else {
         await login(email, password);
@@ -115,11 +121,12 @@ export function LoginForm() {
     <div className="w-full max-w-md space-y-6">
       <div className="text-center">
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-          {mode === "signup" ? "إنشاء حساب" : "تسجيل الدخول"}
+          {isSignup ? "إنشاء حساب جديد" : "تسجيل الدخول"}
         </h1>
         <p className="mt-2 text-sm text-slate-500">
-          أدخل بياناتك أو سجّل الدخول بحساب Google — سيتم تحويلك إلى Google ثم العودة
-          إلى هذا الموقع. إن علقت الصفحة، جرّب Chrome أو Edge بدل المتصفح المضمّن.
+          {isSignup
+            ? "ابدأ حسابك خلال دقيقة، أو استخدم Google للمتابعة بسرعة."
+            : "أدخل بياناتك للوصول إلى حسابك، أو تابع مباشرة عبر Google."}
         </p>
         {authLoading && (
           <p className="mt-2 text-xs text-slate-400">جاري التحقق من الجلسة…</p>
@@ -145,7 +152,7 @@ export function LoginForm() {
       )}
 
       <form onSubmit={handleEmailLogin} className="space-y-4" noValidate>
-        {mode === "signup" && (
+        {isSignup && (
           <div>
             <label
               htmlFor="fullName"
@@ -163,7 +170,14 @@ export function LoginForm() {
               className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none ring-slate-400 transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-900/10"
               placeholder="الاسم الكامل"
               disabled={busy || authLoading}
+              aria-invalid={!!fieldErrors.fullName}
+              aria-describedby={fieldErrors.fullName ? "fullName-error" : undefined}
             />
+            {fieldErrors.fullName && (
+              <p id="fullName-error" className="mt-1 text-xs text-red-600">
+                {fieldErrors.fullName}
+              </p>
+            )}
           </div>
         )}
 
@@ -241,27 +255,23 @@ export function LoginForm() {
           {submitting ? (
             <>
               <Spinner tone="light" />
-              {mode === "signup" ? "جاري إنشاء الحساب…" : "جاري تسجيل الدخول…"}
+              {isSignup ? "جاري إنشاء الحساب…" : "جاري تسجيل الدخول…"}
             </>
           ) : (
-            mode === "signup" ? "إنشاء حساب" : "تسجيل الدخول"
+            isSignup ? "إنشاء الحساب" : "تسجيل الدخول"
           )}
         </button>
       </form>
 
-      <button
-        type="button"
-        onClick={() => {
-          setSubmitError(null);
-          setFieldErrors({});
-          setMode((p) => (p === "login" ? "signup" : "login"));
-        }}
-        className="w-full text-sm font-medium text-slate-700 underline underline-offset-2 hover:text-slate-900"
-      >
-        {mode === "login"
-          ? "ما عندك حساب؟ أنشئ حساب جديد"
-          : "عندك حساب بالفعل؟ ارجع لتسجيل الدخول"}
-      </button>
+      <p className="text-center text-sm text-slate-600">
+        {isSignup ? "عندك حساب بالفعل؟" : "ما عندك حساب؟"}{" "}
+        <Link
+          href={isSignup ? "/login" : "/register"}
+          className="font-medium text-slate-900 underline underline-offset-2 hover:text-slate-700"
+        >
+          {isSignup ? "ارجع لتسجيل الدخول" : "إنشاء حساب جديد"}
+        </Link>
+      </p>
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
@@ -286,7 +296,7 @@ export function LoginForm() {
         ) : (
           <>
             <GoogleIcon />
-            المتابعة مع Google
+            {isSignup ? "إنشاء حساب عبر Google" : "المتابعة مع Google"}
           </>
         )}
       </button>
