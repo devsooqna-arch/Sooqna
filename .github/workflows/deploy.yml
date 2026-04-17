@@ -168,14 +168,39 @@ jobs:
             echo "Backend TypeScript build succeeded."
 
             echo "===== DATABASE DEBUG ====="
-            if [ -n "$BACKEND_DATABASE_URL" ]; then
+            echo "Checking whether BACKEND_DATABASE_URL exists..."
+            if [ -n "${BACKEND_DATABASE_URL:-}" ]; then
               echo "BACKEND_DATABASE_URL is present."
               export DATABASE_URL="$BACKEND_DATABASE_URL"
-              echo "Running prisma migrate deploy..."
-              npx prisma migrate deploy
-              echo "Prisma migrate deploy finished."
+              echo "DATABASE_URL exported successfully."
             else
               echo "BACKEND_DATABASE_URL is not set; skipping prisma migrations."
+            fi
+
+            echo "Listing prisma directory..."
+            ls -lah prisma || true
+            echo "Listing prisma migrations directory..."
+            ls -lah prisma/migrations || true
+
+            if [ -n "${DATABASE_URL:-}" ]; then
+              echo "Running prisma migrate deploy..."
+              migrate_exit=0
+              set +e
+              npx prisma migrate deploy > /tmp/prisma-migrate.log 2>&1
+              migrate_exit=$?
+              set -e
+
+              echo "prisma_migrate_exit=$migrate_exit"
+              echo "========== prisma-migrate.log =========="
+              cat /tmp/prisma-migrate.log || true
+              echo "========================================"
+
+              if [ "$migrate_exit" -ne 0 ]; then
+                echo "Prisma migrate deploy failed with exit code: $migrate_exit"
+                exit "$migrate_exit"
+              fi
+
+              echo "Prisma migrate deploy finished successfully."
             fi
 
             echo "Checking dist output..."
@@ -222,6 +247,5 @@ jobs:
             echo "===== DEPLOY FINISHED ====="
 
       - name: Health check backend
-      
         run: |
           curl --fail --show-error --silent "https://UN.flashpointjordan.com/api/health" > /dev/null
