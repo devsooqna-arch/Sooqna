@@ -171,10 +171,29 @@ jobs:
 
             echo "===== DATABASE DEBUG ====="
             echo "Checking whether BACKEND_DATABASE_URL exists..."
-            DB_URL="${BACKEND_DATABASE_URL-}"
-            echo "BACKEND_DATABASE_URL length: ${#DB_URL}"
+            DB_URL_RAW="${BACKEND_DATABASE_URL-}"
+            echo "BACKEND_DATABASE_URL raw length: ${#DB_URL_RAW}"
+            # Normalize common secret mistakes:
+            # - storing as `DATABASE_URL=...` instead of value only
+            # - wrapping in single/double quotes
+            # - accidental CR/LF characters
+            DB_URL="${DB_URL_RAW#DATABASE_URL=}"
+            DB_URL="${DB_URL%\"}"
+            DB_URL="${DB_URL#\"}"
+            DB_URL="${DB_URL%\'}"
+            DB_URL="${DB_URL#\'}"
+            DB_URL="${DB_URL//$'\r'/}"
+            DB_URL="${DB_URL//$'\n'/}"
+            echo "BACKEND_DATABASE_URL normalized length: ${#DB_URL}"
             if [ -n "$DB_URL" ]; then
-              echo "BACKEND_DATABASE_URL is present."
+              DB_SCHEME="${DB_URL%%://*}"
+              echo "Detected DB URL scheme: ${DB_SCHEME:-<none>}"
+              if [[ "$DB_URL" != postgresql://* && "$DB_URL" != postgres://* ]]; then
+                echo "BACKEND_DATABASE_URL is invalid. Expected to start with postgresql:// or postgres://"
+                echo "Save the GitHub secret as URL value only (no DATABASE_URL= prefix, no quotes)."
+                exit 1
+              fi
+              echo "BACKEND_DATABASE_URL is present and normalized."
               export DATABASE_URL="$DB_URL"
               echo "DATABASE_URL exported successfully."
             else
