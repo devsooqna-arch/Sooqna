@@ -7,5 +7,5 @@ export interface Category {
   slug: string;
   isActive: boolean;
   sortOrder: number;
-  createdAt: any;
+  createdAt: string | null;
 }

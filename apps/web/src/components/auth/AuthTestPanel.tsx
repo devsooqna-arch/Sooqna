@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import type { User } from "firebase/auth";
 import { useAuth } from "@/hooks/useAuth";
 import { getAuthErrorMessage } from "@/services/authService";
@@ -203,12 +204,12 @@ export function AuthTestPanel() {
           نماذج منفصلة للتسجيل والدخول، Google بالـ popup، وعرض بيانات Auth والملف
           الشخصي من Backend.
         </p>
-        <a
+        <Link
           href="/"
           className="inline-block text-sm font-medium text-slate-700 underline hover:text-slate-900"
         >
           ← الرئيسية
-        </a>
+        </Link>
       </header>
 
       {message && (

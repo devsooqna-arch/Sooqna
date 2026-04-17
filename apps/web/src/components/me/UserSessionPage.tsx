@@ -53,21 +53,7 @@ export function UserSessionPage() {
     }
   }, [loading, currentUser, router]);
 
-  if (loading) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <p className="text-sm text-slate-500">جاري التحميل…</p>
-      </div>
-    );
-  }
-
-  if (!currentUser) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <p className="text-sm text-slate-500">جاري التوجيه لتسجيل الدخول…</p>
-      </div>
-    );
-  }
+  const profileDisplay = useMemo(() => formatProfileForDisplay(profileData), [profileData]);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -94,7 +80,21 @@ export function UserSessionPage() {
     };
   }, [currentUser]);
 
-  const profileDisplay = useMemo(() => formatProfileForDisplay(profileData), [profileData]);
+  if (loading) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <p className="text-sm text-slate-500">جاري التحميل…</p>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <p className="text-sm text-slate-500">جاري التوجيه لتسجيل الدخول…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-8">

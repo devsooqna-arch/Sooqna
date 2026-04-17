@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import type { User } from "firebase/auth";
 import { useAuth } from "@/hooks/useAuth";
 import { getAuthErrorMessage } from "@/services/authService";
@@ -137,7 +138,9 @@ export function DevToolsPanel() {
         </p>
         <div className="mt-2 flex gap-4 text-xs text-slate-500">
           <span>Route: /dev-tools</span>
-          <a className="underline" href="/">Back to home</a>
+          <Link className="underline" href="/">
+            Back to home
+          </Link>
         </div>
       </header>
 
