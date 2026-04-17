@@ -92,6 +92,8 @@ jobs:
               -e backend/sooqna-backend/.env \
               -e backend/sooqna-backend/uploads/ \
               -e apps/web/.env.local
+            rm -f backend/sooqna-backend/uploads/listings/.gitkeep
+            rm -f backend/sooqna-backend/uploads/profiles/.gitkeep
             git fetch origin
             git checkout -B main origin/main
             git reset --hard origin/main
