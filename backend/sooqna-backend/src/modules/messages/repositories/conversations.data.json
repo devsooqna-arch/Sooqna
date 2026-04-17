@@ -1,1 +1,152 @@
-[]
+[
+  {
+    "id": "conv-demo-001",
+    "participantIds": [
+      "q5x3acmBlBh12fXM3TQn9boHEVv1",
+      "user-demo-001"
+    ],
+    "participants": {
+      "q5x3acmBlBh12fXM3TQn9boHEVv1": {
+        "fullName": "Issa Tadros",
+        "photoURL": "https://lh3.googleusercontent.com/a/ACg8ocKyJn7VJvayJWfjFmM9VV4kMFs34Iw0vyKf_8wu9bRj7tpqrkQXr=s96-c"
+      },
+      "user-demo-001": {
+        "fullName": "Ahmed Al-Salem",
+        "photoURL": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80"
+      }
+    },
+    "listingId": "listing-demo-001",
+    "listingSnapshot": {
+      "title": "Toyota Corolla 2018",
+      "primaryImageURL": "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=1200&q=80"
+    },
+    "createdBy": "q5x3acmBlBh12fXM3TQn9boHEVv1",
+    "lastMessageText": "ممكن آخر سعر؟",
+    "lastMessageSenderId": "q5x3acmBlBh12fXM3TQn9boHEVv1",
+    "lastMessageAt": "2026-04-17T08:00:00.000Z",
+    "lastMessageType": "text",
+    "isActive": true,
+    "createdAt": "2026-04-17T07:30:00.000Z",
+    "updatedAt": "2026-04-17T08:00:00.000Z"
+  },
+  {
+    "id": "conv-demo-002",
+    "participantIds": [
+      "user-demo-002",
+      "user-demo-003"
+    ],
+    "participants": {
+      "user-demo-002": {
+        "fullName": "Lina Haddad",
+        "photoURL": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80"
+      },
+      "user-demo-003": {
+        "fullName": "Omar Naser",
+        "photoURL": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80"
+      }
+    },
+    "listingId": "listing-demo-003",
+    "listingSnapshot": {
+      "title": "iPhone 14 Pro 256GB",
+      "primaryImageURL": "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=1200&q=80"
+    },
+    "createdBy": "user-demo-002",
+    "lastMessageText": "موجود لسه؟",
+    "lastMessageSenderId": "user-demo-002",
+    "lastMessageAt": "2026-04-17T08:12:00.000Z",
+    "lastMessageType": "text",
+    "isActive": true,
+    "createdAt": "2026-04-17T08:05:00.000Z",
+    "updatedAt": "2026-04-17T08:12:00.000Z"
+  },
+  {
+    "id": "conv-demo-003",
+    "participantIds": [
+      "q5x3acmBlBh12fXM3TQn9boHEVv1",
+      "user-demo-004"
+    ],
+    "participants": {
+      "q5x3acmBlBh12fXM3TQn9boHEVv1": {
+        "fullName": "Issa Tadros",
+        "photoURL": "https://lh3.googleusercontent.com/a/ACg8ocKyJn7VJvayJWfjFmM9VV4kMFs34Iw0vyKf_8wu9bRj7tpqrkQXr=s96-c"
+      },
+      "user-demo-004": {
+        "fullName": "Maya Khalil",
+        "photoURL": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80"
+      }
+    },
+    "listingId": "listing-demo-004",
+    "listingSnapshot": {
+      "title": "طاولة طعام خشب 6 كراسي",
+      "primaryImageURL": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1200&q=80"
+    },
+    "createdBy": "user-demo-004",
+    "lastMessageText": "السعر نهائي؟",
+    "lastMessageSenderId": "q5x3acmBlBh12fXM3TQn9boHEVv1",
+    "lastMessageAt": "2026-04-17T08:20:00.000Z",
+    "lastMessageType": "text",
+    "isActive": true,
+    "createdAt": "2026-04-17T08:15:00.000Z",
+    "updatedAt": "2026-04-17T08:20:00.000Z"
+  },
+  {
+    "id": "conv-demo-004",
+    "participantIds": [
+      "user-demo-001",
+      "user-demo-002"
+    ],
+    "participants": {
+      "user-demo-001": {
+        "fullName": "Ahmed Al-Salem",
+        "photoURL": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80"
+      },
+      "user-demo-002": {
+        "fullName": "Lina Haddad",
+        "photoURL": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80"
+      }
+    },
+    "listingId": "listing-demo-002",
+    "listingSnapshot": {
+      "title": "شقة للإيجار في ضاحية الرشيد",
+      "primaryImageURL": "https://images.unsplash.com/photo-1494526585095-c41746248156?w=1200&q=80"
+    },
+    "createdBy": "user-demo-001",
+    "lastMessageText": "متى موعد المعاينة؟",
+    "lastMessageSenderId": "user-demo-002",
+    "lastMessageAt": "2026-04-17T08:25:00.000Z",
+    "lastMessageType": "text",
+    "isActive": true,
+    "createdAt": "2026-04-17T08:18:00.000Z",
+    "updatedAt": "2026-04-17T08:25:00.000Z"
+  },
+  {
+    "id": "conv-demo-005",
+    "participantIds": [
+      "q5x3acmBlBh12fXM3TQn9boHEVv1",
+      "user-demo-003"
+    ],
+    "participants": {
+      "q5x3acmBlBh12fXM3TQn9boHEVv1": {
+        "fullName": "Issa Tadros",
+        "photoURL": "https://lh3.googleusercontent.com/a/ACg8ocKyJn7VJvayJWfjFmM9VV4kMFs34Iw0vyKf_8wu9bRj7tpqrkQXr=s96-c"
+      },
+      "user-demo-003": {
+        "fullName": "Omar Naser",
+        "photoURL": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80"
+      }
+    },
+    "listingId": "listing-demo-005",
+    "listingSnapshot": {
+      "title": "مطلوب مندوب مبيعات",
+      "primaryImageURL": "https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=1200&q=80"
+    },
+    "createdBy": "q5x3acmBlBh12fXM3TQn9boHEVv1",
+    "lastMessageText": "متى المقابلة؟",
+    "lastMessageSenderId": "user-demo-003",
+    "lastMessageAt": "2026-04-17T08:28:00.000Z",
+    "lastMessageType": "text",
+    "isActive": true,
+    "createdAt": "2026-04-17T08:22:00.000Z",
+    "updatedAt": "2026-04-17T08:28:00.000Z"
+  }
+]

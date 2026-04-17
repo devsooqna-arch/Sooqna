@@ -1,1 +1,62 @@
-[]
+[
+  {
+    "id": "msg-demo-001",
+    "conversationId": "conv-demo-001",
+    "senderId": "user-demo-001",
+    "type": "text",
+    "text": "أهلًا، السيارة موجودة؟",
+    "attachments": [],
+    "isRead": true,
+    "readAt": "2026-04-17T07:40:00.000Z",
+    "createdAt": "2026-04-17T07:35:00.000Z",
+    "deletedAt": null
+  },
+  {
+    "id": "msg-demo-002",
+    "conversationId": "conv-demo-001",
+    "senderId": "q5x3acmBlBh12fXM3TQn9boHEVv1",
+    "type": "text",
+    "text": "نعم موجودة، تفضل.",
+    "attachments": [],
+    "isRead": true,
+    "readAt": "2026-04-17T07:50:00.000Z",
+    "createdAt": "2026-04-17T07:45:00.000Z",
+    "deletedAt": null
+  },
+  {
+    "id": "msg-demo-003",
+    "conversationId": "conv-demo-002",
+    "senderId": "user-demo-002",
+    "type": "text",
+    "text": "موجود لسه؟",
+    "attachments": [],
+    "isRead": true,
+    "readAt": "2026-04-17T08:13:00.000Z",
+    "createdAt": "2026-04-17T08:12:00.000Z",
+    "deletedAt": null
+  },
+  {
+    "id": "msg-demo-004",
+    "conversationId": "conv-demo-003",
+    "senderId": "q5x3acmBlBh12fXM3TQn9boHEVv1",
+    "type": "text",
+    "text": "السعر نهائي؟",
+    "attachments": [],
+    "isRead": false,
+    "readAt": null,
+    "createdAt": "2026-04-17T08:20:00.000Z",
+    "deletedAt": null
+  },
+  {
+    "id": "msg-demo-005",
+    "conversationId": "conv-demo-005",
+    "senderId": "user-demo-003",
+    "type": "text",
+    "text": "متى المقابلة؟",
+    "attachments": [],
+    "isRead": false,
+    "readAt": null,
+    "createdAt": "2026-04-17T08:28:00.000Z",
+    "deletedAt": null
+  }
+]

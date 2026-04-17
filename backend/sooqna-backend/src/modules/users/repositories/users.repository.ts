@@ -1,9 +1,21 @@
+import * as path from "node:path";
+import { env } from "../../../config/env";
 import { prisma } from "../../../config/prisma";
+import { readJsonArrayFile, writeJsonArrayFile } from "../../../utils/fileStore";
 import type { UserProfile } from "../users.types";
 
 export interface UsersRepository {
   findByUid(uid: string): Promise<UserProfile | null>;
   upsert(profile: UserProfile): Promise<UserProfile>;
+}
+
+const usersDataPath = path.resolve(
+  process.cwd(),
+  "src/modules/users/repositories/users.data.json"
+);
+
+function useJsonFallback(): boolean {
+  return env.enableCategoriesJsonFallback === "true";
 }
 
 export class PrismaUsersRepository implements UsersRepository {
@@ -25,6 +37,10 @@ export class PrismaUsersRepository implements UsersRepository {
         updatedAt: user.updatedAt.toISOString(),
       };
     } catch {
+      if (useJsonFallback()) {
+        const users = readJsonArrayFile<UserProfile>(usersDataPath);
+        return users.find((user) => user.uid === uid) ?? null;
+      }
       throw new Error("Failed to fetch user profile.");
     }
   }
@@ -67,6 +83,17 @@ export class PrismaUsersRepository implements UsersRepository {
         updatedAt: user.updatedAt.toISOString(),
       };
     } catch {
+      if (useJsonFallback()) {
+        const users = readJsonArrayFile<UserProfile>(usersDataPath);
+        const idx = users.findIndex((item) => item.uid === profile.uid);
+        if (idx >= 0) {
+          users[idx] = { ...users[idx], ...profile };
+        } else {
+          users.push(profile);
+        }
+        writeJsonArrayFile(usersDataPath, users);
+        return profile;
+      }
       throw new Error("Failed to save user profile.");
     }
   }

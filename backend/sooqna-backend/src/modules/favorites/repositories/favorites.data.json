@@ -1,1 +1,27 @@
-[]
+[
+  {
+    "userId": "q5x3acmBlBh12fXM3TQn9boHEVv1",
+    "listingId": "listing-demo-001",
+    "createdAt": "2026-04-17T08:35:00.000Z"
+  },
+  {
+    "userId": "user-demo-001",
+    "listingId": "listing-demo-003",
+    "createdAt": "2026-04-17T08:40:00.000Z"
+  },
+  {
+    "userId": "user-demo-002",
+    "listingId": "listing-demo-001",
+    "createdAt": "2026-04-17T08:45:00.000Z"
+  },
+  {
+    "userId": "user-demo-003",
+    "listingId": "listing-demo-002",
+    "createdAt": "2026-04-17T08:50:00.000Z"
+  },
+  {
+    "userId": "user-demo-004",
+    "listingId": "listing-demo-005",
+    "createdAt": "2026-04-17T08:55:00.000Z"
+  }
+]

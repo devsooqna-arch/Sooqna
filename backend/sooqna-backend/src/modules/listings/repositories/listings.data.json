@@ -1,1 +1,207 @@
-[]
+[
+  {
+    "id": "listing-demo-001",
+    "title": "Toyota Corolla 2018",
+    "titleLower": "toyota corolla 2018",
+    "description": "سيارة نظيفة جدًا، فحص كامل، استعمال شخصي.",
+    "price": 11800,
+    "currency": "JOD",
+    "priceType": "negotiable",
+    "categoryId": "cars",
+    "ownerId": "user-demo-001",
+    "ownerSnapshot": {
+      "fullName": "Ahmed Al-Salem",
+      "photoURL": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80"
+    },
+    "location": {
+      "country": "Jordan",
+      "city": "Amman",
+      "area": "Khalda"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=1200&q=80",
+        "path": "seed/listing-demo-001/1.jpg",
+        "isPrimary": true,
+        "order": 1
+      }
+    ],
+    "status": "published",
+    "condition": "used",
+    "contactPreference": "chat",
+    "viewsCount": 220,
+    "favoritesCount": 12,
+    "messagesCount": 5,
+    "isFeatured": true,
+    "isApproved": true,
+    "publishedAt": "2026-04-16T11:00:00.000Z",
+    "expiresAt": null,
+    "createdAt": "2026-04-16T10:50:00.000Z",
+    "updatedAt": "2026-04-17T08:30:00.000Z",
+    "deletedAt": null
+  },
+  {
+    "id": "listing-demo-002",
+    "title": "شقة للإيجار في ضاحية الرشيد",
+    "titleLower": "شقة للإيجار في ضاحية الرشيد",
+    "description": "شقة 3 غرف، تشطيب ممتاز، قريبة من الخدمات.",
+    "price": 450,
+    "currency": "JOD",
+    "priceType": "fixed",
+    "categoryId": "real-estate",
+    "ownerId": "user-demo-002",
+    "ownerSnapshot": {
+      "fullName": "Lina Haddad",
+      "photoURL": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80"
+    },
+    "location": {
+      "country": "Jordan",
+      "city": "Amman",
+      "area": "Dabouq"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1494526585095-c41746248156?w=1200&q=80",
+        "path": "seed/listing-demo-002/1.jpg",
+        "isPrimary": true,
+        "order": 1
+      }
+    ],
+    "status": "published",
+    "condition": "used",
+    "contactPreference": "phone",
+    "viewsCount": 147,
+    "favoritesCount": 8,
+    "messagesCount": 3,
+    "isFeatured": false,
+    "isApproved": true,
+    "publishedAt": "2026-04-16T13:00:00.000Z",
+    "expiresAt": null,
+    "createdAt": "2026-04-16T12:45:00.000Z",
+    "updatedAt": "2026-04-17T08:20:00.000Z",
+    "deletedAt": null
+  },
+  {
+    "id": "listing-demo-003",
+    "title": "iPhone 14 Pro 256GB",
+    "titleLower": "iphone 14 pro 256gb",
+    "description": "نظيف جدًا مع الكرتونة الأصلية، بدون صيانة.",
+    "price": 620,
+    "currency": "JOD",
+    "priceType": "negotiable",
+    "categoryId": "electronics",
+    "ownerId": "user-demo-003",
+    "ownerSnapshot": {
+      "fullName": "Omar Naser",
+      "photoURL": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80"
+    },
+    "location": {
+      "country": "Jordan",
+      "city": "Irbid",
+      "area": "University Street"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=1200&q=80",
+        "path": "seed/listing-demo-003/1.jpg",
+        "isPrimary": true,
+        "order": 1
+      }
+    ],
+    "status": "published",
+    "condition": "used",
+    "contactPreference": "chat",
+    "viewsCount": 89,
+    "favoritesCount": 6,
+    "messagesCount": 4,
+    "isFeatured": false,
+    "isApproved": true,
+    "publishedAt": "2026-04-16T15:00:00.000Z",
+    "expiresAt": null,
+    "createdAt": "2026-04-16T14:40:00.000Z",
+    "updatedAt": "2026-04-17T08:10:00.000Z",
+    "deletedAt": null
+  },
+  {
+    "id": "listing-demo-004",
+    "title": "طاولة طعام خشب 6 كراسي",
+    "titleLower": "طاولة طعام خشب 6 كراسي",
+    "description": "طاولة ممتازة بحالة جيدة جدًا، استعمال بسيط.",
+    "price": 230,
+    "currency": "JOD",
+    "priceType": "fixed",
+    "categoryId": "furniture",
+    "ownerId": "user-demo-004",
+    "ownerSnapshot": {
+      "fullName": "Maya Khalil",
+      "photoURL": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80"
+    },
+    "location": {
+      "country": "Jordan",
+      "city": "Zarqa",
+      "area": "New Zarqa"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1200&q=80",
+        "path": "seed/listing-demo-004/1.jpg",
+        "isPrimary": true,
+        "order": 1
+      }
+    ],
+    "status": "published",
+    "condition": "used",
+    "contactPreference": "phone",
+    "viewsCount": 64,
+    "favoritesCount": 2,
+    "messagesCount": 1,
+    "isFeatured": false,
+    "isApproved": true,
+    "publishedAt": "2026-04-16T16:30:00.000Z",
+    "expiresAt": null,
+    "createdAt": "2026-04-16T16:00:00.000Z",
+    "updatedAt": "2026-04-17T08:00:00.000Z",
+    "deletedAt": null
+  },
+  {
+    "id": "listing-demo-005",
+    "title": "مطلوب مندوب مبيعات",
+    "titleLower": "مطلوب مندوب مبيعات",
+    "description": "شركة تجارية تبحث عن مندوب مبيعات بخبرة سنة على الأقل.",
+    "price": 550,
+    "currency": "JOD",
+    "priceType": "contact",
+    "categoryId": "jobs",
+    "ownerId": "q5x3acmBlBh12fXM3TQn9boHEVv1",
+    "ownerSnapshot": {
+      "fullName": "Issa Tadros",
+      "photoURL": "https://lh3.googleusercontent.com/a/ACg8ocKyJn7VJvayJWfjFmM9VV4kMFs34Iw0vyKf_8wu9bRj7tpqrkQXr=s96-c"
+    },
+    "location": {
+      "country": "Jordan",
+      "city": "Amman",
+      "area": "Mecca St"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=1200&q=80",
+        "path": "seed/listing-demo-005/1.jpg",
+        "isPrimary": true,
+        "order": 1
+      }
+    ],
+    "status": "published",
+    "condition": "new",
+    "contactPreference": "chat",
+    "viewsCount": 102,
+    "favoritesCount": 5,
+    "messagesCount": 6,
+    "isFeatured": true,
+    "isApproved": true,
+    "publishedAt": "2026-04-16T18:00:00.000Z",
+    "expiresAt": null,
+    "createdAt": "2026-04-16T17:20:00.000Z",
+    "updatedAt": "2026-04-17T07:50:00.000Z",
+    "deletedAt": null
+  }
+]

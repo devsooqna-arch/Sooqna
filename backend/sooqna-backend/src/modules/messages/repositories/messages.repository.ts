@@ -1,5 +1,8 @@
+import * as path from "node:path";
+import { env } from "../../../config/env";
 import { prisma } from "../../../config/prisma";
 import { parseIso, toIso } from "../../../shared/utils/dates";
+import { readJsonArrayFile, writeJsonArrayFile } from "../../../utils/fileStore";
 import type { Conversation, Message } from "../messages.types";
 import type { Prisma } from "@prisma/client";
 
@@ -9,6 +12,19 @@ export interface MessagesRepository {
   updateConversation(conversation: Conversation): Promise<Conversation>;
   createMessage(message: Message): Promise<Message>;
   listMessages(conversationId: string): Promise<Message[]>;
+}
+
+const conversationsDataPath = path.resolve(
+  process.cwd(),
+  "src/modules/messages/repositories/conversations.data.json"
+);
+const messagesDataPath = path.resolve(
+  process.cwd(),
+  "src/modules/messages/repositories/messages.data.json"
+);
+
+function useJsonFallback(): boolean {
+  return env.enableCategoriesJsonFallback === "true";
 }
 
 export class PrismaMessagesRepository implements MessagesRepository {
@@ -66,6 +82,12 @@ export class PrismaMessagesRepository implements MessagesRepository {
         updatedAt: created.updatedAt.toISOString(),
       };
     } catch {
+      if (useJsonFallback()) {
+        const conversations = readJsonArrayFile<Conversation>(conversationsDataPath);
+        conversations.push(conversation);
+        writeJsonArrayFile(conversationsDataPath, conversations);
+        return conversation;
+      }
       throw new Error("Failed to create conversation.");
     }
   }
@@ -105,6 +127,10 @@ export class PrismaMessagesRepository implements MessagesRepository {
         updatedAt: conversation.updatedAt.toISOString(),
       };
     } catch {
+      if (useJsonFallback()) {
+        const conversations = readJsonArrayFile<Conversation>(conversationsDataPath);
+        return conversations.find((conversation) => conversation.id === id) ?? null;
+      }
       throw new Error("Failed to fetch conversation.");
     }
   }
@@ -133,6 +159,14 @@ export class PrismaMessagesRepository implements MessagesRepository {
         updatedAt: updated.updatedAt.toISOString(),
       };
     } catch {
+      if (useJsonFallback()) {
+        const conversations = readJsonArrayFile<Conversation>(conversationsDataPath);
+        const idx = conversations.findIndex((item) => item.id === conversation.id);
+        if (idx < 0) throw new Error("Conversation not found");
+        conversations[idx] = conversation;
+        writeJsonArrayFile(conversationsDataPath, conversations);
+        return conversation;
+      }
       throw new Error("Conversation not found");
     }
   }
@@ -166,6 +200,12 @@ export class PrismaMessagesRepository implements MessagesRepository {
         deletedAt: toIso(created.deletedAt),
       };
     } catch {
+      if (useJsonFallback()) {
+        const messages = readJsonArrayFile<Message>(messagesDataPath);
+        messages.push(message);
+        writeJsonArrayFile(messagesDataPath, messages);
+        return message;
+      }
       throw new Error("Failed to create message.");
     }
   }
@@ -189,6 +229,12 @@ export class PrismaMessagesRepository implements MessagesRepository {
         deletedAt: toIso(item.deletedAt),
       }));
     } catch {
+      if (useJsonFallback()) {
+        const items = readJsonArrayFile<Message>(messagesDataPath);
+        return items
+          .filter((item) => item.conversationId === conversationId)
+          .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+      }
       throw new Error("Failed to list messages.");
     }
   }

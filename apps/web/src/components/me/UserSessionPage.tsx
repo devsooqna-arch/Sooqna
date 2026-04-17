@@ -40,12 +40,27 @@ function formatProfileForDisplay(data: Record<string, unknown> | null) {
   return out;
 }
 
+type SeedSummaryCounts = {
+  users: number;
+  categories: number;
+  listings: number;
+  favorites: number;
+  conversations: number;
+  messages: number;
+};
+
 export function UserSessionPage() {
   const router = useRouter();
   const { currentUser, loading, logout } = useAuth();
   const [profileData, setProfileData] = useState<Record<string, unknown> | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
+  const [seedSummary, setSeedSummary] = useState<{
+    source: "database" | "json-fallback";
+    counts: SeedSummaryCounts;
+  } | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !currentUser) {
@@ -74,6 +89,36 @@ export function UserSessionPage() {
       .finally(() => {
         if (!mounted) return;
         setProfileLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    let mounted = true;
+    setSummaryLoading(true);
+    setSummaryError(null);
+    void apiFetch<{
+      success: true;
+      source: "database" | "json-fallback";
+      counts: SeedSummaryCounts;
+    }>("/dev/seed-summary")
+      .then((result) => {
+        if (!mounted) return;
+        setSeedSummary({
+          source: result.source,
+          counts: result.counts,
+        });
+      })
+      .catch((error) => {
+        if (!mounted) return;
+        setSummaryError(error instanceof Error ? error.message : "Failed to load data summary.");
+      })
+      .finally(() => {
+        if (!mounted) return;
+        setSummaryLoading(false);
       });
     return () => {
       mounted = false;
@@ -165,6 +210,34 @@ export function UserSessionPage() {
         )}
       </section>
 
+      <section className="w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold text-slate-800">Dummy Data Summary</h2>
+          {summaryLoading ? (
+            <span className="text-xs text-slate-400">جاري الجلب…</span>
+          ) : seedSummary ? (
+            <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs text-sky-900">
+              المصدر: {seedSummary.source === "database" ? "Database" : "JSON Fallback"}
+            </span>
+          ) : null}
+        </div>
+        {summaryError && <p className="mb-3 text-xs text-red-600">{summaryError}</p>}
+        {seedSummary ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <SummaryCard label="Users" value={seedSummary.counts.users} />
+            <SummaryCard label="Categories" value={seedSummary.counts.categories} />
+            <SummaryCard label="Listings" value={seedSummary.counts.listings} />
+            <SummaryCard label="Favorites" value={seedSummary.counts.favorites} />
+            <SummaryCard label="Conversations" value={seedSummary.counts.conversations} />
+            <SummaryCard label="Messages" value={seedSummary.counts.messages} />
+          </div>
+        ) : (
+          <p className="text-sm text-slate-500">
+            لا يوجد ملخص بيانات بعد — سيتم جلبه تلقائيًا بعد تسجيل الدخول.
+          </p>
+        )}
+      </section>
+
       <div className="flex w-full flex-col items-center gap-3 sm:flex-row sm:justify-center">
         <button
           type="button"
@@ -180,6 +253,15 @@ export function UserSessionPage() {
           الرئيسية
         </Link>
       </div>
+    </div>
+  );
+}
+
+function SummaryCard({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+      <p className="text-xs text-slate-500">{label}</p>
+      <p className="mt-1 text-2xl font-semibold text-slate-900">{value}</p>
     </div>
   );
 }

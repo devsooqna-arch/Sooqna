@@ -1,4 +1,5 @@
 import { Router } from "express";
+import * as path from "node:path";
 import { authRouter } from "../modules/auth/auth.routes";
 import { uploadRouter } from "../modules/uploads/uploads.routes";
 import { usersRouter } from "../modules/users/users.routes";
@@ -6,11 +7,67 @@ import { listingsRouter } from "../modules/listings/listings.routes";
 import { favoritesRouter } from "../modules/favorites/favorites.routes";
 import { messagesRouter } from "../modules/messages/messages.routes";
 import { categoriesRouter } from "../modules/categories/categories.routes";
+import { prisma } from "../config/prisma";
+import { readJsonArrayFile } from "../utils/fileStore";
 
 export const apiRouter = Router();
 
 apiRouter.get("/health", (_req, res) => {
   res.json({ success: true, data: { status: "ok", uptime: process.uptime() } });
+});
+
+apiRouter.get("/dev/seed-summary", async (_req, res) => {
+  try {
+    const [users, categories, listings, favorites, conversations, messages] = await Promise.all([
+      prisma.user.count(),
+      prisma.category.count(),
+      prisma.listing.count(),
+      prisma.favorite.count(),
+      prisma.conversation.count(),
+      prisma.message.count(),
+    ]);
+    res.json({
+      success: true,
+      source: "database",
+      counts: { users, categories, listings, favorites, conversations, messages },
+    });
+    return;
+  } catch {
+    const usersPath = path.resolve(process.cwd(), "src/modules/users/repositories/users.data.json");
+    const categoriesPath = path.resolve(
+      process.cwd(),
+      "src/modules/categories/repositories/categories.data.json"
+    );
+    const listingsPath = path.resolve(
+      process.cwd(),
+      "src/modules/listings/repositories/listings.data.json"
+    );
+    const favoritesPath = path.resolve(
+      process.cwd(),
+      "src/modules/favorites/repositories/favorites.data.json"
+    );
+    const conversationsPath = path.resolve(
+      process.cwd(),
+      "src/modules/messages/repositories/conversations.data.json"
+    );
+    const messagesPath = path.resolve(
+      process.cwd(),
+      "src/modules/messages/repositories/messages.data.json"
+    );
+
+    res.json({
+      success: true,
+      source: "json-fallback",
+      counts: {
+        users: readJsonArrayFile(usersPath).length,
+        categories: readJsonArrayFile(categoriesPath).length,
+        listings: readJsonArrayFile(listingsPath).length,
+        favorites: readJsonArrayFile(favoritesPath).length,
+        conversations: readJsonArrayFile(conversationsPath).length,
+        messages: readJsonArrayFile(messagesPath).length,
+      },
+    });
+  }
 });
 
 apiRouter.use("/auth", authRouter);

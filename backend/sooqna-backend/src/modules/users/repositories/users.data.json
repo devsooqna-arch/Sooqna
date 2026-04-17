@@ -1,1 +1,57 @@
-[]
+[
+  {
+    "uid": "q5x3acmBlBh12fXM3TQn9boHEVv1",
+    "fullName": "issa tadros",
+    "email": "flashpointjordan@gmail.com",
+    "photoURL": "https://lh3.googleusercontent.com/a/ACg8ocKyJn7VJayJWfjFmM9VV4kMFs34lw0vyKf_8wu9bRj7tpqRkQXk=s96-c",
+    "role": "user",
+    "accountStatus": "active",
+    "isEmailVerified": true,
+    "createdAt": "2026-04-17T09:00:00.000Z",
+    "updatedAt": "2026-04-17T10:43:12.613Z"
+  },
+  {
+    "uid": "user-demo-001",
+    "fullName": "Ahmed Al-Salem",
+    "email": "ahmed.demo@sooqna.test",
+    "photoURL": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80",
+    "role": "user",
+    "accountStatus": "active",
+    "isEmailVerified": true,
+    "createdAt": "2026-04-16T08:00:00.000Z",
+    "updatedAt": "2026-04-17T09:00:00.000Z"
+  },
+  {
+    "uid": "user-demo-002",
+    "fullName": "Lina Haddad",
+    "email": "lina.demo@sooqna.test",
+    "photoURL": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80",
+    "role": "user",
+    "accountStatus": "active",
+    "isEmailVerified": true,
+    "createdAt": "2026-04-16T08:05:00.000Z",
+    "updatedAt": "2026-04-17T09:00:00.000Z"
+  },
+  {
+    "uid": "user-demo-003",
+    "fullName": "Omar Naser",
+    "email": "omar.demo@sooqna.test",
+    "photoURL": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80",
+    "role": "user",
+    "accountStatus": "active",
+    "isEmailVerified": false,
+    "createdAt": "2026-04-16T08:10:00.000Z",
+    "updatedAt": "2026-04-17T09:00:00.000Z"
+  },
+  {
+    "uid": "user-demo-004",
+    "fullName": "Maya Khalil",
+    "email": "maya.demo@sooqna.test",
+    "photoURL": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80",
+    "role": "user",
+    "accountStatus": "active",
+    "isEmailVerified": true,
+    "createdAt": "2026-04-16T08:15:00.000Z",
+    "updatedAt": "2026-04-17T09:00:00.000Z"
+  }
+]
