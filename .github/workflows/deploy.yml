@@ -100,9 +100,9 @@ jobs:
 
             # Backend deployment
             cd backend/sooqna-backend
-            npm ci
+            npm ci --include=dev
             npm run prisma:generate
-            npm run build
+            npm run build -- --pretty false
             if [ -n "${{ secrets.BACKEND_DATABASE_URL }}" ]; then
               export DATABASE_URL="${{ secrets.BACKEND_DATABASE_URL }}"
               npx prisma migrate deploy
