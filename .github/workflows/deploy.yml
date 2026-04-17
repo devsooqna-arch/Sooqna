@@ -103,7 +103,12 @@ jobs:
             npm ci
             npm run prisma:generate
             npm run build
-            npm run prisma:migrate
+            if [ -n "${{ secrets.BACKEND_DATABASE_URL }}" ]; then
+              export DATABASE_URL="${{ secrets.BACKEND_DATABASE_URL }}"
+              npx prisma migrate deploy
+            else
+              echo "BACKEND_DATABASE_URL is not set; skipping prisma migrations."
+            fi
             pm2 restart sooqna-backend || pm2 start dist/server.js --name sooqna-backend
             cd ../..
 
