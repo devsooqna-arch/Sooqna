@@ -198,9 +198,7 @@ export function CreateListingForm() {
         {submitting ? "Creating..." : "Create Listing"}
       </button>
 
-      {createdListingId && currentUser ? (
-        <ImageUpload listingId={createdListingId} userId={currentUser.uid} />
-      ) : null}
+      {createdListingId && currentUser ? <ImageUpload listingId={createdListingId} /> : null}
     </form>
   );
 }

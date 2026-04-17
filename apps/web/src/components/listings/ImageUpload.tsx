@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import { attachListingImage } from "@/services/listingService";
 import { uploadImage } from "@/services/backendUploadService";
 
 type ImageUploadProps = {
   listingId: string;
-  userId: string;
   onUploaded?: (payload: { url: string; path: string }) => void;
 };
 
-export function ImageUpload({ listingId, userId, onUploaded }: ImageUploadProps) {
+export function ImageUpload({ listingId, onUploaded }: ImageUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,10 +66,13 @@ export function ImageUpload({ listingId, userId, onUploaded }: ImageUploadProps)
       />
 
       {previewUrl ? (
-        <img
+        <Image
           src={previewUrl}
           alt="Selected preview"
           className="h-32 w-32 rounded-lg border border-slate-200 object-cover"
+          width={128}
+          height={128}
+          unoptimized
         />
       ) : null}
 
@@ -91,10 +94,13 @@ export function ImageUpload({ listingId, userId, onUploaded }: ImageUploadProps)
       {uploadedUrl ? (
         <div className="space-y-2 text-xs">
           <p className="text-emerald-700">Image uploaded and linked to listing.</p>
-          <img
+          <Image
             src={uploadedUrl}
             alt="Uploaded preview"
             className="h-32 w-32 rounded-lg border border-slate-200 object-cover"
+            width={128}
+            height={128}
+            unoptimized
           />
           <p className="break-all text-slate-600">URL: {uploadedUrl}</p>
           {uploadedPath ? <p className="break-all text-slate-500">Path: {uploadedPath}</p> : null}

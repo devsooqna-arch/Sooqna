@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { User } from "firebase/auth";
 import { useAuth } from "@/hooks/useAuth";
 import { getAuthErrorMessage } from "@/services/authService";
@@ -458,10 +459,13 @@ export function DevToolsPanel() {
               Attach uploaded image to listing
             </button>
             {uploadedImage?.url ? (
-              <img
+              <Image
                 src={uploadedImage.url}
                 alt="Uploaded preview"
                 className="h-32 w-32 rounded border border-slate-300 object-cover"
+                width={128}
+                height={128}
+                unoptimized
               />
             ) : null}
             <JsonPanel data={uploadedImage} />

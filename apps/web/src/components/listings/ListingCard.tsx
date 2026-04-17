@@ -1,4 +1,5 @@
 import type { Listing } from "@/types/listing";
+import Image from "next/image";
 
 export function ListingCard({ listing }: { listing: Listing }) {
   const firstImage = listing.images.find((img) => img.isPrimary) ?? listing.images[0];
@@ -6,11 +7,14 @@ export function ListingCard({ listing }: { listing: Listing }) {
   return (
     <article className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       {firstImage?.url ? (
-        <img
+        <Image
           src={firstImage.url}
           alt={listing.title}
           className="h-40 w-full object-cover"
+          width={640}
+          height={320}
           loading="lazy"
+          unoptimized
         />
       ) : (
         <div className="flex h-40 items-center justify-center bg-slate-100 text-sm text-slate-500">
