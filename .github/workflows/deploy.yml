@@ -25,6 +25,7 @@ jobs:
           DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
           DEPLOY_APP_DIR: ${{ secrets.DEPLOY_APP_DIR }}
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          BACKEND_DATABASE_URL: ${{ secrets.BACKEND_DATABASE_URL }}
           NEXT_PUBLIC_BACKEND_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_BACKEND_API_BASE_URL }}
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
           NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
@@ -77,60 +78,81 @@ jobs:
           script: |
             set -e
 
-            # Full monorepo path on production server.
+            # Full monorepo path on production server
             cd "${{ secrets.DEPLOY_APP_DIR }}"
             git config --global --add safe.directory "${{ secrets.DEPLOY_APP_DIR }}"
+
             if ! git remote get-url origin >/dev/null 2>&1; then
-              echo "Missing git remote 'origin' in ${{ secrets.DEPLOY_APP_DIR }}."
+              echo "Missing git remote 'origin' in ${{ secrets.DEPLOY_APP_DIR }}"
               echo "Set it once on server: git remote add origin git@github.com:devsooqna-arch/Sooqna.git"
               exit 1
             fi
 
-            # Clean conflicting untracked files from one-time extracted archives.
-            # Keep backend env and uploads directory across deploys.
+            # Clean conflicting untracked files from previous extracted archives
+            # Keep backend env, uploads, and web local env across deploys
             git clean -fd \
               -e backend/sooqna-backend/.env \
               -e backend/sooqna-backend/uploads/ \
               -e apps/web/.env.local
+
             rm -f backend/sooqna-backend/uploads/listings/.gitkeep
             rm -f backend/sooqna-backend/uploads/profiles/.gitkeep
+
             git fetch origin
             git checkout -B main origin/main
             git reset --hard origin/main
 
+            # =========================
             # Backend deployment
+            # =========================
             cd backend/sooqna-backend
+
+            echo "Node version:"
             node -v
+            echo "NPM version:"
             npm -v
 
-            # Keep devDependencies even when server NODE_ENV is set to production.
+            # Keep devDependencies even if NODE_ENV=production on server
             npm ci --production=false --include=dev
+
+            echo "Generating Prisma client..."
             npm run prisma:generate
 
-            # Run TypeScript build and always print full diagnostics before failing.
-            set +e
-            ./node_modules/.bin/tsc -p tsconfig.json --pretty false > /tmp/backend-tsc.log 2>&1
-            build_exit=$?
-            set -e
+            echo "Checking TypeScript compiler path..."
+            ls -lah ./node_modules/.bin/tsc || true
 
-            cat /tmp/backend-tsc.log
+            echo "Running backend TypeScript build..."
+            build_exit=0
+            ./node_modules/.bin/tsc -p tsconfig.json --pretty false > /tmp/backend-tsc.log 2>&1 || build_exit=$?
+
+            echo "========== backend-tsc.log =========="
+            cat /tmp/backend-tsc.log || true
+            echo "====================================="
+
             if [ "$build_exit" -ne 0 ]; then
               echo "Backend TypeScript build failed (exit ${build_exit})."
               exit "$build_exit"
             fi
 
             if [ -n "${{ secrets.BACKEND_DATABASE_URL }}" ]; then
+              echo "Running prisma migrate deploy..."
               export DATABASE_URL="${{ secrets.BACKEND_DATABASE_URL }}"
               npx prisma migrate deploy
             else
               echo "BACKEND_DATABASE_URL is not set; skipping prisma migrations."
             fi
 
+            echo "Restarting backend with PM2..."
             pm2 restart sooqna-backend || pm2 start dist/server.js --name sooqna-backend
+
             cd ../..
 
+            # =========================
             # Web deployment
+            # =========================
             cd apps/web
+
+            echo "Writing apps/web/.env.local ..."
             cat > .env.local <<EOF
             NEXT_PUBLIC_BACKEND_API_BASE_URL=${{ secrets.NEXT_PUBLIC_BACKEND_API_BASE_URL }}
             NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
@@ -142,9 +164,15 @@ jobs:
             NEXT_PUBLIC_AUTH_DEBUG=false
             EOF
 
+            echo "Installing web dependencies..."
             npm ci
+
+            echo "Building web app..."
             npm run build
+
+            echo "Restarting web with PM2..."
             pm2 restart sooqna-web || pm2 start "npm run start -- -p 3000" --name sooqna-web
+
             cd ../..
 
       - name: Health check backend
