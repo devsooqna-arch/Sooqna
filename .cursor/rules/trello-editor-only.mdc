@@ -1,0 +1,12 @@
+---
+description: Enforce Trello work through local trello-editor bridge
+alwaysApply: true
+---
+
+# Trello Integration Rule
+
+- For any Trello task, always use the local bridge at `tools/trello-editor`.
+- Do not introduce direct Trello API calls in backend/frontend app code.
+- Do not create alternate Trello integration scripts when the bridge can handle the request.
+- Keep Trello credentials only in `tools/trello-editor/.env` (never commit secrets).
+- Before Trello operations, confirm `trello-editor` is healthy at `GET /health`.
