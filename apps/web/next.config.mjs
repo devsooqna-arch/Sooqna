@@ -1,5 +1,6 @@
 import path from "path";
 import { fileURLToPath } from "url";
+import { wpExactRedirects, wpPatternRedirects } from "./wp-redirects.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -36,6 +37,13 @@ const nextConfig = {
       config.devtool = "source-map";
     }
     return config;
+  },
+  async redirects() {
+    return [
+      ...wpExactRedirects,
+      ...wpPatternRedirects,
+      // Non-WP compatibility redirects can be added below.
+    ];
   },
 };
 

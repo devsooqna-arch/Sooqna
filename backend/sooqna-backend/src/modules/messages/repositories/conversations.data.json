@@ -148,5 +148,35 @@
     "isActive": true,
     "createdAt": "2026-04-17T08:22:00.000Z",
     "updatedAt": "2026-04-17T08:28:00.000Z"
+  },
+  {
+    "id": "conv_1777283416443_fb6dba4775da",
+    "participantIds": [
+      "q5x3acmBlBh12fXM3TQn9boHEVv1",
+      "user-demo-003"
+    ],
+    "participants": {
+      "q5x3acmBlBh12fXM3TQn9boHEVv1": {
+        "fullName": "issa tadros",
+        "photoURL": "https://lh3.googleusercontent.com/a/ACg8ocKyJn7VJayJWfjFmM9VV4kMFs34lw0vyKf_8wu9bRj7tpqRkQXk=s96-c"
+      },
+      "user-demo-003": {
+        "fullName": "Omar Naser",
+        "photoURL": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80"
+      }
+    },
+    "listingId": "listing-demo-003",
+    "listingSnapshot": {
+      "title": "iPhone 14 Pro 256GB",
+      "primaryImageURL": "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=1200&q=80"
+    },
+    "createdBy": "q5x3acmBlBh12fXM3TQn9boHEVv1",
+    "lastMessageText": "",
+    "lastMessageSenderId": "",
+    "lastMessageAt": null,
+    "lastMessageType": "text",
+    "isActive": true,
+    "createdAt": "2026-04-27T09:50:16.443Z",
+    "updatedAt": "2026-04-27T09:50:16.443Z"
   }
 ]

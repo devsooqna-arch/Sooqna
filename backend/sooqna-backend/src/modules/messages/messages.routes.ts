@@ -11,6 +11,7 @@ import {
   createMessage,
   getConversation,
   getConversationMessages,
+  listConversations,
 } from "./messages.controller";
 
 export const messagesRouter = Router();
@@ -21,6 +22,7 @@ messagesRouter.post(
   validateRequest({ body: createConversationBodySchema }),
   createConversation
 );
+messagesRouter.get("/conversations", verifyFirebaseToken, listConversations);
 messagesRouter.post(
   "/conversations/:conversationId/messages",
   verifyFirebaseToken,

@@ -9,6 +9,7 @@ import type { Prisma } from "@prisma/client";
 export interface MessagesRepository {
   createConversation(conversation: Conversation): Promise<Conversation>;
   findConversationById(id: string): Promise<Conversation | null>;
+  listConversationsForUser(userId: string): Promise<Conversation[]>;
   updateConversation(conversation: Conversation): Promise<Conversation>;
   createMessage(message: Message): Promise<Message>;
   listMessages(conversationId: string): Promise<Message[]>;
@@ -81,14 +82,14 @@ export class PrismaMessagesRepository implements MessagesRepository {
         createdAt: created.createdAt.toISOString(),
         updatedAt: created.updatedAt.toISOString(),
       };
-    } catch {
+    } catch (error) {
       if (useJsonFallback()) {
         const conversations = readJsonArrayFile<Conversation>(conversationsDataPath);
         conversations.push(conversation);
         writeJsonArrayFile(conversationsDataPath, conversations);
         return conversation;
       }
-      throw new Error("Failed to create conversation.");
+      throw new Error("Failed to create conversation.", { cause: error });
     }
   }
 
@@ -126,12 +127,65 @@ export class PrismaMessagesRepository implements MessagesRepository {
         createdAt: conversation.createdAt.toISOString(),
         updatedAt: conversation.updatedAt.toISOString(),
       };
-    } catch {
+    } catch (error) {
       if (useJsonFallback()) {
         const conversations = readJsonArrayFile<Conversation>(conversationsDataPath);
         return conversations.find((conversation) => conversation.id === id) ?? null;
       }
-      throw new Error("Failed to fetch conversation.");
+      throw new Error("Failed to fetch conversation.", { cause: error });
+    }
+  }
+
+  async listConversationsForUser(userId: string): Promise<Conversation[]> {
+    try {
+      const items = await prisma.conversation.findMany({
+        where: {
+          participants: {
+            some: {
+              userId,
+            },
+          },
+        },
+        include: { participants: true },
+        orderBy: { updatedAt: "desc" },
+      });
+
+      return items.map((conversation) => {
+        const participants: Conversation["participants"] = {};
+        for (const participant of conversation.participants) {
+          participants[participant.userId] = {
+            fullName: participant.fullName,
+            photoURL: participant.photoURL,
+          };
+        }
+
+        return {
+          id: conversation.id,
+          participantIds: conversation.participants.map((p) => p.userId),
+          participants,
+          listingId: conversation.listingId,
+          listingSnapshot: {
+            title: conversation.listingSnapshotTitle,
+            primaryImageURL: conversation.listingSnapshotPrimaryImageURL,
+          },
+          createdBy: conversation.createdBy,
+          lastMessageText: conversation.lastMessageText,
+          lastMessageSenderId: conversation.lastMessageSenderId,
+          lastMessageAt: toIso(conversation.lastMessageAt),
+          lastMessageType: conversation.lastMessageType as Conversation["lastMessageType"],
+          isActive: conversation.isActive,
+          createdAt: conversation.createdAt.toISOString(),
+          updatedAt: conversation.updatedAt.toISOString(),
+        };
+      });
+    } catch (error) {
+      if (useJsonFallback()) {
+        const conversations = readJsonArrayFile<Conversation>(conversationsDataPath);
+        return conversations
+          .filter((conversation) => conversation.participantIds.includes(userId))
+          .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+      }
+      throw new Error("Failed to list conversations.", { cause: error });
     }
   }
 
@@ -158,7 +212,7 @@ export class PrismaMessagesRepository implements MessagesRepository {
         createdAt: updated.createdAt.toISOString(),
         updatedAt: updated.updatedAt.toISOString(),
       };
-    } catch {
+    } catch (error) {
       if (useJsonFallback()) {
         const conversations = readJsonArrayFile<Conversation>(conversationsDataPath);
         const idx = conversations.findIndex((item) => item.id === conversation.id);
@@ -167,7 +221,7 @@ export class PrismaMessagesRepository implements MessagesRepository {
         writeJsonArrayFile(conversationsDataPath, conversations);
         return conversation;
       }
-      throw new Error("Conversation not found");
+      throw new Error("Conversation not found.", { cause: error });
     }
   }
 
@@ -199,14 +253,14 @@ export class PrismaMessagesRepository implements MessagesRepository {
         createdAt: created.createdAt.toISOString(),
         deletedAt: toIso(created.deletedAt),
       };
-    } catch {
+    } catch (error) {
       if (useJsonFallback()) {
         const messages = readJsonArrayFile<Message>(messagesDataPath);
         messages.push(message);
         writeJsonArrayFile(messagesDataPath, messages);
         return message;
       }
-      throw new Error("Failed to create message.");
+      throw new Error("Failed to create message.", { cause: error });
     }
   }
 
@@ -228,14 +282,14 @@ export class PrismaMessagesRepository implements MessagesRepository {
         createdAt: item.createdAt.toISOString(),
         deletedAt: toIso(item.deletedAt),
       }));
-    } catch {
+    } catch (error) {
       if (useJsonFallback()) {
         const items = readJsonArrayFile<Message>(messagesDataPath);
         return items
           .filter((item) => item.conversationId === conversationId)
           .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
       }
-      throw new Error("Failed to list messages.");
+      throw new Error("Failed to list messages.", { cause: error });
     }
   }
 }

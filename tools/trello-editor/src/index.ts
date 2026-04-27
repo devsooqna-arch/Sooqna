@@ -140,6 +140,84 @@ app.put("/cards/:cardId/move", async (req, res, next) => {
   }
 });
 
+app.post("/cards/:cardId/checklists", async (req, res, next) => {
+  try {
+    const client = requireTrelloClient(res);
+    if (!client) return;
+
+    const name = req.body?.name;
+    if (!name || typeof name !== "string") {
+      res.status(400).json({
+        success: false,
+        message: "name is required.",
+      });
+      return;
+    }
+
+    const data = await client.createChecklist(req.params.cardId, name);
+    res.status(201).json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/checklists/:checklistId/items", async (req, res, next) => {
+  try {
+    const client = requireTrelloClient(res);
+    if (!client) return;
+
+    const name = req.body?.name;
+    if (!name || typeof name !== "string") {
+      res.status(400).json({
+        success: false,
+        message: "name is required.",
+      });
+      return;
+    }
+
+    const data = await client.addChecklistItem(req.params.checklistId, {
+      name,
+      checked: Boolean(req.body?.checked),
+    });
+    res.status(201).json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.put("/checklists/:checklistId", async (req, res, next) => {
+  try {
+    const client = requireTrelloClient(res);
+    if (!client) return;
+
+    const name = req.body?.name;
+    if (!name || typeof name !== "string") {
+      res.status(400).json({
+        success: false,
+        message: "name is required.",
+      });
+      return;
+    }
+
+    const data = await client.updateChecklist(req.params.checklistId, name);
+    res.json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.delete("/checklists/:checklistId", async (req, res, next) => {
+  try {
+    const client = requireTrelloClient(res);
+    if (!client) return;
+
+    await client.deleteChecklist(req.params.checklistId);
+    res.json({ success: true });
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.put("/boards/:boardId", async (req, res, next) => {
   try {
     const client = requireTrelloClient(res);

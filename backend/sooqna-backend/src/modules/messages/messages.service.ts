@@ -102,6 +102,13 @@ export class MessagesService {
     return this.repo.findConversationById(id);
   }
 
+  async listUserConversations(userId: string): Promise<Conversation[]> {
+    if (!userId.trim()) {
+      throw new AppError(400, "userId is required", "VALIDATION_ERROR");
+    }
+    return this.repo.listConversationsForUser(userId);
+  }
+
   async getConversationForUser(id: string, userId: string): Promise<Conversation> {
     const conversation = await this.repo.findConversationById(id);
     if (!conversation) {

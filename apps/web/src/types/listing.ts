@@ -62,6 +62,12 @@ export interface CreateListingInput {
   title: string;
   price: number;
   categoryId: string;
+  description?: string;
+  location?: {
+    country?: string;
+    city?: string;
+    area?: string;
+  };
 }
 
 export interface CreateListingResult {

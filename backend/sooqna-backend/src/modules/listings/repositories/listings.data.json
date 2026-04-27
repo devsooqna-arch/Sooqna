@@ -203,5 +203,39 @@
     "createdAt": "2026-04-16T17:20:00.000Z",
     "updatedAt": "2026-04-17T07:50:00.000Z",
     "deletedAt": null
+  },
+  {
+    "id": "lst_1777281992086_f090ee91c55b",
+    "title": "اختبار سيارة",
+    "titleLower": "اختبار سيارة",
+    "description": "هذا وصف اختباري للإعلان",
+    "price": 5000,
+    "currency": "JOD",
+    "priceType": "fixed",
+    "categoryId": "cars",
+    "ownerId": "q5x3acmBlBh12fXM3TQn9boHEVv1",
+    "ownerSnapshot": {
+      "fullName": "issa tadros",
+      "photoURL": "https://lh3.googleusercontent.com/a/ACg8ocKyJn7VJayJWfjFmM9VV4kMFs34lw0vyKf_8wu9bRj7tpqRkQXk=s96-c"
+    },
+    "location": {
+      "country": "Jordan",
+      "city": "Amman",
+      "area": "Amman"
+    },
+    "images": [],
+    "status": "draft",
+    "condition": "used",
+    "contactPreference": "chat",
+    "viewsCount": 0,
+    "favoritesCount": 0,
+    "messagesCount": 0,
+    "isFeatured": false,
+    "isApproved": false,
+    "publishedAt": null,
+    "expiresAt": null,
+    "createdAt": "2026-04-27T09:26:32.086Z",
+    "updatedAt": "2026-04-27T09:26:32.086Z",
+    "deletedAt": null
   }
 ]

@@ -17,7 +17,12 @@ function ensureDir(dir: string): void {
 }
 
 function sanitizeFileName(name: string): string {
-  return name.replace(/\s+/g, "_").replace(/[^\w.-]/g, "");
+  return name
+    .replace(/\s+/g, "_")
+    .replace(/[^a-zA-Z0-9._-]/g, "")
+    .replace(/\.{2,}/g, ".")   // no path traversal via ..
+    .substring(0, 80)
+    || "image";
 }
 
 export function createImageUploader(folderType: "listings" | "profiles") {

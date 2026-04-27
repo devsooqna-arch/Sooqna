@@ -2,13 +2,121 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Classic (WordPress baseline) ────────────────────────── */
+:root,
+html[data-theme="classic"] {
+  --bg:             #f0f0f0;
+  --surface:        #ffffff;
+  --surface-muted:  #f7f8f5;
+  --border:         #dde3d8;
+  --text:           #1a1f16;
+  --text-muted:     #6b7563;
+  --brand:          #2d6a2d;
+  --brand-hover:    #245824;
+  --brand-contrast: #ffffff;
+  --accent-strip:   #a8d520;
+  --accent-soft:    #edf7cc;
+  --chip:           #f0f4e8;
+  --chip-border:    #c5d4a0;
+  --danger:         #dc2626;
+  --star:           #f5a623;
+  --featured:       #f5a623;
+  --featured-text:  #ffffff;
+  --nav-bottom:     #ffffff;
+  --nav-bottom-border: #dde3d8;
+  --input-bg:       #ffffff;
+  --shadow:         0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md:      0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+}
+
+/* ─── Light ────────────────────────────────────────────────── */
+html[data-theme="light"] {
+  --bg:             #f8faf4;
+  --surface:        #ffffff;
+  --surface-muted:  #f2f6ec;
+  --border:         #d4dfca;
+  --text:           #1a2416;
+  --text-muted:     #5c7052;
+  --brand:          #2d6a2d;
+  --brand-hover:    #245824;
+  --brand-contrast: #ffffff;
+  --accent-strip:   #8bc34a;
+  --accent-soft:    #e8f5e0;
+  --chip:           #edf5e4;
+  --chip-border:    #b8d49a;
+  --danger:         #dc2626;
+  --star:           #f5a623;
+  --featured:       #f5a623;
+  --featured-text:  #ffffff;
+  --nav-bottom:     #ffffff;
+  --nav-bottom-border: #d4dfca;
+  --input-bg:       #ffffff;
+  --shadow:         0 1px 3px rgba(45,106,45,.08), 0 1px 2px rgba(45,106,45,.05);
+  --shadow-md:      0 4px 8px rgba(45,106,45,.10), 0 2px 4px rgba(45,106,45,.06);
+}
+
+/* ─── Dark ─────────────────────────────────────────────────── */
+html[data-theme="dark"] {
+  --bg:             #0d1a0d;
+  --surface:        #152415;
+  --surface-muted:  #1a2e1a;
+  --border:         #243d24;
+  --text:           #dceedd;
+  --text-muted:     #86ab87;
+  --brand:          #5cb85c;
+  --brand-hover:    #4aa04a;
+  --brand-contrast: #0d1a0d;
+  --accent-strip:   #1e3d1e;
+  --accent-soft:    #1a3020;
+  --chip:           #1e341e;
+  --chip-border:    #2e502e;
+  --danger:         #f87171;
+  --star:           #f5c842;
+  --featured:       #d4880a;
+  --featured-text:  #ffffff;
+  --nav-bottom:     #152415;
+  --nav-bottom-border: #243d24;
+  --input-bg:       #1a2e1a;
+  --shadow:         0 1px 3px rgba(0,0,0,.30), 0 1px 2px rgba(0,0,0,.20);
+  --shadow-md:      0 4px 6px rgba(0,0,0,.40), 0 2px 4px rgba(0,0,0,.30);
+}
+
+/* ─── Base ──────────────────────────────────────────────────── */
 @layer base {
-  * {
-    box-sizing: border-box;
-  }
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
 
   body {
     margin: 0;
-    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-family: "Tahoma", "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    /* space for mobile bottom nav */
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--chip-border); border-radius: 3px; }
+}
+
+/* ─── Utilities ─────────────────────────────────────────────── */
+@layer utilities {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }

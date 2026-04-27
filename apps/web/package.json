@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "validate:redirects": "node ./scripts/validate-wp-redirects.mjs",
+    "build": "npm run validate:redirects && next build",
     "start": "next start",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-pattern .next --ignore-pattern next-env.d.ts"
   },

@@ -5,9 +5,15 @@ import { parseIso, toIso } from "../../../shared/utils/dates";
 import { readJsonArrayFile, writeJsonArrayFile } from "../../../utils/fileStore";
 import type { Listing } from "../listings.types";
 
+export type PaginationOptions = {
+  limit?: number;
+  offset?: number;
+};
+
 export interface ListingsRepository {
   create(listing: Listing): Promise<Listing>;
-  list(): Promise<Listing[]>;
+  list(pagination?: PaginationOptions): Promise<{ items: Listing[]; total: number }>;
+  listByOwner(ownerId: string): Promise<Listing[]>;
   findById(id: string): Promise<Listing | null>;
   update(id: string, listing: Listing): Promise<Listing>;
 }
@@ -115,33 +121,60 @@ export class PrismaListingsRepository implements ListingsRepository {
         include: { listingImages: { orderBy: { order: "asc" } } },
       });
       return mapListing(created);
-    } catch {
+    } catch (error) {
       if (useJsonFallback()) {
         const listings = readJsonArrayFile<Listing>(listingsDataPath);
         listings.push(listing);
         writeJsonArrayFile(listingsDataPath, listings);
         return listing;
       }
-      throw new Error("Failed to create listing.");
+      throw new Error("Failed to create listing.", { cause: error });
     }
   }
 
-  async list(): Promise<Listing[]> {
+  async list(pagination?: PaginationOptions): Promise<{ items: Listing[]; total: number }> {
+    const limit = Math.min(pagination?.limit ?? 20, 100);
+    const offset = pagination?.offset ?? 0;
+    try {
+      const [listings, total] = await prisma.$transaction([
+        prisma.listing.findMany({
+          where: { deletedAt: null },
+          orderBy: { createdAt: "desc" },
+          include: { listingImages: { orderBy: { order: "asc" } } },
+          take: limit,
+          skip: offset,
+        }),
+        prisma.listing.count({ where: { deletedAt: null } }),
+      ]);
+      return { items: listings.map(mapListing), total };
+    } catch (error) {
+      if (useJsonFallback()) {
+        const all = readJsonArrayFile<Listing>(listingsDataPath);
+        const filtered = all
+          .filter((listing) => listing.deletedAt === null)
+          .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        return { items: filtered.slice(offset, offset + limit), total: filtered.length };
+      }
+      throw new Error("Failed to list listings.", { cause: error });
+    }
+  }
+
+  async listByOwner(ownerId: string): Promise<Listing[]> {
     try {
       const listings = await prisma.listing.findMany({
-        where: { deletedAt: null },
+        where: { deletedAt: null, ownerId },
         orderBy: { createdAt: "desc" },
         include: { listingImages: { orderBy: { order: "asc" } } },
       });
       return listings.map(mapListing);
-    } catch {
+    } catch (error) {
       if (useJsonFallback()) {
         const listings = readJsonArrayFile<Listing>(listingsDataPath);
         return listings
-          .filter((listing) => listing.deletedAt === null)
+          .filter((listing) => listing.deletedAt === null && listing.ownerId === ownerId)
           .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
       }
-      throw new Error("Failed to list listings.");
+      throw new Error("Failed to list owner listings.", { cause: error });
     }
   }
 
@@ -152,13 +185,13 @@ export class PrismaListingsRepository implements ListingsRepository {
         include: { listingImages: { orderBy: { order: "asc" } } },
       });
       return listing ? mapListing(listing) : null;
-    } catch {
+    } catch (error) {
       if (useJsonFallback()) {
         const listings = readJsonArrayFile<Listing>(listingsDataPath);
         const listing = listings.find((item) => item.id === id && item.deletedAt === null);
         return listing ?? null;
       }
-      throw new Error("Failed to fetch listing.");
+      throw new Error("Failed to fetch listing.", { cause: error });
     }
   }
 
@@ -206,7 +239,7 @@ export class PrismaListingsRepository implements ListingsRepository {
         include: { listingImages: { orderBy: { order: "asc" } } },
       });
       return mapListing(updated);
-    } catch {
+    } catch (error) {
       if (useJsonFallback()) {
         const listings = readJsonArrayFile<Listing>(listingsDataPath);
         const idx = listings.findIndex((item) => item.id === id);
@@ -215,7 +248,7 @@ export class PrismaListingsRepository implements ListingsRepository {
         writeJsonArrayFile(listingsDataPath, listings);
         return listing;
       }
-      throw new Error("Listing not found.");
+      throw new Error("Listing not found.", { cause: error });
     }
   }
 }

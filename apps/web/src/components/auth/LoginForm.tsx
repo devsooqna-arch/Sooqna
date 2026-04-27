@@ -118,12 +118,12 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
   }
 
   return (
-    <div className="w-full max-w-md space-y-6">
+    <div className="w-full max-w-md space-y-5">
       <div className="text-center">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <h1 className="text-4xl font-extrabold text-[var(--text)]">
           {isSignup ? "إنشاء حساب جديد" : "تسجيل الدخول"}
         </h1>
-        <p className="mt-2 text-sm text-slate-500">
+        <p className="mt-2 text-sm text-[var(--text-muted)]">
           {isSignup
             ? "ابدأ حسابك خلال دقيقة، أو استخدم Google للمتابعة بسرعة."
             : "أدخل بياناتك للوصول إلى حسابك، أو تابع مباشرة عبر Google."}
@@ -156,7 +156,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
           <div>
             <label
               htmlFor="fullName"
-              className="mb-1.5 block text-sm font-medium text-slate-700"
+              className="mb-1.5 block text-sm font-semibold text-[var(--text)]"
             >
               الاسم الكامل
             </label>
@@ -167,7 +167,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
               autoComplete="name"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none ring-slate-400 transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-900/10"
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text)] shadow-sm outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--brand)]"
               placeholder="الاسم الكامل"
               disabled={busy || authLoading}
               aria-invalid={!!fieldErrors.fullName}
@@ -184,7 +184,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
         <div>
           <label
             htmlFor="email"
-            className="mb-1.5 block text-sm font-medium text-slate-700"
+            className="mb-1.5 block text-sm font-semibold text-[var(--text)]"
           >
             البريد الإلكتروني
           </label>
@@ -200,7 +200,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
                 setFieldErrors((p) => ({ ...p, email: undefined }));
               }
             }}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none ring-slate-400 transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-900/10"
+            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text)] shadow-sm outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--brand)]"
             placeholder="you@example.com"
             disabled={busy || authLoading}
             aria-invalid={!!fieldErrors.email}
@@ -216,7 +216,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
         <div>
           <label
             htmlFor="password"
-            className="mb-1.5 block text-sm font-medium text-slate-700"
+            className="mb-1.5 block text-sm font-semibold text-[var(--text)]"
           >
             كلمة المرور
           </label>
@@ -232,7 +232,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
                 setFieldErrors((p) => ({ ...p, password: undefined }));
               }
             }}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none ring-slate-400 transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-900/10"
+            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text)] shadow-sm outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--brand)]"
             placeholder="••••••••"
             disabled={busy || authLoading}
             aria-invalid={!!fieldErrors.password}
@@ -245,12 +245,22 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
               {fieldErrors.password}
             </p>
           )}
+          {!isSignup ? (
+            <div className="mt-2 text-end">
+              <Link
+                href="/reset-password"
+                className="text-xs font-medium text-[var(--text-muted)] hover:text-[var(--brand)]"
+              >
+                نسيت كلمة المرور؟
+              </Link>
+            </div>
+          ) : null}
         </div>
 
         <button
           type="submit"
           disabled={busy || authLoading}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--brand)] px-4 py-2.5 text-sm font-semibold text-[var(--brand-contrast)] shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {submitting ? (
             <>
@@ -263,11 +273,11 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
         </button>
       </form>
 
-      <p className="text-center text-sm text-slate-600">
+      <p className="text-center text-sm text-[var(--text-muted)]">
         {isSignup ? "عندك حساب بالفعل؟" : "ما عندك حساب؟"}{" "}
         <Link
           href={isSignup ? "/login" : "/register"}
-          className="font-medium text-slate-900 underline underline-offset-2 hover:text-slate-700"
+          className="font-semibold text-[var(--brand)]"
         >
           {isSignup ? "ارجع لتسجيل الدخول" : "إنشاء حساب جديد"}
         </Link>
@@ -275,10 +285,10 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-slate-200" />
+          <div className="w-full border-t border-[var(--border)]" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white px-2 text-slate-400">أو</span>
+          <span className="bg-[var(--surface)] px-2 text-[var(--text-muted)]">أو</span>
         </div>
       </div>
 
@@ -286,7 +296,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
         type="button"
         onClick={handleGoogleLogin}
         disabled={busy || authLoading}
-        className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-full border border-[var(--chip-border)] bg-[var(--chip)] px-4 py-2.5 text-sm font-semibold text-[var(--text)] shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {googleLoading ? (
           <>

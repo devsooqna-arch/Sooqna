@@ -61,6 +61,10 @@ model Listing {
   favorites     Favorite[]
   uploads       Upload[]
   listingImages ListingImage[]
+
+  @@index([ownerId])
+  @@index([status, deletedAt])
+  @@index([categoryId])
 }
 
 model ListingImage {

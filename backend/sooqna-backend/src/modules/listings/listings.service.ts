@@ -2,7 +2,7 @@ import { generateId } from "../../utils/ids";
 import { nowIso } from "../../utils/time";
 import { AppError } from "../../shared/errors/appError";
 import { PrismaUsersRepository } from "../users/repositories/users.repository";
-import type { ListingsRepository } from "./repositories/listings.repository";
+import type { ListingsRepository, PaginationOptions } from "./repositories/listings.repository";
 import type { Listing } from "./listings.types";
 
 type CreateListingInput = {
@@ -107,8 +107,15 @@ export class ListingsService {
     return this.repo.create(listing);
   }
 
-  async list(): Promise<Listing[]> {
-    return this.repo.list();
+  async list(pagination?: PaginationOptions): Promise<{ items: Listing[]; total: number }> {
+    return this.repo.list(pagination);
+  }
+
+  async listForOwner(ownerId: string): Promise<Listing[]> {
+    if (!ownerId.trim()) {
+      throw new AppError(400, "ownerId is required", "VALIDATION_ERROR");
+    }
+    return this.repo.listByOwner(ownerId);
   }
 
   async getById(id: string): Promise<Listing | null> {

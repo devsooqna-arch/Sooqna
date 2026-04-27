@@ -26,8 +26,18 @@ export async function createListing(req: Request, res: Response): Promise<void> 
   res.status(201).json({ success: true, listing });
 }
 
-export async function listListings(_req: Request, res: Response): Promise<void> {
-  const listings = await service.list();
+export async function listListings(req: Request, res: Response): Promise<void> {
+  const limit = Math.max(1, Math.min(Number(req.query.limit) || 20, 100));
+  const offset = Math.max(0, Number(req.query.offset) || 0);
+  const { items, total } = await service.list({ limit, offset });
+  res.json({ success: true, listings: items, total, limit, offset });
+}
+
+export async function listMyListings(req: Request, res: Response): Promise<void> {
+  if (!req.authUser) {
+    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
+  }
+  const listings = await service.listForOwner(req.authUser.uid);
   res.json({ success: true, listings });
 }
 

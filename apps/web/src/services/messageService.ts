@@ -19,6 +19,16 @@ export async function getConversationById(
   }
 }
 
+export async function getMyConversations(): Promise<Conversation[]> {
+  const response = await apiFetch<{ success: true; conversations: Conversation[] }>(
+    "/messages/conversations",
+    {
+      authenticated: true,
+    }
+  );
+  return response.conversations;
+}
+
 export async function getConversationMessages(
   conversationId: string
 ): Promise<Message[]> {

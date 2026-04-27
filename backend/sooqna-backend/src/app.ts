@@ -15,12 +15,27 @@ app.use(helmet());
 app.use(cors({ origin: env.corsOrigin, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 app.use(morgan(env.nodeEnv === "production" ? "combined" : "dev"));
+
+// General API limiter — 500 req / 15 min
 app.use(
   "/api",
   rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 500,
     standardHeaders: true,
+    legacyHeaders: false,
+  })
+);
+
+// Auth limiter — 20 req / 15 min per IP (brute-force protection)
+app.use(
+  "/api/auth",
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: "Too many requests, please try again later." },
   })
 );
 

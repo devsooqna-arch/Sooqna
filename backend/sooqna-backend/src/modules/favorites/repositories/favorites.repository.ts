@@ -31,14 +31,14 @@ export class PrismaFavoritesRepository implements FavoritesRepository {
         listingId: item.listingId ?? "",
         createdAt: item.createdAt.toISOString(),
       }));
-    } catch {
+    } catch (error) {
       if (useJsonFallback()) {
         const items = readJsonArrayFile<FavoriteRecord>(favoritesDataPath);
         return items
           .filter((item) => item.userId === userId)
           .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
       }
-      throw new Error("Failed to fetch favorites.");
+      throw new Error("Failed to fetch favorites.", { cause: error });
     }
   }
 
@@ -60,7 +60,7 @@ export class PrismaFavoritesRepository implements FavoritesRepository {
           createdAt: new Date(record.createdAt),
         },
       });
-    } catch {
+    } catch (error) {
       if (useJsonFallback()) {
         const items = readJsonArrayFile<FavoriteRecord>(favoritesDataPath);
         const exists = items.some(
@@ -72,7 +72,7 @@ export class PrismaFavoritesRepository implements FavoritesRepository {
         }
         return;
       }
-      throw new Error("Failed to save favorite.");
+      throw new Error("Failed to save favorite.", { cause: error });
     }
   }
 
@@ -81,7 +81,7 @@ export class PrismaFavoritesRepository implements FavoritesRepository {
       await prisma.favorite.deleteMany({
         where: { userId, listingId },
       });
-    } catch {
+    } catch (error) {
       if (useJsonFallback()) {
         const items = readJsonArrayFile<FavoriteRecord>(favoritesDataPath);
         const filtered = items.filter(
@@ -90,7 +90,7 @@ export class PrismaFavoritesRepository implements FavoritesRepository {
         writeJsonArrayFile(favoritesDataPath, filtered);
         return;
       }
-      throw new Error("Failed to remove favorite.");
+      throw new Error("Failed to remove favorite.", { cause: error });
     }
   }
 }

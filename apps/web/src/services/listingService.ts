@@ -7,6 +7,11 @@ import type { CreateListingInput, CreateListingResult, Listing } from "@/types/l
 export async function createListing(
   input: CreateListingInput
 ): Promise<CreateListingResult> {
+  const location = {
+    country: input.location?.country?.trim() || "Jordan",
+    city: input.location?.city?.trim() || "Amman",
+    area: input.location?.area?.trim() || "Unknown",
+  };
   const response = await apiFetch<{ success: true; listing: Listing }>("/listings", {
     method: "POST",
     authenticated: true,
@@ -14,6 +19,8 @@ export async function createListing(
       title: input.title,
       price: input.price,
       categoryId: input.categoryId,
+      description: input.description ?? "",
+      location,
     }),
   });
   return {
@@ -27,6 +34,13 @@ export async function createListing(
  */
 export async function getListings(): Promise<Listing[]> {
   const response = await apiFetch<{ success: true; listings: Listing[] }>("/listings");
+  return response.listings;
+}
+
+export async function getMyListings(): Promise<Listing[]> {
+  const response = await apiFetch<{ success: true; listings: Listing[] }>("/listings/mine", {
+    authenticated: true,
+  });
   return response.listings;
 }
 

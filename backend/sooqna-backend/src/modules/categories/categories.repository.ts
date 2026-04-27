@@ -37,8 +37,8 @@ export class PrismaCategoriesRepository implements CategoriesRepository {
         createdAt: category.createdAt ? category.createdAt.toISOString() : null,
         updatedAt: category.updatedAt ? category.updatedAt.toISOString() : null,
       }));
-    } catch {
-      throw new Error("Failed to list categories.");
+    } catch (error) {
+      throw new Error("Failed to list categories.", { cause: error });
     }
   }
 
@@ -68,8 +68,8 @@ export class PrismaCategoriesRepository implements CategoriesRepository {
           },
         });
       }
-    } catch {
-      throw new Error("Failed to seed categories.");
+    } catch (error) {
+      throw new Error("Failed to seed categories.", { cause: error });
     }
   }
 }

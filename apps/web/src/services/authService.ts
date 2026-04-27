@@ -5,6 +5,7 @@ import {
   createUserWithEmailAndPassword,
   getRedirectResult,
   inMemoryPersistence,
+  sendPasswordResetEmail,
   setPersistence,
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -91,6 +92,11 @@ export async function loginWithGoogleRedirect(): Promise<void> {
 
 export async function logout(): Promise<void> {
   await signOut(auth);
+}
+
+export async function sendPasswordResetLink(email: string): Promise<void> {
+  await ensureAuthPersistence();
+  await sendPasswordResetEmail(auth, email.trim());
 }
 
 /**

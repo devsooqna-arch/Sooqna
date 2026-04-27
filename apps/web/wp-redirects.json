@@ -1,0 +1,22 @@
+{
+  "exact": [
+    { "source": "/my-account/login/", "destination": "/login", "permanent": true },
+    { "source": "/my-account/register/", "destination": "/register", "permanent": true },
+    { "source": "/my-account/lost-password/", "destination": "/reset-password", "permanent": true },
+    { "source": "/my-account/", "destination": "/me", "permanent": false },
+    { "source": "/add-listing/", "destination": "/submit-listing", "permanent": true },
+    { "source": "/listings/", "destination": "/listings", "permanent": true },
+    { "source": "/listing/كاميرا-سوني-a7-iv-مع-عدسة-50mm/", "destination": "/listings", "permanent": false }
+  ],
+  "patterns": [
+    { "source": "/my-account/login/:path*", "destination": "/login", "permanent": true },
+    { "source": "/my-account/register/:path*", "destination": "/register", "permanent": true },
+    { "source": "/my-account/lost-password/:path*", "destination": "/reset-password", "permanent": true },
+    { "source": "/my-account/:path*", "destination": "/me", "permanent": false },
+    { "source": "/add-listing/:path*", "destination": "/submit-listing", "permanent": true },
+    { "source": "/listing/:slug", "destination": "/listings", "permanent": false },
+    { "source": "/listing/:slug/:path*", "destination": "/listings", "permanent": false },
+    { "source": "/category/:slug", "destination": "/listings?category=:slug", "permanent": false },
+    { "source": "/category/:slug/:path*", "destination": "/listings?category=:slug", "permanent": false }
+  ]
+}

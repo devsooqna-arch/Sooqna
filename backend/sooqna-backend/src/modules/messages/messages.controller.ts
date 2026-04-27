@@ -73,6 +73,16 @@ export async function getConversation(req: Request, res: Response): Promise<void
   res.json({ success: true, conversation });
 }
 
+export async function listConversations(req: Request, res: Response): Promise<void> {
+  const uid = req.authUser?.uid;
+  if (!uid) {
+    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
+  }
+
+  const conversations = await service.listUserConversations(uid);
+  res.json({ success: true, conversations });
+}
+
 export async function getConversationMessages(req: Request, res: Response): Promise<void> {
   const uid = req.authUser?.uid;
   if (!uid) {

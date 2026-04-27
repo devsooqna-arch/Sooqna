@@ -78,6 +78,31 @@ export class TrelloClient {
     return this.request(`/boards/${boardId}`, "PUT", input);
   }
 
+  public async createChecklist(cardId: string, name: string) {
+    return this.request("/checklists", "POST", {
+      idCard: cardId,
+      name,
+    });
+  }
+
+  public async addChecklistItem(
+    checklistId: string,
+    input: { name: string; checked?: boolean }
+  ) {
+    return this.request(`/checklists/${checklistId}/checkItems`, "POST", {
+      name: input.name,
+      checked: input.checked ?? false,
+    });
+  }
+
+  public async updateChecklist(checklistId: string, name: string) {
+    return this.request(`/checklists/${checklistId}`, "PUT", { name });
+  }
+
+  public async deleteChecklist(checklistId: string) {
+    return this.request(`/checklists/${checklistId}`, "DELETE");
+  }
+
   private async request(
     path: string,
     method: TrelloHttpMethod,

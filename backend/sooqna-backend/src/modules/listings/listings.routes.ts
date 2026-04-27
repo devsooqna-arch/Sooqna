@@ -13,12 +13,14 @@ import {
   deleteListing,
   getListingById,
   listListings,
+  listMyListings,
   patchListing,
 } from "./listings.controller";
 
 export const listingsRouter = Router();
 
 listingsRouter.get("/", listListings);
+listingsRouter.get("/mine", verifyFirebaseToken, listMyListings);
 listingsRouter.get("/:id", validateRequest({ params: idParamsSchema }), getListingById);
 
 listingsRouter.post(

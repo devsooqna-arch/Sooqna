@@ -22,8 +22,8 @@ export class PrismaUploadsRepository implements UploadsRepository {
           createdAt: new Date(nowIso()),
         },
       });
-    } catch {
-      throw new Error("Failed to store upload metadata.");
+    } catch (error) {
+      throw new Error("Failed to store upload metadata.", { cause: error });
     }
   }
 }

@@ -36,12 +36,12 @@ export class PrismaUsersRepository implements UsersRepository {
         createdAt: user.createdAt.toISOString(),
         updatedAt: user.updatedAt.toISOString(),
       };
-    } catch {
+    } catch (error) {
       if (useJsonFallback()) {
         const users = readJsonArrayFile<UserProfile>(usersDataPath);
         return users.find((user) => user.uid === uid) ?? null;
       }
-      throw new Error("Failed to fetch user profile.");
+      throw new Error("Failed to fetch user profile.", { cause: error });
     }
   }
 
@@ -82,7 +82,7 @@ export class PrismaUsersRepository implements UsersRepository {
         createdAt: user.createdAt.toISOString(),
         updatedAt: user.updatedAt.toISOString(),
       };
-    } catch {
+    } catch (error) {
       if (useJsonFallback()) {
         const users = readJsonArrayFile<UserProfile>(usersDataPath);
         const idx = users.findIndex((item) => item.uid === profile.uid);
@@ -94,7 +94,7 @@ export class PrismaUsersRepository implements UsersRepository {
         writeJsonArrayFile(usersDataPath, users);
         return profile;
       }
-      throw new Error("Failed to save user profile.");
+      throw new Error("Failed to save user profile.", { cause: error });
     }
   }
 }

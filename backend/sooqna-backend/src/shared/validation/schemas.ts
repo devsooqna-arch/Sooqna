@@ -69,6 +69,7 @@ export const createConversationBodySchema = z
       title: z.string().trim().min(1).max(200),
       primaryImageURL: z.string().trim().url().max(2048).optional().default(""),
     }),
+    createdBy: z.string().trim().optional(), // ignored — taken from auth token on the server
   })
   .strict();
 
