@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { RequireAuthGate } from "@/components/auth/RequireAuthGate";
@@ -23,14 +24,11 @@ export function FavoritesPageView() {
 
     void getUserFavoriteListingIds(currentUser.uid)
       .then(async (listingIds) => {
-        const listingPromises = listingIds.map((id) =>
-          getListingById(id).catch(() => null)
-        );
-        const listings = (await Promise.all(listingPromises)).filter(
-          (item): item is Listing => Boolean(item)
-        );
+        const results = (
+          await Promise.all(listingIds.map((id) => getListingById(id).catch(() => null)))
+        ).filter((item): item is Listing => Boolean(item));
         if (!mounted) return;
-        setItems(listings);
+        setItems(results);
       })
       .catch((err) => {
         if (!mounted) return;
@@ -41,15 +39,17 @@ export function FavoritesPageView() {
         setLoading(false);
       });
 
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, [currentUser]);
 
   return (
     <RequireAuthGate fallbackMessage="يتم التحقق من الجلسة قبل تحميل المفضلة...">
       {loading ? (
-        <p className="text-sm text-[var(--text-muted)]">جاري تحميل المفضلة...</p>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-52 animate-pulse rounded-lg bg-[var(--surface)]" />
+          ))}
+        </div>
       ) : error ? (
         <p className="text-sm text-[var(--danger)]">{error}</p>
       ) : items.length ? (
@@ -59,9 +59,19 @@ export function FavoritesPageView() {
           ))}
         </div>
       ) : (
-        <p className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--text-muted)]">
-          لا توجد إعلانات في المفضلة بعد.
-        </p>
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-6 py-14 text-center shadow-[var(--shadow)]">
+          <span className="text-5xl">❤️</span>
+          <p className="mt-4 text-base font-semibold text-[var(--text)]">قائمة المفضلة فارغة</p>
+          <p className="mt-2 text-sm text-[var(--text-muted)]">
+            تصفح الإعلانات واحفظ ما يعجبك للرجوع إليه لاحقاً
+          </p>
+          <Link
+            href="/listings"
+            className="mt-5 inline-block rounded-full bg-[var(--brand)] px-6 py-2.5 text-sm font-semibold text-[var(--brand-contrast)]"
+          >
+            تصفح الإعلانات
+          </Link>
+        </div>
       )}
     </RequireAuthGate>
   );

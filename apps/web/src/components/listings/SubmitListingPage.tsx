@@ -225,9 +225,9 @@ export function SubmitListingPage() {
           <button
             type="submit"
             disabled={busy || categoryLoading}
-            className="rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-semibold text-[var(--brand-contrast)] transition hover:opacity-90 disabled:opacity-60"
+            className="w-full rounded-full bg-[var(--brand)] py-3 text-sm font-bold text-[var(--brand-contrast)] shadow transition hover:opacity-90 disabled:opacity-60"
           >
-            {busy ? "جاري الإنشاء..." : "إنشاء الإعلان"}
+            {busy ? "جاري الإنشاء..." : "نشر الإعلان"}
           </button>
         </form>
 
