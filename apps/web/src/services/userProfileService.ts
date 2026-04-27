@@ -9,11 +9,15 @@ export async function ensureUserProfile(
   options?: { fullName?: string }
 ): Promise<{ created: boolean }> {
   const fullName = options?.fullName?.trim() || user.displayName?.trim() || "";
+  const token = await user.getIdToken();
+  
   const response = await apiFetch<{ success: true; profile: { uid: string } }>(
     "/users/profile",
     {
       method: "POST",
-      authenticated: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({
         fullName,
         photoURL: user.photoURL ?? "",

@@ -14,8 +14,8 @@ export async function verifyFirebaseToken(
   try {
     req.authUser = await adminAuth.verifyIdToken(authHeader.slice(7));
     next();
-  } catch {
-    res.status(401).json({ success: false, message: "Invalid or expired token." });
+  } catch (error) {
+    console.error("Firebase Token Verification Error:", error);
+    res.status(401).json({ success: false, message: "Invalid or expired token.", error: String(error) });
   }
 }
-
