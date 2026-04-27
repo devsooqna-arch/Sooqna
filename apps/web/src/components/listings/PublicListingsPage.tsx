@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { ListingCard } from "@/components/listings/ListingCard";
 import { getListings } from "@/services/listingService";
@@ -17,7 +17,23 @@ const SORT_LABELS: Record<SortKey, string> = {
   price_desc: "السعر: الأعلى أولاً",
 };
 
-export function PublicListingsPage() {
+function ListingsSkeleton() {
+  return (
+    <div className="grid gap-5 lg:grid-cols-[270px_1fr]">
+      <div className="h-48 animate-pulse rounded-lg bg-[var(--surface)]" />
+      <div className="space-y-4">
+        <div className="h-8 w-48 animate-pulse rounded-lg bg-[var(--surface)]" />
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-52 animate-pulse rounded-lg bg-[var(--surface)]" />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PublicListingsPageInner() {
   const params = useSearchParams();
   const categoryFilter = params.get("category");
   const searchFilter = params.get("search")?.toLowerCase() ?? "";
@@ -69,19 +85,7 @@ export function PublicListingsPage() {
   }, [listings, categoryFilter, searchFilter, sort]);
 
   if (loading) {
-    return (
-      <div className="grid gap-5 lg:grid-cols-[270px_1fr]">
-        <div className="h-48 animate-pulse rounded-lg bg-[var(--surface)]" />
-        <div className="space-y-4">
-          <div className="h-8 w-48 animate-pulse rounded-lg bg-[var(--surface)]" />
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-52 animate-pulse rounded-lg bg-[var(--surface)]" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <ListingsSkeleton />;
   }
 
   if (error) {
@@ -179,5 +183,13 @@ export function PublicListingsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export function PublicListingsPage() {
+  return (
+    <Suspense fallback={<ListingsSkeleton />}>
+      <PublicListingsPageInner />
+    </Suspense>
   );
 }

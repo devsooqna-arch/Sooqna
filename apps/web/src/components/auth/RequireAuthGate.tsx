@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode, Suspense } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 
-export function RequireAuthGate({
+function RequireAuthGateInner({
   children,
   fallbackMessage = "جاري التحقق من الجلسة...",
   redirectDelayMs = 1500,
@@ -49,4 +49,16 @@ export function RequireAuthGate({
   }
 
   return <>{children}</>;
+}
+
+export function RequireAuthGate(props: {
+  children: ReactNode;
+  fallbackMessage?: string;
+  redirectDelayMs?: number;
+}) {
+  return (
+    <Suspense fallback={<p className="text-sm text-[var(--text-muted)]">{props.fallbackMessage || "جاري التحقق من الجلسة..."}</p>}>
+      <RequireAuthGateInner {...props} />
+    </Suspense>
+  );
 }
