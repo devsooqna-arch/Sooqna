@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { AppError } from "../../shared/errors/appError";
+import { logAuditEvent } from "../audit/audit.service";
 import { JsonReportsRepository } from "./reports.repository";
 import { ReportsService } from "./reports.service";
 import type { ReportStatus } from "./reports.types";
@@ -15,6 +16,13 @@ export async function submitReport(req: Request, res: Response): Promise<void> {
     reasonCode: req.body.reasonCode,
     details: req.body.details,
     reporterId: uid,
+  });
+  await logAuditEvent({
+    actorId: uid,
+    action: "report.submit",
+    targetType: report.targetType,
+    targetId: report.targetId,
+    metadata: { reportId: report.id, reasonCode: report.reasonCode },
   });
   res.status(201).json({ success: true, report });
 }
@@ -39,6 +47,13 @@ export async function updateModerationReport(req: Request, res: Response): Promi
     status: req.body.status,
     moderatorId: uid,
     note: req.body.note,
+  });
+  await logAuditEvent({
+    actorId: uid,
+    action: "report.update",
+    targetType: report.targetType,
+    targetId: report.targetId,
+    metadata: { reportId: report.id, status: report.status },
   });
   res.json({ success: true, report });
 }

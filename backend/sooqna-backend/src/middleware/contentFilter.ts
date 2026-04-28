@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { env } from "../config/env";
 import { sendError } from "../shared/contracts/api";
+import { logAuditEvent } from "../modules/audit/audit.service";
 
 function containsBlockedKeyword(text: string): string | null {
   const normalized = text.toLowerCase();
@@ -33,6 +34,13 @@ export function contentFilter(req: Request, res: Response, next: NextFunction): 
     next();
     return;
   }
+  void logAuditEvent({
+    actorId: req.authUser?.uid ?? null,
+    action: "security.content_blocked",
+    targetType: "request",
+    targetId: req.originalUrl,
+    metadata: { blockedKeyword, method: req.method },
+  });
   sendError(
     res,
     400,

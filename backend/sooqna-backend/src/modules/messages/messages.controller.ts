@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { AppError } from "../../shared/errors/appError";
+import { logAuditEvent } from "../audit/audit.service";
 import { PrismaMessagesRepository } from "./repositories/messages.repository";
 import { MessagesService } from "./messages.service";
 
@@ -56,6 +57,13 @@ export async function createMessage(req: Request, res: Response): Promise<void> 
     text: String(req.body?.text ?? ""),
     attachments: Array.isArray(req.body?.attachments) ? req.body.attachments : [],
   });
+  await logAuditEvent({
+    actorId: uid,
+    action: "message.create",
+    targetType: "conversation",
+    targetId: req.params.conversationId,
+    metadata: { messageId: message.id, type: message.type },
+  });
   res.status(201).json({ success: true, message });
 }
 
@@ -99,6 +107,13 @@ export async function markConversationRead(req: Request, res: Response): Promise
     throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
   }
   const updatedCount = await service.markConversationRead(req.params.conversationId, uid);
+  await logAuditEvent({
+    actorId: uid,
+    action: "message.read",
+    targetType: "conversation",
+    targetId: req.params.conversationId,
+    metadata: { updatedCount },
+  });
   res.json({ success: true, updatedCount });
 }
 

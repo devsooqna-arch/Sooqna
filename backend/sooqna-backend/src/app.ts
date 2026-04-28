@@ -39,6 +39,40 @@ app.use(
   })
 );
 
+// Abuse protection for write-heavy/sensitive routes
+app.use(
+  "/api/reports",
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 40,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, code: "RATE_LIMITED", message: "Too many report requests." },
+  })
+);
+
+app.use(
+  "/api/messages",
+  rateLimit({
+    windowMs: 5 * 60 * 1000,
+    max: 120,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, code: "RATE_LIMITED", message: "Too many messaging requests." },
+  })
+);
+
+app.use(
+  "/api/favorites",
+  rateLimit({
+    windowMs: 5 * 60 * 1000,
+    max: 120,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, code: "RATE_LIMITED", message: "Too many favorites requests." },
+  })
+);
+
 app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 app.use("/api", apiRouter);
 app.use(notFoundHandler);

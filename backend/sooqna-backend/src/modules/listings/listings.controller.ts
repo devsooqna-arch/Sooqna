@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { AppError } from "../../shared/errors/appError";
+import { logAuditEvent } from "../audit/audit.service";
 import { PrismaListingsRepository } from "./repositories/listings.repository";
 import { ListingsService } from "./listings.service";
 
@@ -22,6 +23,12 @@ export async function createListing(req: Request, res: Response): Promise<void> 
       city: String(req.body?.location?.city ?? ""),
       area: String(req.body?.location?.area ?? ""),
     },
+  });
+  await logAuditEvent({
+    actorId: req.authUser.uid,
+    action: "listing.create",
+    targetType: "listing",
+    targetId: listing.id,
   });
   res.status(201).json({ success: true, listing });
 }
@@ -89,6 +96,12 @@ export async function patchListing(req: Request, res: Response): Promise<void> {
     description: req.body?.description,
     price: req.body?.price,
   });
+  await logAuditEvent({
+    actorId: req.authUser.uid,
+    action: "listing.update",
+    targetType: "listing",
+    targetId: listing.id,
+  });
   res.json({ success: true, listing });
 }
 
@@ -97,6 +110,12 @@ export async function publishListing(req: Request, res: Response): Promise<void>
     throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
   }
   const listing = await service.publish(req.params.id, req.authUser.uid);
+  await logAuditEvent({
+    actorId: req.authUser.uid,
+    action: "listing.publish",
+    targetType: "listing",
+    targetId: listing.id,
+  });
   res.json({ success: true, listing });
 }
 
@@ -105,6 +124,12 @@ export async function unpublishListing(req: Request, res: Response): Promise<voi
     throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
   }
   const listing = await service.unpublish(req.params.id, req.authUser.uid);
+  await logAuditEvent({
+    actorId: req.authUser.uid,
+    action: "listing.unpublish",
+    targetType: "listing",
+    targetId: listing.id,
+  });
   res.json({ success: true, listing });
 }
 
@@ -117,6 +142,13 @@ export async function renewListing(req: Request, res: Response): Promise<void> {
       ? req.body.durationDays
       : undefined;
   const listing = await service.renew(req.params.id, req.authUser.uid, durationDays);
+  await logAuditEvent({
+    actorId: req.authUser.uid,
+    action: "listing.renew",
+    targetType: "listing",
+    targetId: listing.id,
+    metadata: { durationDays: durationDays ?? null },
+  });
   res.json({ success: true, listing });
 }
 
@@ -125,6 +157,12 @@ export async function expireListing(req: Request, res: Response): Promise<void> 
     throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
   }
   const listing = await service.expire(req.params.id, req.authUser.uid);
+  await logAuditEvent({
+    actorId: req.authUser.uid,
+    action: "listing.expire",
+    targetType: "listing",
+    targetId: listing.id,
+  });
   res.json({ success: true, listing });
 }
 
@@ -133,6 +171,12 @@ export async function deleteListing(req: Request, res: Response): Promise<void> 
     throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
   }
   const listing = await service.softDelete(req.params.id, req.authUser.uid);
+  await logAuditEvent({
+    actorId: req.authUser.uid,
+    action: "listing.delete",
+    targetType: "listing",
+    targetId: listing.id,
+  });
   res.json({ success: true, listing });
 }
 
