@@ -12,6 +12,7 @@ import {
 import { onAuthStateChanged, updateProfile, type User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import * as authService from "@/services/authService";
+import { apiFetch } from "@/services/apiClient";
 import { ensureUserProfile } from "@/services/userProfileService";
 
 function debugAuth(...args: unknown[]) {
@@ -25,11 +26,16 @@ export type AuthContextValue = {
   currentUser: User | null;
   loading: boolean;
   /** Create account with email/password + display name; ensures backend profile. */
-  register: (email: string, password: string, fullName: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    fullName: string
+  ) => Promise<{ emailVerified: boolean }>;
   /** Email/password — throws on failure (handle in UI with `getAuthErrorMessage`). */
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<{ emailVerified: boolean }>;
   /** Google via redirect (reliable in real browsers; avoids blank firebaseapp.com handler in embedded browsers). */
   loginWithGoogle: () => Promise<void>;
+  resendEmailVerification: () => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -118,6 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       uid: cred.user.uid,
       created: result.created,
     });
+    return { emailVerified: cred.user.emailVerified };
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
@@ -128,6 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       uid: cred.user.uid,
       created: result.created,
     });
+    return { emailVerified: cred.user.emailVerified };
   }, []);
 
   const loginWithGoogle = useCallback(async () => {
@@ -158,6 +166,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await authService.logout();
   }, []);
 
+  const resendEmailVerification = useCallback(async () => {
+    // Apply backend policy + rate limit first.
+    await apiFetch<{ success: true; data: { allowed: boolean; alreadyVerified: boolean } }>(
+      "/auth/resend-verification",
+      {
+        method: "POST",
+        authenticated: true,
+      }
+    );
+    await authService.sendVerificationEmailToCurrentUser();
+  }, []);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       currentUser,
@@ -165,9 +185,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       register,
       login,
       loginWithGoogle,
+      resendEmailVerification,
       logout,
     }),
-    [currentUser, loading, register, login, loginWithGoogle, logout]
+    [currentUser, loading, register, login, loginWithGoogle, resendEmailVerification, logout]
   );
 
   return (

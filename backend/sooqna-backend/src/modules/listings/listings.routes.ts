@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { verifyFirebaseToken } from "../../middleware/verifyFirebaseToken";
+import { requireVerifiedEmail } from "../../middleware/requireVerifiedEmail";
 import { validateRequest } from "../../middleware/validateRequest";
 import {
   attachListingImageBodySchema,
@@ -26,24 +27,28 @@ listingsRouter.get("/:id", validateRequest({ params: idParamsSchema }), getListi
 listingsRouter.post(
   "/",
   verifyFirebaseToken,
+  requireVerifiedEmail,
   validateRequest({ body: createListingBodySchema }),
   createListing
 );
 listingsRouter.patch(
   "/:id",
   verifyFirebaseToken,
+  requireVerifiedEmail,
   validateRequest({ params: idParamsSchema, body: patchListingBodySchema }),
   patchListing
 );
 listingsRouter.delete(
   "/:id",
   verifyFirebaseToken,
+  requireVerifiedEmail,
   validateRequest({ params: idParamsSchema }),
   deleteListing
 );
 listingsRouter.post(
   "/:id/images",
   verifyFirebaseToken,
+  requireVerifiedEmail,
   validateRequest({ params: idParamsSchema, body: attachListingImageBodySchema }),
   attachListingImage
 );

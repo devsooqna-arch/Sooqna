@@ -45,6 +45,9 @@ export const env = {
   firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL ?? "",
   firebasePrivateKey: (process.env.FIREBASE_PRIVATE_KEY ?? "").replace(/\\n/g, "\n"),
   firebaseServiceAccountPath: process.env.FIREBASE_SERVICE_ACCOUNT_PATH ?? "",
+  recaptchaEnabled: parseBoolean(process.env.RECAPTCHA_ENABLED, isProduction),
+  recaptchaSecretKey: process.env.RECAPTCHA_SECRET_KEY ?? "",
+  requireEmailVerified: parseBoolean(process.env.REQUIRE_EMAIL_VERIFIED, isProduction),
   databaseUrl,
   enableCategoriesJsonFallback,
 };

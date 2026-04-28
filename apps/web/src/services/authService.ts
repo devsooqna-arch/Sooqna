@@ -5,6 +5,7 @@ import {
   createUserWithEmailAndPassword,
   getRedirectResult,
   inMemoryPersistence,
+  sendEmailVerification,
   sendPasswordResetEmail,
   setPersistence,
   signInWithEmailAndPassword,
@@ -13,6 +14,7 @@ import {
   signOut,
   type UserCredential,
 } from "firebase/auth";
+import { apiFetch } from "@/services/apiClient";
 import { auth } from "@/lib/firebase";
 
 async function ensureAuthPersistence(): Promise<void> {
@@ -97,6 +99,72 @@ export async function logout(): Promise<void> {
 export async function sendPasswordResetLink(email: string): Promise<void> {
   await ensureAuthPersistence();
   await sendPasswordResetEmail(auth, email.trim());
+}
+
+export async function sendVerificationEmailToCurrentUser(): Promise<void> {
+  await ensureAuthPersistence();
+  if (!auth.currentUser) {
+    throw new Error("لا يوجد مستخدم مسجل حالياً.");
+  }
+  await sendEmailVerification(auth.currentUser);
+}
+
+declare global {
+  interface Window {
+    grecaptcha?: {
+      ready: (callback: () => void) => void;
+      execute: (siteKey: string, options: { action: string }) => Promise<string>;
+    };
+  }
+}
+
+async function loadRecaptchaScript(siteKey: string): Promise<void> {
+  if (typeof window === "undefined") return;
+  if (window.grecaptcha) return;
+
+  const existing = document.querySelector<HTMLScriptElement>('script[data-recaptcha="v3"]');
+  if (existing) {
+    await new Promise<void>((resolve) => {
+      existing.addEventListener("load", () => resolve(), { once: true });
+      existing.addEventListener("error", () => resolve(), { once: true });
+    });
+    return;
+  }
+
+  await new Promise<void>((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = `https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(siteKey)}`;
+    script.async = true;
+    script.defer = true;
+    script.dataset.recaptcha = "v3";
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load reCAPTCHA script."));
+    document.head.appendChild(script);
+  });
+}
+
+export async function verifyRecaptchaIfEnabled(action: "signup" | "login"): Promise<void> {
+  const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY?.trim();
+  let token = "";
+
+  if (siteKey && typeof window !== "undefined") {
+    await loadRecaptchaScript(siteKey);
+    if (window.grecaptcha) {
+      token = await new Promise<string>((resolve, reject) => {
+        window.grecaptcha!.ready(() => {
+          window.grecaptcha!
+            .execute(siteKey, { action })
+            .then(resolve)
+            .catch(() => reject(new Error("تعذر التحقق من reCAPTCHA.")));
+        });
+      });
+    }
+  }
+
+  await apiFetch<{ success: true; data: { verified: boolean } }>("/auth/recaptcha/verify", {
+    method: "POST",
+    body: JSON.stringify({ token, action }),
+  });
 }
 
 /**

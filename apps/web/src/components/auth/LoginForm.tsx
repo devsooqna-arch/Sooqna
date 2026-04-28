@@ -4,7 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { getAuthErrorMessage } from "@/services/authService";
+import { getAuthErrorMessage, verifyRecaptchaIfEnabled } from "@/services/authService";
 
 function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
@@ -26,7 +26,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
   const [nextPath, setNextPath] = useState("/me");
   const isSignup = mode === "signup";
 
-  const { currentUser, loading: authLoading, register, login, loginWithGoogle } =
+  const { currentUser, loading: authLoading, register, login, loginWithGoogle, resendEmailVerification } =
     useAuth();
 
   useEffect(() => {
@@ -45,6 +45,8 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [verificationRequired, setVerificationRequired] = useState(false);
+  const [resendingVerification, setResendingVerification] = useState(false);
 
   // Already signed in → /me (or ?next=…)
   useEffect(() => {
@@ -79,10 +81,19 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
 
     setSubmitting(true);
     try {
+      await verifyRecaptchaIfEnabled(isSignup ? "signup" : "login");
       if (isSignup) {
-        await register(email, password, fullName);
+        const result = await register(email, password, fullName);
+        if (!result.emailVerified) {
+          setVerificationRequired(true);
+          return;
+        }
       } else {
-        await login(email, password);
+        const result = await login(email, password);
+        if (!result.emailVerified) {
+          setVerificationRequired(true);
+          return;
+        }
       }
       setSuccess(true);
       router.replace(nextPath);
@@ -97,11 +108,24 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
     setSubmitError(null);
     setGoogleLoading(true);
     try {
+      await verifyRecaptchaIfEnabled("login");
       await loginWithGoogle();
       // signInWithRedirect navigates away; completion is handled by getRedirectResult + onAuthStateChanged.
     } catch (err) {
       setSubmitError(getAuthErrorMessage(err));
       setGoogleLoading(false);
+    }
+  }
+
+  async function handleResendVerification() {
+    setSubmitError(null);
+    setResendingVerification(true);
+    try {
+      await resendEmailVerification();
+    } catch (err) {
+      setSubmitError(getAuthErrorMessage(err));
+    } finally {
+      setResendingVerification(false);
     }
   }
 
@@ -148,6 +172,23 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
           role="alert"
         >
           {submitError}
+        </div>
+      )}
+
+      {verificationRequired && (
+        <div
+          className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-center text-sm text-amber-900"
+          role="status"
+        >
+          <p>يرجى التحقق من بريدك الإلكتروني قبل متابعة الدخول.</p>
+          <button
+            type="button"
+            onClick={handleResendVerification}
+            disabled={resendingVerification}
+            className="mt-2 rounded-full border border-amber-300 px-3 py-1 text-xs font-semibold transition hover:bg-amber-100 disabled:opacity-60"
+          >
+            {resendingVerification ? "جاري إعادة الإرسال..." : "إعادة إرسال رابط التحقق"}
+          </button>
         </div>
       )}
 
