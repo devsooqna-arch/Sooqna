@@ -50,12 +50,17 @@ export const patchListingBodySchema = z
     title: z.string().trim().min(1).max(160).optional(),
     description: z.string().trim().max(10000).optional(),
     price: z.number().finite().nonnegative().optional(),
-    status: z.enum(["draft", "pending", "published", "rejected", "sold", "archived"]).optional(),
   })
   .strict()
   .refine((value) => Object.keys(value).length > 0, {
     message: "At least one field is required for patch.",
   });
+
+export const renewListingBodySchema = z
+  .object({
+    durationDays: z.number().int().min(1).max(365).optional(),
+  })
+  .strict();
 
 export const attachListingImageBodySchema = z
   .object({

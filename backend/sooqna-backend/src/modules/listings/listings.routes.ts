@@ -7,15 +7,20 @@ import {
   createListingBodySchema,
   idParamsSchema,
   patchListingBodySchema,
+  renewListingBodySchema,
 } from "../../shared/validation/schemas";
 import {
   attachListingImage,
   createListing,
   deleteListing,
+  expireListing,
   getListingById,
   listListings,
   listMyListings,
   patchListing,
+  publishListing,
+  renewListing,
+  unpublishListing,
 } from "./listings.controller";
 
 export const listingsRouter = Router();
@@ -37,6 +42,34 @@ listingsRouter.patch(
   requireVerifiedEmail,
   validateRequest({ params: idParamsSchema, body: patchListingBodySchema }),
   patchListing
+);
+listingsRouter.post(
+  "/:id/publish",
+  verifyFirebaseToken,
+  requireVerifiedEmail,
+  validateRequest({ params: idParamsSchema }),
+  publishListing
+);
+listingsRouter.post(
+  "/:id/unpublish",
+  verifyFirebaseToken,
+  requireVerifiedEmail,
+  validateRequest({ params: idParamsSchema }),
+  unpublishListing
+);
+listingsRouter.post(
+  "/:id/renew",
+  verifyFirebaseToken,
+  requireVerifiedEmail,
+  validateRequest({ params: idParamsSchema, body: renewListingBodySchema }),
+  renewListing
+);
+listingsRouter.post(
+  "/:id/expire",
+  verifyFirebaseToken,
+  requireVerifiedEmail,
+  validateRequest({ params: idParamsSchema }),
+  expireListing
 );
 listingsRouter.delete(
   "/:id",

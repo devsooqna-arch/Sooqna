@@ -74,8 +74,43 @@ export async function patchListing(req: Request, res: Response): Promise<void> {
     title: req.body?.title,
     description: req.body?.description,
     price: req.body?.price,
-    status: req.body?.status,
   });
+  res.json({ success: true, listing });
+}
+
+export async function publishListing(req: Request, res: Response): Promise<void> {
+  if (!req.authUser) {
+    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
+  }
+  const listing = await service.publish(req.params.id, req.authUser.uid);
+  res.json({ success: true, listing });
+}
+
+export async function unpublishListing(req: Request, res: Response): Promise<void> {
+  if (!req.authUser) {
+    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
+  }
+  const listing = await service.unpublish(req.params.id, req.authUser.uid);
+  res.json({ success: true, listing });
+}
+
+export async function renewListing(req: Request, res: Response): Promise<void> {
+  if (!req.authUser) {
+    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
+  }
+  const durationDays =
+    typeof req.body?.durationDays === "number" && Number.isInteger(req.body.durationDays)
+      ? req.body.durationDays
+      : undefined;
+  const listing = await service.renew(req.params.id, req.authUser.uid, durationDays);
+  res.json({ success: true, listing });
+}
+
+export async function expireListing(req: Request, res: Response): Promise<void> {
+  if (!req.authUser) {
+    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
+  }
+  const listing = await service.expire(req.params.id, req.authUser.uid);
   res.json({ success: true, listing });
 }
 

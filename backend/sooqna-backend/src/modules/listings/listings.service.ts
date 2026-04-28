@@ -1,6 +1,7 @@
 import { generateId } from "../../utils/ids";
 import { nowIso } from "../../utils/time";
 import { AppError } from "../../shared/errors/appError";
+import { env } from "../../config/env";
 import { PrismaUsersRepository } from "../users/repositories/users.repository";
 import type { ListingsRepository, PaginationOptions } from "./repositories/listings.repository";
 import type { Listing } from "./listings.types";
@@ -125,11 +126,15 @@ export class ListingsService {
   async patch(
     listingId: string,
     userId: string,
-    patch: Partial<Pick<Listing, "title" | "description" | "price" | "status">>
+    patch: Partial<Pick<Listing, "title" | "description" | "price">>
   ): Promise<Listing> {
     const existing = await this.repo.findById(listingId);
     if (!existing) throw new AppError(404, "Listing not found", "NOT_FOUND");
     if (existing.ownerId !== userId) throw new AppError(403, "Forbidden", "FORBIDDEN");
+    this.applyAutoExpiration(existing);
+    if (existing.status === "sold" || existing.status === "rejected") {
+      throw new AppError(400, "Listing cannot be edited in current status.", "LISTING_STATE_INVALID");
+    }
 
     const next: Listing = {
       ...existing,
@@ -140,7 +145,6 @@ export class ListingsService {
         patch.price !== undefined && Number.isFinite(patch.price) && patch.price >= 0
           ? patch.price
           : existing.price,
-      status: patch.status ?? existing.status,
       updatedAt: nowIso(),
     };
     return this.repo.update(existing.id, next);
@@ -163,6 +167,14 @@ export class ListingsService {
     const listing = await this.repo.findById(input.listingId);
     if (!listing) throw new AppError(404, "Listing not found", "NOT_FOUND");
     if (listing.ownerId !== input.ownerId) throw new AppError(403, "Forbidden", "FORBIDDEN");
+    this.applyAutoExpiration(listing);
+    if (listing.status === "sold" || listing.status === "rejected") {
+      throw new AppError(
+        400,
+        "Listing images cannot be updated in current status.",
+        "LISTING_STATE_INVALID"
+      );
+    }
 
     const nextImages = [
       ...listing.images,
@@ -185,6 +197,102 @@ export class ListingsService {
     };
 
     return this.repo.update(listing.id, next);
+  }
+
+  async publish(listingId: string, ownerId: string): Promise<Listing> {
+    const listing = await this.getOwnerListingOrThrow(listingId, ownerId);
+    this.applyAutoExpiration(listing);
+    if (listing.status === "published") {
+      throw new AppError(400, "Listing is already published.", "LISTING_STATE_INVALID");
+    }
+    if (listing.status === "sold" || listing.status === "rejected") {
+      throw new AppError(400, "Listing cannot be published in current status.", "LISTING_STATE_INVALID");
+    }
+    if (listing.images.length === 0) {
+      throw new AppError(400, "At least one image is required before publishing.", "VALIDATION_ERROR");
+    }
+
+    const now = new Date();
+    const expiresAt = new Date(now);
+    expiresAt.setDate(expiresAt.getDate() + env.listingDefaultExpiryDays);
+
+    const next: Listing = {
+      ...listing,
+      status: "published",
+      isApproved: true,
+      publishedAt: now.toISOString(),
+      expiresAt: expiresAt.toISOString(),
+      updatedAt: now.toISOString(),
+    };
+    return this.repo.update(listing.id, next);
+  }
+
+  async unpublish(listingId: string, ownerId: string): Promise<Listing> {
+    const listing = await this.getOwnerListingOrThrow(listingId, ownerId);
+    this.applyAutoExpiration(listing);
+    if (listing.status !== "published") {
+      throw new AppError(400, "Only published listings can be unpublished.", "LISTING_STATE_INVALID");
+    }
+    const next: Listing = {
+      ...listing,
+      status: "archived",
+      updatedAt: nowIso(),
+    };
+    return this.repo.update(listing.id, next);
+  }
+
+  async renew(listingId: string, ownerId: string, durationDays?: number): Promise<Listing> {
+    const listing = await this.getOwnerListingOrThrow(listingId, ownerId);
+    this.applyAutoExpiration(listing);
+    if (listing.status !== "archived") {
+      throw new AppError(400, "Only archived listings can be renewed.", "LISTING_STATE_INVALID");
+    }
+    const effectiveDays =
+      typeof durationDays === "number" && durationDays >= 1 && durationDays <= 365
+        ? durationDays
+        : env.listingRenewDays;
+    const now = new Date();
+    const expiresAt = new Date(now);
+    expiresAt.setDate(expiresAt.getDate() + effectiveDays);
+
+    const next: Listing = {
+      ...listing,
+      status: "published",
+      publishedAt: now.toISOString(),
+      expiresAt: expiresAt.toISOString(),
+      updatedAt: now.toISOString(),
+    };
+    return this.repo.update(listing.id, next);
+  }
+
+  async expire(listingId: string, ownerId: string): Promise<Listing> {
+    const listing = await this.getOwnerListingOrThrow(listingId, ownerId);
+    this.applyAutoExpiration(listing);
+    if (listing.status !== "published") {
+      throw new AppError(400, "Only published listings can be expired.", "LISTING_STATE_INVALID");
+    }
+    const now = nowIso();
+    const next: Listing = {
+      ...listing,
+      status: "archived",
+      expiresAt: now,
+      updatedAt: now,
+    };
+    return this.repo.update(listing.id, next);
+  }
+
+  private async getOwnerListingOrThrow(listingId: string, ownerId: string): Promise<Listing> {
+    const listing = await this.repo.findById(listingId);
+    if (!listing) throw new AppError(404, "Listing not found", "NOT_FOUND");
+    if (listing.ownerId !== ownerId) throw new AppError(403, "Forbidden", "FORBIDDEN");
+    return listing;
+  }
+
+  private applyAutoExpiration(listing: Listing): void {
+    if (listing.status !== "published" || !listing.expiresAt) return;
+    if (new Date(listing.expiresAt).getTime() > Date.now()) return;
+    listing.status = "archived";
+    listing.updatedAt = nowIso();
   }
 }
 

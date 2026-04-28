@@ -20,6 +20,19 @@ function parseBoolean(value: string | undefined, defaultValue: boolean): boolean
   return defaultValue;
 }
 
+function parsePositiveInt(
+  value: string | undefined,
+  defaultValue: number,
+  min: number,
+  max: number
+): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return defaultValue;
+  const normalized = Math.trunc(parsed);
+  if (normalized < min || normalized > max) return defaultValue;
+  return normalized;
+}
+
 const enableCategoriesJsonFallback = parseBoolean(
   process.env.ENABLE_CATEGORIES_JSON_FALLBACK,
   false
@@ -48,6 +61,8 @@ export const env = {
   recaptchaEnabled: parseBoolean(process.env.RECAPTCHA_ENABLED, isProduction),
   recaptchaSecretKey: process.env.RECAPTCHA_SECRET_KEY ?? "",
   requireEmailVerified: parseBoolean(process.env.REQUIRE_EMAIL_VERIFIED, isProduction),
+  listingDefaultExpiryDays: parsePositiveInt(process.env.LISTING_DEFAULT_EXPIRY_DAYS, 30, 1, 365),
+  listingRenewDays: parsePositiveInt(process.env.LISTING_RENEW_DAYS, 30, 1, 365),
   databaseUrl,
   enableCategoriesJsonFallback,
 };

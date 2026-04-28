@@ -146,16 +146,24 @@ export class PrismaListingsRepository implements ListingsRepository {
 
     const where = {
       deletedAt: null,
+      status: "published",
       ...(category ? { categoryId: { equals: category } } : {}),
       ...(city ? { locationCity: { equals: city, mode: "insensitive" as const } } : {}),
-      ...(search
-        ? {
-            OR: [
-              { title: { contains: search, mode: "insensitive" as const } },
-              { description: { contains: search, mode: "insensitive" as const } },
-            ],
-          }
-        : {}),
+      AND: [
+        {
+          OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+        },
+        ...(search
+          ? [
+              {
+                OR: [
+                  { title: { contains: search, mode: "insensitive" as const } },
+                  { description: { contains: search, mode: "insensitive" as const } },
+                ],
+              },
+            ]
+          : []),
+      ],
     };
     const orderBy =
       sort === "price_asc"
@@ -179,7 +187,13 @@ export class PrismaListingsRepository implements ListingsRepository {
     } catch (error) {
       if (useJsonFallback()) {
         const all = readJsonArrayFile<Listing>(listingsDataPath);
-        let filtered = all.filter((listing) => listing.deletedAt === null);
+        const nowMs = Date.now();
+        let filtered = all.filter((listing) => {
+          if (listing.deletedAt !== null) return false;
+          if (listing.status !== "published") return false;
+          if (!listing.expiresAt) return true;
+          return new Date(listing.expiresAt).getTime() > nowMs;
+        });
         if (category) {
           filtered = filtered.filter((listing) => listing.categoryId.toLowerCase() === category);
         }
