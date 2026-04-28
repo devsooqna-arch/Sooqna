@@ -1,13 +1,14 @@
-export type ListingPriceType = "fixed" | "negotiable" | "contact";
-export type ListingStatus =
-  | "draft"
-  | "pending"
-  | "published"
-  | "rejected"
-  | "sold"
-  | "archived";
-export type ListingCondition = "new" | "used";
-export type ListingContactPreference = "chat" | "phone";
+import {
+  LISTING_CONDITIONS,
+  LISTING_CONTACT_PREFERENCES,
+  LISTING_PRICE_TYPES,
+  LISTING_STATUSES,
+} from "../../shared/constants/domain";
+
+export type ListingPriceType = (typeof LISTING_PRICE_TYPES)[number];
+export type ListingStatus = (typeof LISTING_STATUSES)[number];
+export type ListingCondition = (typeof LISTING_CONDITIONS)[number];
+export type ListingContactPreference = (typeof LISTING_CONTACT_PREFERENCES)[number];
 
 export interface ListingImage {
   url: string;

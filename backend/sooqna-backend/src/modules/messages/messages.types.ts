@@ -1,4 +1,6 @@
-export type MessageType = "text" | "image" | "system";
+import { MESSAGE_TYPES } from "../../shared/constants/domain";
+
+export type MessageType = (typeof MESSAGE_TYPES)[number];
 
 export interface Conversation {
   id: string;

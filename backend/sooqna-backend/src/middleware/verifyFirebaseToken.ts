@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { adminAuth } from "../config/firebaseAdmin";
+import { sendError } from "../shared/contracts/api";
 
 export async function verifyFirebaseToken(
   req: Request,
@@ -8,7 +9,7 @@ export async function verifyFirebaseToken(
 ): Promise<void> {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith("Bearer ")) {
-    res.status(401).json({ success: false, message: "Missing Bearer token." });
+    sendError(res, 401, "UNAUTHORIZED", "Missing Bearer token.");
     return;
   }
   try {
@@ -16,6 +17,6 @@ export async function verifyFirebaseToken(
     next();
   } catch (error) {
     console.error("Firebase Token Verification Error:", error);
-    res.status(401).json({ success: false, message: "Invalid or expired token.", error: String(error) });
+    sendError(res, 401, "UNAUTHORIZED", "Invalid or expired token.", String(error));
   }
 }

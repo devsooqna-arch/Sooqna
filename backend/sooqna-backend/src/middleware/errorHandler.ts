@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import { isAppError } from "../shared/errors/appError";
+import { sendError } from "../shared/contracts/api";
 
 export function errorHandler(
   err: unknown,
@@ -9,37 +10,20 @@ export function errorHandler(
   _next: NextFunction
 ): void {
   if (isAppError(err)) {
-    res.status(err.statusCode).json({
-      success: false,
-      code: err.code,
-      message: err.message,
-      details: err.details,
-    });
+    sendError(res, err.statusCode, err.code, err.message, err.details);
     return;
   }
 
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    res.status(400).json({
-      success: false,
-      code: "DATABASE_ERROR",
-      message: "Database operation failed.",
-    });
+    sendError(res, 400, "DATABASE_ERROR", "Database operation failed.");
     return;
   }
 
   if (err instanceof Prisma.PrismaClientValidationError) {
-    res.status(400).json({
-      success: false,
-      code: "DATABASE_VALIDATION_ERROR",
-      message: "Invalid database payload.",
-    });
+    sendError(res, 400, "DATABASE_VALIDATION_ERROR", "Invalid database payload.");
     return;
   }
 
-  res.status(500).json({
-    success: false,
-    code: "INTERNAL_SERVER_ERROR",
-    message: "Internal server error.",
-  });
+  sendError(res, 500, "INTERNAL_SERVER_ERROR", "Internal server error.");
 }
 

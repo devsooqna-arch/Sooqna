@@ -1,5 +1,7 @@
-export type UserRole = "user";
-export type AccountStatus = "active";
+import { ACCOUNT_STATUSES, USER_ROLES } from "../../shared/constants/domain";
+
+export type UserRole = (typeof USER_ROLES)[number];
+export type AccountStatus = (typeof ACCOUNT_STATUSES)[number];
 
 export interface UserProfile {
   uid: string;
