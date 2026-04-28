@@ -71,7 +71,8 @@ export async function listMyListings(req: Request, res: Response): Promise<void>
 }
 
 export async function getListingById(req: Request, res: Response): Promise<void> {
-  const listing = await service.getById(req.params.id);
+  const viewerId = req.authUser?.uid;
+  const listing = await service.recordView(req.params.id, viewerId);
   if (!listing) {
     res.status(404).json({ success: false, message: "Listing not found" });
     return;

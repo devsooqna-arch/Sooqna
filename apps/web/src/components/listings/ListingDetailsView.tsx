@@ -11,6 +11,7 @@ import type { Category } from "@/types/category";
 import { useAuth } from "@/hooks/useAuth";
 import { addToFavorites, removeFromFavorites, isFavorite } from "@/services/favoriteService";
 import { createConversation } from "@/services/messageService";
+import { trackEngagementEvent } from "@/services/engagementService";
 
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
@@ -109,6 +110,10 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
           primaryImageURL: primaryImg?.url ?? "",
         },
         createdBy: currentUser.uid,
+      });
+      void trackEngagementEvent("contact_intent", {
+        listingId: listing.id,
+        conversationId: result.conversationId,
       });
       router.push(`/messages?conversation=${encodeURIComponent(result.conversationId)}`);
     } catch (err) {

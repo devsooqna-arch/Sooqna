@@ -4,6 +4,7 @@ import { AppError } from "../../shared/errors/appError";
 import { env } from "../../config/env";
 import { CATEGORY_IDS, CITY_IDS } from "../../shared/constants/domain";
 import { PrismaUsersRepository } from "../users/repositories/users.repository";
+import { trackEngagementEvent } from "../engagement/engagement.service";
 import type { ListingsRepository, PaginationOptions } from "./repositories/listings.repository";
 import type { Listing } from "./listings.types";
 
@@ -144,6 +145,23 @@ export class ListingsService {
 
   async getById(id: string): Promise<Listing | null> {
     return this.repo.findById(id);
+  }
+
+  async recordView(listingId: string, viewerId?: string): Promise<Listing | null> {
+    const listing = await this.repo.findById(listingId);
+    if (!listing) return null;
+    const next: Listing = {
+      ...listing,
+      viewsCount: Math.max(0, listing.viewsCount) + 1,
+      updatedAt: nowIso(),
+    };
+    const updated = await this.repo.update(listingId, next);
+    await trackEngagementEvent({
+      eventType: "view",
+      listingId,
+      actorId: viewerId,
+    });
+    return updated;
   }
 
   async patch(

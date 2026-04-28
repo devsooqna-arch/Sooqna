@@ -8,6 +8,7 @@ export interface FavoritesRepository {
   listByUser(userId: string): Promise<FavoriteRecord[]>;
   upsert(record: FavoriteRecord): Promise<void>;
   remove(userId: string, listingId: string): Promise<void>;
+  countByListing(listingId: string): Promise<number>;
 }
 
 const favoritesDataPath = path.resolve(
@@ -91,6 +92,20 @@ export class PrismaFavoritesRepository implements FavoritesRepository {
         return;
       }
       throw new Error("Failed to remove favorite.", { cause: error });
+    }
+  }
+
+  async countByListing(listingId: string): Promise<number> {
+    try {
+      return await prisma.favorite.count({
+        where: { listingId },
+      });
+    } catch (error) {
+      if (useJsonFallback()) {
+        const items = readJsonArrayFile<FavoriteRecord>(favoritesDataPath);
+        return items.filter((item) => item.listingId === listingId).length;
+      }
+      throw new Error("Failed to count favorites.", { cause: error });
     }
   }
 }

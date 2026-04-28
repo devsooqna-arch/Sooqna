@@ -1,5 +1,6 @@
 import { apiFetch } from "@/services/apiClient";
 import type { Favorite } from "@/types/favorite";
+import { trackEngagementEvent } from "@/services/engagementService";
 
 /**
  * Create or overwrite favorite:
@@ -14,6 +15,7 @@ export async function addToFavorites(userId: string, listingId: string): Promise
     method: "POST",
     authenticated: true,
   });
+  void trackEngagementEvent("favorite", { listingId, metadata: { action: "add" } });
 }
 
 /**
@@ -28,6 +30,7 @@ export async function removeFromFavorites(userId: string, listingId: string): Pr
     method: "DELETE",
     authenticated: true,
   });
+  void trackEngagementEvent("favorite", { listingId, metadata: { action: "remove" } });
 }
 
 /**
