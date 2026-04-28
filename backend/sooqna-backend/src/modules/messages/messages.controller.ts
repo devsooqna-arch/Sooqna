@@ -93,3 +93,21 @@ export async function getConversationMessages(req: Request, res: Response): Prom
   res.json({ success: true, messages });
 }
 
+export async function markConversationRead(req: Request, res: Response): Promise<void> {
+  const uid = req.authUser?.uid;
+  if (!uid) {
+    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
+  }
+  const updatedCount = await service.markConversationRead(req.params.conversationId, uid);
+  res.json({ success: true, updatedCount });
+}
+
+export async function getUnreadSummary(req: Request, res: Response): Promise<void> {
+  const uid = req.authUser?.uid;
+  if (!uid) {
+    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
+  }
+  const summary = await service.getUnreadSummary(uid);
+  res.json({ success: true, ...summary });
+}
+

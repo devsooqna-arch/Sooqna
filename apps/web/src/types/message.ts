@@ -22,6 +22,7 @@ export interface Conversation {
   lastMessageAt: string | null;
   lastMessageType: MessageType;
   isActive: boolean;
+  unreadCount?: number;
   createdAt: string | null;
   updatedAt: string | null;
 }
@@ -51,5 +52,10 @@ export interface CreateMessageInput {
   type: MessageType;
   text: string;
   attachments?: unknown[];
+}
+
+export interface UnreadSummary {
+  totalUnread: number;
+  byConversation: Record<string, number>;
 }
 

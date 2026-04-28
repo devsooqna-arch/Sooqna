@@ -17,6 +17,7 @@ export interface Conversation {
   lastMessageAt: string | null;
   lastMessageType: MessageType;
   isActive: boolean;
+  unreadCount?: number;
   createdAt: string;
   updatedAt: string;
 }

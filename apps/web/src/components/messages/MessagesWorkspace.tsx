@@ -13,9 +13,13 @@ import { RequireAuthGate } from "@/components/auth/RequireAuthGate";
 import {
   createConversation,
   createMessage,
+  enqueuePendingMessage,
+  flushPendingMessages,
   getConversationById,
   getConversationMessages,
   getMyConversations,
+  getUnreadSummary,
+  markConversationRead,
 } from "@/services/messageService";
 import type { Conversation, Message } from "@/types/message";
 
@@ -29,6 +33,7 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
   const [inbox, setInbox] = useState<Conversation[]>([]);
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [unreadTotal, setUnreadTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,8 +41,12 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
     if (!currentUser) return;
     setInboxLoading(true);
     try {
-      const conversations = await getMyConversations();
+      const [conversations, unreadSummary] = await Promise.all([
+        getMyConversations(),
+        getUnreadSummary(),
+      ]);
       setInbox(conversations);
+      setUnreadTotal(unreadSummary.totalUnread);
     } finally {
       setInboxLoading(false);
     }
@@ -53,7 +62,13 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
     void refreshInbox();
   }, [currentUser, refreshInbox]);
 
-  async function refreshConversationData(targetConversationId: string) {
+  useEffect(() => {
+    void flushPendingMessages().then((count) => {
+      if (count > 0) void refreshInbox();
+    });
+  }, [refreshInbox]);
+
+  const refreshConversationData = useCallback(async (targetConversationId: string) => {
     setLoading(true);
     setError(null);
     try {
@@ -63,17 +78,19 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
       ]);
       setConversation(conversationData);
       setMessages(messagesData);
+      await markConversationRead(targetConversationId);
+      await refreshInbox();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load conversation.");
     } finally {
       setLoading(false);
     }
-  }
+  }, [refreshInbox]);
 
   useEffect(() => {
     if (!conversationId) return;
     void refreshConversationData(conversationId);
-  }, [conversationId]);
+  }, [conversationId, refreshConversationData]);
 
   async function handleCreateConversation() {
     if (!currentUser) return;
@@ -121,6 +138,18 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
     if (!currentUser || !conversationId.trim() || !messageText.trim()) return;
     setLoading(true);
     setError(null);
+    const optimisticMessage: Message = {
+      id: `tmp-${Date.now()}`,
+      senderId: currentUser.uid,
+      type: "text",
+      text: messageText.trim(),
+      attachments: [],
+      isRead: false,
+      readAt: null,
+      createdAt: new Date().toISOString(),
+      deletedAt: null,
+    };
+    setMessages((prev) => [...prev, optimisticMessage]);
     try {
       await createMessage(conversationId.trim(), {
         senderId: currentUser.uid,
@@ -131,7 +160,18 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
       await refreshConversationData(conversationId.trim());
       await refreshInbox();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send message.");
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        enqueuePendingMessage(conversationId.trim(), {
+          senderId: currentUser.uid,
+          type: "text",
+          text: messageText.trim(),
+        });
+        setMessageText("");
+        setError("أنت غير متصل الآن. تم حفظ الرسالة محلياً وسيتم إرسالها عند عودة الاتصال.");
+      } else {
+        setError(err instanceof Error ? err.message : "Failed to send message.");
+        setMessages((prev) => prev.filter((item) => item.id !== optimisticMessage.id));
+      }
     } finally {
       setLoading(false);
     }
@@ -143,14 +183,19 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
         <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm sm:p-6">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-base font-semibold">صندوق المحادثات</h2>
-            <button
-              type="button"
-              onClick={() => void refreshInbox()}
-              disabled={inboxLoading}
-              className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-1.5 text-xs font-semibold"
-            >
-              {inboxLoading ? "..." : "تحديث"}
-            </button>
+            <div className="flex items-center gap-2">
+              <span className="rounded-full border border-[var(--border)] bg-[var(--surface-muted)] px-2.5 py-1 text-xs font-semibold">
+                غير مقروء: {unreadTotal}
+              </span>
+              <button
+                type="button"
+                onClick={() => void refreshInbox()}
+                disabled={inboxLoading}
+                className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-1.5 text-xs font-semibold"
+              >
+                {inboxLoading ? "..." : "تحديث"}
+              </button>
+            </div>
           </div>
 
           {inbox.length ? (
@@ -166,6 +211,11 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
                   <p className="text-xs text-[var(--text-muted)]">
                     {item.lastMessageText || "لا يوجد رسائل بعد"} • {formatDate(item.updatedAt)}
                   </p>
+                  {(item.unreadCount ?? 0) > 0 ? (
+                    <span className="mt-1 inline-block rounded-full bg-[var(--brand)] px-2 py-0.5 text-[10px] font-bold text-[var(--brand-contrast)]">
+                      {item.unreadCount} غير مقروءة
+                    </span>
+                  ) : null}
                 </button>
               ))}
             </div>

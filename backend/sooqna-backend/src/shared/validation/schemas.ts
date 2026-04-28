@@ -12,6 +12,10 @@ const conversationIdParamSchema = z.object({
   conversationId: z.string().min(1),
 });
 
+const conversationUnreadParamsSchema = z.object({
+  conversationId: z.string().min(1),
+});
+
 export const userProfileBodySchema = z
   .object({
     fullName: z.string().trim().min(1).max(120).optional(),
@@ -92,7 +96,7 @@ export const createMessageBodySchema = z
   .object({
     type: z.enum(["text", "image", "system"]).default("text"),
     text: z.string().trim().max(4000).optional().default(""),
-    attachments: z.array(z.unknown()).optional().default([]),
+    attachments: z.array(z.unknown()).max(5).optional().default([]),
   })
   .strict()
   .refine((value) => value.type !== "text" || value.text.length > 0, {
@@ -109,3 +113,4 @@ export const categoriesQuerySchema = z
 export const idParamsSchema = idParamSchema;
 export const listingIdParamsSchema = listingIdParamSchema;
 export const conversationIdParamsSchema = conversationIdParamSchema;
+export const conversationUnreadParams = conversationUnreadParamsSchema;

@@ -13,6 +13,8 @@ export interface MessagesRepository {
   updateConversation(conversation: Conversation): Promise<Conversation>;
   createMessage(message: Message): Promise<Message>;
   listMessages(conversationId: string): Promise<Message[]>;
+  markConversationMessagesRead(conversationId: string, readerId: string): Promise<number>;
+  getUnreadCountMapForUser(userId: string): Promise<Record<string, number>>;
 }
 
 const conversationsDataPath = path.resolve(
@@ -267,7 +269,7 @@ export class PrismaMessagesRepository implements MessagesRepository {
   async listMessages(conversationId: string): Promise<Message[]> {
     try {
       const items = await prisma.message.findMany({
-        where: { conversationId },
+        where: { conversationId, deletedAt: null },
         orderBy: { createdAt: "asc" },
       });
       return items.map((item) => ({
@@ -290,6 +292,92 @@ export class PrismaMessagesRepository implements MessagesRepository {
           .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
       }
       throw new Error("Failed to list messages.", { cause: error });
+    }
+  }
+
+  async markConversationMessagesRead(conversationId: string, readerId: string): Promise<number> {
+    try {
+      const result = await prisma.message.updateMany({
+        where: {
+          conversationId,
+          senderId: { not: readerId },
+          isRead: false,
+          deletedAt: null,
+        },
+        data: {
+          isRead: true,
+          readAt: new Date(),
+        },
+      });
+      return result.count;
+    } catch (error) {
+      if (useJsonFallback()) {
+        const messages = readJsonArrayFile<Message>(messagesDataPath);
+        let updated = 0;
+        const next = messages.map((message) => {
+          if (
+            message.conversationId === conversationId &&
+            message.senderId !== readerId &&
+            !message.isRead &&
+            message.deletedAt === null
+          ) {
+            updated += 1;
+            return { ...message, isRead: true, readAt: new Date().toISOString() };
+          }
+          return message;
+        });
+        writeJsonArrayFile(messagesDataPath, next);
+        return updated;
+      }
+      throw new Error("Failed to mark conversation messages as read.", { cause: error });
+    }
+  }
+
+  async getUnreadCountMapForUser(userId: string): Promise<Record<string, number>> {
+    try {
+      const unreadMessages = await prisma.message.findMany({
+        where: {
+          senderId: { not: userId },
+          isRead: false,
+          deletedAt: null,
+          conversation: {
+            participants: {
+              some: { userId },
+            },
+          },
+        },
+        select: {
+          conversationId: true,
+        },
+      });
+
+      return unreadMessages.reduce<Record<string, number>>((acc, item) => {
+        acc[item.conversationId] = (acc[item.conversationId] ?? 0) + 1;
+        return acc;
+      }, {});
+    } catch (error) {
+      if (useJsonFallback()) {
+        const messages = readJsonArrayFile<Message>(messagesDataPath);
+        const conversations = readJsonArrayFile<Conversation>(conversationsDataPath);
+        const accessibleConversationIds = new Set(
+          conversations
+            .filter((conversation) => conversation.participantIds.includes(userId))
+            .map((conversation) => conversation.id)
+        );
+
+        return messages.reduce<Record<string, number>>((acc, message) => {
+          if (
+            accessibleConversationIds.has(message.conversationId) &&
+            message.senderId !== userId &&
+            !message.isRead &&
+            message.deletedAt === null
+          ) {
+            acc[message.conversationId] = (acc[message.conversationId] ?? 0) + 1;
+          }
+          return acc;
+        }, {});
+      }
+      throw new Error("Failed to compute unread counters.", { cause: error });
     }
   }
 }

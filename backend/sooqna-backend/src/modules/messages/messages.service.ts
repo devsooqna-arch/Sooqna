@@ -39,6 +39,17 @@ export class MessagesService {
     }
 
     const now = nowIso();
+    const existingConversations = await this.repo.listConversationsForUser(input.createdBy);
+    const sortedParticipants = [...participantIds].sort().join("|");
+    const duplicate = existingConversations.find(
+      (conversation) =>
+        conversation.listingId === input.listingId &&
+        [...conversation.participantIds].sort().join("|") === sortedParticipants
+    );
+    if (duplicate) {
+      return duplicate;
+    }
+
     const conversation: Conversation = {
       id: generateId("conv"),
       participantIds,
@@ -106,7 +117,14 @@ export class MessagesService {
     if (!userId.trim()) {
       throw new AppError(400, "userId is required", "VALIDATION_ERROR");
     }
-    return this.repo.listConversationsForUser(userId);
+    const [conversations, unreadMap] = await Promise.all([
+      this.repo.listConversationsForUser(userId),
+      this.repo.getUnreadCountMapForUser(userId),
+    ]);
+    return conversations.map((conversation) => ({
+      ...conversation,
+      unreadCount: unreadMap[conversation.id] ?? 0,
+    }));
   }
 
   async getConversationForUser(id: string, userId: string): Promise<Conversation> {
@@ -127,6 +145,23 @@ export class MessagesService {
   async getMessages(conversationId: string, userId: string): Promise<Message[]> {
     await this.getConversationForUser(conversationId, userId);
     return this.repo.listMessages(conversationId);
+  }
+
+  async markConversationRead(conversationId: string, userId: string): Promise<number> {
+    await this.getConversationForUser(conversationId, userId);
+    return this.repo.markConversationMessagesRead(conversationId, userId);
+  }
+
+  async getUnreadSummary(userId: string): Promise<{
+    totalUnread: number;
+    byConversation: Record<string, number>;
+  }> {
+    if (!userId.trim()) {
+      throw new AppError(400, "userId is required", "VALIDATION_ERROR");
+    }
+    const byConversation = await this.repo.getUnreadCountMapForUser(userId);
+    const totalUnread = Object.values(byConversation).reduce((sum, count) => sum + count, 0);
+    return { totalUnread, byConversation };
   }
 }
 
