@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ListingCard } from "@/components/listings/ListingCard";
-import { getListings } from "@/services/listingService";
+import { getListingsFiltered } from "@/services/listingService";
 import { getCategories } from "@/services/categoryService";
 import type { Listing } from "@/types/listing";
 import type { Category } from "@/types/category";
@@ -34,23 +34,50 @@ function ListingsSkeleton() {
 }
 
 function PublicListingsPageInner() {
+  const router = useRouter();
   const params = useSearchParams();
   const categoryFilter = params.get("category");
-  const cityFilter = params.get("city")?.toLowerCase() ?? "";
-  const searchFilter = params.get("search")?.toLowerCase() ?? "";
+  const cityFilterRaw = params.get("city") ?? "";
+  const cityFilter = cityFilterRaw.toLowerCase();
+  const searchFilterRaw = params.get("search") ?? "";
+  const searchFilter = searchFilterRaw.toLowerCase();
 
   const [listings, setListings] = useState<Listing[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sort, setSort] = useState<SortKey>("newest");
 
   useEffect(() => {
+    const sortParam = params.get("sort");
+    if (sortParam === "newest" || sortParam === "price_asc" || sortParam === "price_desc") {
+      setSort(sortParam);
+    } else {
+      setSort("newest");
+    }
+  }, [params]);
+
+  useEffect(() => {
     let mounted = true;
-    void Promise.all([getListings(), getCategories()])
-      .then(([items, cats]) => {
+    setLoading(true);
+    setError(null);
+
+    void Promise.all([
+      getListingsFiltered({
+        category: categoryFilter ?? undefined,
+        city: cityFilterRaw || undefined,
+        search: searchFilterRaw || undefined,
+        sort,
+        limit: 60,
+        offset: 0,
+      }),
+      getCategories(),
+    ])
+      .then(([result, cats]) => {
         if (!mounted) return;
-        setListings(items);
+        setListings(result.listings);
+        setTotal(result.total);
         setCategories(cats);
       })
       .catch((err) => {
@@ -65,28 +92,7 @@ function PublicListingsPageInner() {
     return () => {
       mounted = false;
     };
-  }, []);
-
-  const filtered = useMemo(() => {
-    let result = listings;
-    if (categoryFilter) {
-      const target = categoryFilter.toLowerCase();
-      result = result.filter((l) => l.categoryId.toLowerCase() === target);
-    }
-    if (cityFilter) {
-      result = result.filter((l) => l.location.city.toLowerCase() === cityFilter);
-    }
-    if (searchFilter) {
-      result = result.filter(
-        (l) =>
-          l.title.toLowerCase().includes(searchFilter) ||
-          l.description?.toLowerCase().includes(searchFilter)
-      );
-    }
-    if (sort === "price_asc") result = [...result].sort((a, b) => a.price - b.price);
-    if (sort === "price_desc") result = [...result].sort((a, b) => b.price - a.price);
-    return result;
-  }, [listings, categoryFilter, cityFilter, searchFilter, sort]);
+  }, [categoryFilter, cityFilterRaw, searchFilterRaw, sort]);
 
   if (loading) {
     return <ListingsSkeleton />;
@@ -138,6 +144,56 @@ function PublicListingsPageInner() {
 
       {/* Listings area */}
       <div className="space-y-4">
+        {(categoryFilter || cityFilterRaw || searchFilterRaw) ? (
+          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-2 transition-all duration-300 ease-out">
+            {categoryFilter ? (
+              <Link
+                href={`/listings${cityFilterRaw || searchFilterRaw ? "?" : ""}${new URLSearchParams(
+                  Object.entries({
+                    city: cityFilterRaw || undefined,
+                    search: searchFilterRaw || undefined,
+                  }).filter(([, value]) => value)
+                ).toString()}`}
+                className="translate-y-0 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800 opacity-100 transition-all duration-300 ease-out hover:bg-emerald-100"
+              >
+                🏷️ التصنيف: {categoryFilter} ×
+              </Link>
+            ) : null}
+            {cityFilterRaw ? (
+              <Link
+                href={`/listings${categoryFilter || searchFilterRaw ? "?" : ""}${new URLSearchParams(
+                  Object.entries({
+                    category: categoryFilter || undefined,
+                    search: searchFilterRaw || undefined,
+                  }).filter(([, value]) => value)
+                ).toString()}`}
+                className="translate-y-0 rounded-full border border-sky-300 bg-sky-50 px-3 py-1 text-xs font-medium text-sky-800 opacity-100 transition-all duration-300 ease-out hover:bg-sky-100"
+              >
+                📍 المدينة: {cityFilterRaw} ×
+              </Link>
+            ) : null}
+            {searchFilterRaw ? (
+              <Link
+                href={`/listings${categoryFilter || cityFilterRaw ? "?" : ""}${new URLSearchParams(
+                  Object.entries({
+                    category: categoryFilter || undefined,
+                    city: cityFilterRaw || undefined,
+                  }).filter(([, value]) => value)
+                ).toString()}`}
+                className="translate-y-0 rounded-full border border-violet-300 bg-violet-50 px-3 py-1 text-xs font-medium text-violet-800 opacity-100 transition-all duration-300 ease-out hover:bg-violet-100"
+              >
+                🔎 بحث: {searchFilterRaw} ×
+              </Link>
+            ) : null}
+            <Link
+              href="/listings"
+              className="rounded-full bg-[var(--brand)] px-3 py-1 text-xs font-semibold text-[var(--brand-contrast)] transition hover:opacity-90"
+            >
+              مسح الفلاتر
+            </Link>
+          </div>
+        ) : null}
+
         {/* Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -148,22 +204,28 @@ function PublicListingsPageInner() {
                 )}
                 {categoryFilter && (cityFilter || searchFilter) && " • "}
                 {cityFilter && (
-                  <>المدينة: <span className="font-semibold text-[var(--text)]">{cityFilter}</span></>
+                  <>المدينة: <span className="font-semibold text-[var(--text)]">{cityFilterRaw}</span></>
                 )}
                 {cityFilter && searchFilter && " • "}
                 {searchFilter && (
-                  <>بحث: <span className="font-semibold text-[var(--text)]">{searchFilter}</span></>
+                  <>بحث: <span className="font-semibold text-[var(--text)]">{searchFilterRaw}</span></>
                 )}
               </p>
             ) : null}
             <p className="text-xs text-[var(--text-muted)]">
-              {filtered.length} إعلان
+              {total} إعلان
             </p>
           </div>
 
           <select
             value={sort}
-            onChange={(e) => setSort(e.target.value as SortKey)}
+            onChange={(e) => {
+              const nextSort = e.target.value as SortKey;
+              setSort(nextSort);
+              const nextParams = new URLSearchParams(params.toString());
+              nextParams.set("sort", nextSort);
+              router.replace(`/listings?${nextParams.toString()}`);
+            }}
             className="rounded-full border border-[var(--border)] bg-[var(--input-bg)] px-4 py-1.5 text-xs text-[var(--text)] outline-none focus:border-[var(--brand)]"
           >
             {Object.entries(SORT_LABELS).map(([value, label]) => (
@@ -172,9 +234,9 @@ function PublicListingsPageInner() {
           </select>
         </div>
 
-        {filtered.length ? (
+        {listings.length ? (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {filtered.map((listing) => (
+            {listings.map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>

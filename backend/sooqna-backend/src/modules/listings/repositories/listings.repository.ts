@@ -8,6 +8,10 @@ import type { Listing } from "../listings.types";
 export type PaginationOptions = {
   limit?: number;
   offset?: number;
+  category?: string;
+  city?: string;
+  search?: string;
+  sort?: "newest" | "price_asc" | "price_desc";
 };
 
 export interface ListingsRepository {
@@ -135,24 +139,67 @@ export class PrismaListingsRepository implements ListingsRepository {
   async list(pagination?: PaginationOptions): Promise<{ items: Listing[]; total: number }> {
     const limit = Math.min(pagination?.limit ?? 20, 100);
     const offset = pagination?.offset ?? 0;
+    const category = pagination?.category?.trim().toLowerCase() ?? "";
+    const city = pagination?.city?.trim().toLowerCase() ?? "";
+    const search = pagination?.search?.trim().toLowerCase() ?? "";
+    const sort = pagination?.sort ?? "newest";
+
+    const where = {
+      deletedAt: null,
+      ...(category ? { categoryId: { equals: category } } : {}),
+      ...(city ? { locationCity: { equals: city, mode: "insensitive" as const } } : {}),
+      ...(search
+        ? {
+            OR: [
+              { title: { contains: search, mode: "insensitive" as const } },
+              { description: { contains: search, mode: "insensitive" as const } },
+            ],
+          }
+        : {}),
+    };
+    const orderBy =
+      sort === "price_asc"
+        ? ({ price: "asc" } as const)
+        : sort === "price_desc"
+          ? ({ price: "desc" } as const)
+          : ({ createdAt: "desc" } as const);
+
     try {
       const [listings, total] = await prisma.$transaction([
         prisma.listing.findMany({
-          where: { deletedAt: null },
-          orderBy: { createdAt: "desc" },
+          where,
+          orderBy,
           include: { listingImages: { orderBy: { order: "asc" } } },
           take: limit,
           skip: offset,
         }),
-        prisma.listing.count({ where: { deletedAt: null } }),
+        prisma.listing.count({ where }),
       ]);
       return { items: listings.map(mapListing), total };
     } catch (error) {
       if (useJsonFallback()) {
         const all = readJsonArrayFile<Listing>(listingsDataPath);
-        const filtered = all
-          .filter((listing) => listing.deletedAt === null)
-          .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        let filtered = all.filter((listing) => listing.deletedAt === null);
+        if (category) {
+          filtered = filtered.filter((listing) => listing.categoryId.toLowerCase() === category);
+        }
+        if (city) {
+          filtered = filtered.filter((listing) => listing.location.city.toLowerCase() === city);
+        }
+        if (search) {
+          filtered = filtered.filter(
+            (listing) =>
+              listing.title.toLowerCase().includes(search) ||
+              listing.description.toLowerCase().includes(search)
+          );
+        }
+        if (sort === "price_asc") {
+          filtered = [...filtered].sort((a, b) => a.price - b.price);
+        } else if (sort === "price_desc") {
+          filtered = [...filtered].sort((a, b) => b.price - a.price);
+        } else {
+          filtered = [...filtered].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        }
         return { items: filtered.slice(offset, offset + limit), total: filtered.length };
       }
       throw new Error("Failed to list listings.", { cause: error });

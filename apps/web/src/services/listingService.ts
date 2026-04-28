@@ -37,6 +37,35 @@ export async function getListings(): Promise<Listing[]> {
   return response.listings;
 }
 
+export type ListingsFilterParams = {
+  limit?: number;
+  offset?: number;
+  category?: string;
+  city?: string;
+  search?: string;
+  sort?: "newest" | "price_asc" | "price_desc";
+};
+
+export async function getListingsFiltered(params: ListingsFilterParams): Promise<{
+  listings: Listing[];
+  total: number;
+  limit: number;
+  offset: number;
+}> {
+  const query = new URLSearchParams();
+  if (typeof params.limit === "number") query.set("limit", String(params.limit));
+  if (typeof params.offset === "number") query.set("offset", String(params.offset));
+  if (params.category?.trim()) query.set("category", params.category.trim());
+  if (params.city?.trim()) query.set("city", params.city.trim());
+  if (params.search?.trim()) query.set("search", params.search.trim());
+  if (params.sort) query.set("sort", params.sort);
+
+  const suffix = query.toString() ? `?${query.toString()}` : "";
+  return apiFetch<{ success: true; listings: Listing[]; total: number; limit: number; offset: number }>(
+    `/listings${suffix}`
+  );
+}
+
 export async function getMyListings(): Promise<Listing[]> {
   const response = await apiFetch<{ success: true; listings: Listing[] }>("/listings/mine", {
     authenticated: true,

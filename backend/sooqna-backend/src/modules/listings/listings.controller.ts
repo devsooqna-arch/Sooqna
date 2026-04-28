@@ -29,7 +29,23 @@ export async function createListing(req: Request, res: Response): Promise<void> 
 export async function listListings(req: Request, res: Response): Promise<void> {
   const limit = Math.max(1, Math.min(Number(req.query.limit) || 20, 100));
   const offset = Math.max(0, Number(req.query.offset) || 0);
-  const { items, total } = await service.list({ limit, offset });
+  const category =
+    typeof req.query.category === "string" && req.query.category.trim()
+      ? req.query.category.trim()
+      : undefined;
+  const city =
+    typeof req.query.city === "string" && req.query.city.trim() ? req.query.city.trim() : undefined;
+  const search =
+    typeof req.query.search === "string" && req.query.search.trim()
+      ? req.query.search.trim()
+      : undefined;
+  const sortRaw = typeof req.query.sort === "string" ? req.query.sort : undefined;
+  const sort =
+    sortRaw === "price_asc" || sortRaw === "price_desc" || sortRaw === "newest"
+      ? sortRaw
+      : undefined;
+
+  const { items, total } = await service.list({ limit, offset, category, city, search, sort });
   res.json({ success: true, listings: items, total, limit, offset });
 }
 

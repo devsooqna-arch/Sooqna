@@ -237,5 +237,39 @@
     "createdAt": "2026-04-27T09:26:32.086Z",
     "updatedAt": "2026-04-27T09:26:32.086Z",
     "deletedAt": null
+  },
+  {
+    "id": "lst_1777369864231_f0e7069c252a",
+    "title": "test",
+    "titleLower": "test",
+    "description": "testtest",
+    "price": 100,
+    "currency": "JOD",
+    "priceType": "fixed",
+    "categoryId": "cars",
+    "ownerId": "q5x3acmBlBh12fXM3TQn9boHEVv1",
+    "ownerSnapshot": {
+      "fullName": "issa tadros",
+      "photoURL": "https://lh3.googleusercontent.com/a/ACg8ocKyJn7VJayJWfjFmM9VV4kMFs34lw0vyKf_8wu9bRj7tpqRkQXk=s96-c"
+    },
+    "location": {
+      "country": "Jordan",
+      "city": "Amman",
+      "area": "Amman"
+    },
+    "images": [],
+    "status": "draft",
+    "condition": "used",
+    "contactPreference": "chat",
+    "viewsCount": 0,
+    "favoritesCount": 0,
+    "messagesCount": 0,
+    "isFeatured": false,
+    "isApproved": false,
+    "publishedAt": null,
+    "expiresAt": null,
+    "createdAt": "2026-04-28T09:51:04.231Z",
+    "updatedAt": "2026-04-28T09:51:04.231Z",
+    "deletedAt": null
   }
 ]
