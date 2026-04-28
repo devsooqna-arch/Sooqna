@@ -11,7 +11,7 @@ export async function ensureUserProfile(
   const fullName = options?.fullName?.trim() || user.displayName?.trim() || "";
   const token = await user.getIdToken();
   
-  const response = await apiFetch<{ success: true; profile: { uid: string } }>(
+  const response = await apiFetch<{ success: true; data: { profile: { uid: string } } }>(
     "/users/profile",
     {
       method: "POST",
@@ -24,5 +24,5 @@ export async function ensureUserProfile(
       }),
     }
   );
-  return { created: Boolean(response.profile.uid) };
+  return { created: Boolean(response.data.profile.uid) };
 }

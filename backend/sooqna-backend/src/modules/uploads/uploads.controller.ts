@@ -43,6 +43,38 @@ export async function uploadListingImage(req: Request, res: Response): Promise<v
   });
 }
 
+export async function uploadProfileAvatar(req: Request, res: Response): Promise<void> {
+  const file = req.file;
+  const userId = req.authUser?.uid;
+  if (!userId) {
+    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
+  }
+  if (!file) {
+    throw new AppError(400, "Image file is required.", "VALIDATION_ERROR");
+  }
+
+  const relativePath = path
+    .relative(process.cwd(), file.path)
+    .replace(/\\/g, "/")
+    .replace(/^\.?\//, "");
+
+  const avatarUrl = toPublicUrl(relativePath);
+
+  await uploadsRepository.create({
+    url: avatarUrl,
+    path: relativePath,
+    listingId: null,
+  });
+
+  res.json({
+    success: true,
+    avatarUrl,
+    avatarPath: relativePath,
+    filename: file.filename,
+    size: file.size,
+  });
+}
+
 export function handleUploadError(
   err: unknown,
   _req: Request,

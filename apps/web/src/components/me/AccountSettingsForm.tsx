@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import { RequireAuthGate } from "@/components/auth/RequireAuthGate";
 import { getBackendMe, syncBackendProfile } from "@/services/backendAuthService";
+import { uploadBackendProfileAvatar } from "@/services/backendUploadService";
 
 export function AccountSettingsForm() {
   const { currentUser } = useAuth();
@@ -13,6 +15,19 @@ export function AccountSettingsForm() {
   const [success, setSuccess] = useState<string | null>(null);
   const [fullName, setFullName] = useState("");
   const [photoURL, setPhotoURL] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  const previewUrl = useMemo(() => {
+    if (!avatarFile) return null;
+    return URL.createObjectURL(avatarFile);
+  }, [avatarFile]);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -48,15 +63,27 @@ export function AccountSettingsForm() {
     setError(null);
     setSuccess(null);
     try {
+      let nextPhotoURL = photoURL.trim() || undefined;
+      if (avatarFile) {
+        setUploadingAvatar(true);
+        const uploaded = await uploadBackendProfileAvatar(avatarFile);
+        nextPhotoURL = uploaded.avatarUrl;
+      }
+
       await syncBackendProfile({
         fullName: fullName.trim(),
-        photoURL: photoURL.trim() || undefined,
+        photoURL: nextPhotoURL,
       });
+      if (nextPhotoURL) {
+        setPhotoURL(nextPhotoURL);
+      }
+      setAvatarFile(null);
       setSuccess("تم تحديث بيانات الحساب بنجاح.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update profile.");
     } finally {
       setSaving(false);
+      setUploadingAvatar(false);
     }
   }
 
@@ -103,12 +130,39 @@ export function AccountSettingsForm() {
             />
           </label>
 
+          <label className="space-y-1">
+            <span className="text-sm font-medium">رفع صورة شخصية</span>
+            <input
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              onChange={(e) => setAvatarFile(e.target.files?.[0] ?? null)}
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]"
+              disabled={saving}
+            />
+          </label>
+
+          {(previewUrl || photoURL) && (
+            <div className="flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2">
+              <Image
+                src={previewUrl ?? photoURL}
+                alt="الصورة الشخصية"
+                width={56}
+                height={56}
+                className="h-14 w-14 rounded-full object-cover"
+                unoptimized
+              />
+              <p className="text-xs text-[var(--text-muted)]">
+                {previewUrl ? "معاينة قبل الرفع" : "الصورة الحالية"}
+              </p>
+            </div>
+          )}
+
           <button
             type="submit"
-            disabled={saving}
+            disabled={saving || uploadingAvatar}
             className="rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-semibold text-[var(--brand-contrast)] transition hover:opacity-90 disabled:opacity-60"
           >
-            {saving ? "جاري الحفظ..." : "حفظ الإعدادات"}
+            {saving || uploadingAvatar ? "جاري الحفظ..." : "حفظ الإعدادات"}
           </button>
         </form>
       )}

@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { RequireAuthGate } from "@/components/auth/RequireAuthGate";
+import { getBackendMe, type BackendProfile } from "@/services/backendAuthService";
 
 type DashCard = {
   title: string;
@@ -27,11 +28,29 @@ const DASH_CARDS: DashCard[] = [
 
 export function AccountDashboard() {
   const { currentUser } = useAuth();
+  const [profile, setProfile] = useState<BackendProfile | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    void getBackendMe()
+      .then((data) => {
+        if (mounted) setProfile(data);
+      })
+      .catch(() => {
+        if (mounted) setProfile(null);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const displayName = useMemo(() => {
+    if (profile?.fullName) return profile.fullName;
     if (!currentUser) return "";
     return currentUser.displayName || currentUser.email?.split("@")[0] || "المستخدم";
-  }, [currentUser]);
+  }, [currentUser, profile]);
+
+  const photoURL = profile?.photoURL || currentUser?.photoURL || "";
 
   return (
     <RequireAuthGate fallbackMessage="جاري تحميل لوحة الحساب...">
@@ -40,9 +59,9 @@ export function AccountDashboard() {
         <section className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow)]">
           <div className="absolute inset-0 bg-gradient-to-l from-[var(--accent-soft)] to-transparent opacity-60" />
           <div className="relative flex items-center gap-4">
-            {currentUser?.photoURL ? (
+            {photoURL ? (
               <Image
-                src={currentUser.photoURL}
+                src={photoURL}
                 alt={displayName}
                 width={64}
                 height={64}

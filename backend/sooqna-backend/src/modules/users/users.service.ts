@@ -7,6 +7,25 @@ import type { UsersRepository } from "./repositories/users.repository";
 export class UsersService {
   constructor(private readonly repo: UsersRepository) {}
 
+  private buildProfile(
+    authUser: DecodedIdToken,
+    existing: UserProfile | null,
+    input?: Partial<Pick<UserProfile, "fullName" | "photoURL">>
+  ): UserProfile {
+    const now = nowIso();
+    return {
+      uid: authUser.uid,
+      fullName: input?.fullName ?? existing?.fullName ?? authUser.name ?? "",
+      email: authUser.email ?? existing?.email ?? "",
+      photoURL: input?.photoURL ?? existing?.photoURL ?? authUser.picture ?? "",
+      role: existing?.role ?? "user",
+      accountStatus: existing?.accountStatus ?? "active",
+      isEmailVerified: authUser.email_verified ?? false,
+      createdAt: existing?.createdAt ?? now,
+      updatedAt: now,
+    };
+  }
+
   async createOrUpdateProfileFromToken(
     authUser: DecodedIdToken,
     input?: Partial<Pick<UserProfile, "fullName" | "photoURL">>
@@ -15,21 +34,23 @@ export class UsersService {
       throw new AppError(400, "uid is required", "VALIDATION_ERROR");
     }
 
-    const now = nowIso();
     const existing = await this.safeFindByUid(authUser.uid);
+    const profile = this.buildProfile(authUser, existing, input);
+    return this.safeUpsert(profile);
+  }
 
-    const profile: UserProfile = {
-      uid: authUser.uid,
-      fullName: input?.fullName ?? existing?.fullName ?? authUser.name ?? "",
-      email: authUser.email ?? existing?.email ?? "",
-      photoURL: input?.photoURL ?? existing?.photoURL ?? authUser.picture ?? "",
-      role: "user",
-      accountStatus: "active",
-      isEmailVerified: authUser.email_verified ?? false,
-      createdAt: existing?.createdAt ?? now,
-      updatedAt: now,
-    };
-
+  async patchProfileFromToken(
+    authUser: DecodedIdToken,
+    input: Partial<Pick<UserProfile, "fullName" | "photoURL">>
+  ): Promise<UserProfile> {
+    if (!authUser.uid) {
+      throw new AppError(400, "uid is required", "VALIDATION_ERROR");
+    }
+    const existing = await this.safeFindByUid(authUser.uid);
+    const profile = this.buildProfile(authUser, existing, {
+      fullName: input.fullName ?? existing?.fullName ?? authUser.name ?? "",
+      photoURL: input.photoURL ?? existing?.photoURL ?? authUser.picture ?? "",
+    });
     return this.safeUpsert(profile);
   }
 
@@ -38,6 +59,24 @@ export class UsersService {
       throw new AppError(400, "uid is required", "VALIDATION_ERROR");
     }
     return this.safeFindByUid(uid);
+  }
+
+  async getOrCreateMe(authUser: DecodedIdToken): Promise<UserProfile> {
+    if (!authUser.uid) {
+      throw new AppError(400, "uid is required", "VALIDATION_ERROR");
+    }
+    const existing = await this.safeFindByUid(authUser.uid);
+    if (existing) {
+      // Keep verification status in sync with latest token claims.
+      const nextProfile = {
+        ...existing,
+        email: authUser.email ?? existing.email,
+        isEmailVerified: authUser.email_verified ?? false,
+        updatedAt: nowIso(),
+      };
+      return this.safeUpsert(nextProfile);
+    }
+    return this.createOrUpdateProfileFromToken(authUser);
   }
 
   private async safeFindByUid(uid: string): Promise<UserProfile | null> {

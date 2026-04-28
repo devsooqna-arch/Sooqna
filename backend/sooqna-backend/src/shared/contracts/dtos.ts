@@ -5,6 +5,7 @@ import type { UserProfile } from "../../modules/users/users.types";
 export type AuthSessionDto = {
   uid: string | null;
   email: string | null;
+  emailVerified?: boolean;
 };
 
 export type UpsertProfileRequestDto = {
@@ -42,4 +43,11 @@ export type MessagesListDto = {
 
 export type MeDto = {
   profile: UserProfile | null;
+};
+
+export type ProfileAvatarUploadDto = {
+  avatarUrl: string;
+  avatarPath: string;
+  filename: string;
+  size: number;
 };

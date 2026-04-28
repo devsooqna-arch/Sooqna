@@ -19,6 +19,16 @@ export const userProfileBodySchema = z
   })
   .strict();
 
+export const userProfilePatchBodySchema = z
+  .object({
+    fullName: z.string().trim().min(1).max(120).optional(),
+    photoURL: z.string().trim().url().max(2048).optional(),
+  })
+  .strict()
+  .refine((value) => Object.keys(value).length > 0, {
+    message: "At least one profile field is required.",
+  });
+
 const listingLocationSchema = z.object({
   country: z.string().trim().min(1).max(120),
   city: z.string().trim().min(1).max(120),
