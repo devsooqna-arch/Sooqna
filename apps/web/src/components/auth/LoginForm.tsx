@@ -125,8 +125,8 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
         </h1>
         <p className="mt-2 text-sm text-[var(--text-muted)]">
           {isSignup
-            ? "ابدأ حسابك خلال دقيقة، أو استخدم Google للمتابعة بسرعة."
-            : "أدخل بياناتك للوصول إلى حسابك، أو تابع مباشرة عبر Google."}
+            ? "ابدأ حسابك خلال دقيقة، أو استخدم جوجل للمتابعة بسرعة."
+            : "أدخل بياناتك للوصول إلى حسابك، أو تابع مباشرة عبر جوجل."}
         </p>
         {authLoading && (
           <p className="mt-2 text-xs text-slate-400">جاري التحقق من الجلسة…</p>
@@ -301,12 +301,12 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
         {googleLoading ? (
           <>
             <Spinner tone="dark" />
-            جاري الاتصال بـ Google…
+            جاري الاتصال بـ جوجل…
           </>
         ) : (
           <>
             <GoogleIcon />
-            {isSignup ? "إنشاء حساب عبر Google" : "المتابعة مع Google"}
+            {isSignup ? "إنشاء حساب عبر جوجل" : "المتابعة مع جوجل"}
           </>
         )}
       </button>

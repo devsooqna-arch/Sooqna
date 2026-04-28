@@ -24,7 +24,7 @@ const listingsDataPath = path.resolve(
 );
 
 function useJsonFallback(): boolean {
-  return env.enableCategoriesJsonFallback === "true";
+  return env.enableCategoriesJsonFallback;
 }
 
 type ListingWithImages = Awaited<ReturnType<typeof prisma.listing.findFirst>> & {

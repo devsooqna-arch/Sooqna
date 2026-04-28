@@ -25,11 +25,11 @@ export function PublicShell({
             <Link href="/" className="flex items-center gap-3">
               <Image
                 src="/branding/logo.png"
-                alt="Sooqna"
+                alt="سوقنا"
                 width={82}
                 height={40}
                 className="h-10 w-auto"
-                style={{ width: "auto" }}
+                style={{ width: "auto", height: "auto" }}
                 priority
               />
             </Link>

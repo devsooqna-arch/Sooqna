@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { AuthTestPanelNoSsr } from "@/components/auth/AuthTestPanelNoSsr";
 
 export const metadata: Metadata = {
-  title: "اختبار المصادقة | Sooqna",
-  description: "اختبار التسجيل، الدخول، Google، وقراءة ملف المستخدم من Backend",
+  title: "اختبار المصادقة | سوقنا",
+  description: "اختبار التسجيل، الدخول، جوجل، وقراءة ملف المستخدم من الخادم الخلفي",
 };
 
 export default function AuthTestPage() {

@@ -20,11 +20,11 @@ export function AuthPageShell({ activeTab, children }: AuthPageShellProps) {
           <Link href="/">
             <Image
               src="/branding/logo.png"
-              alt="Sooqna"
+              alt="سوقنا"
               width={82}
               height={40}
               className="h-10 w-auto"
-              style={{ width: "auto" }}
+              style={{ width: "auto", height: "auto" }}
               priority
             />
           </Link>
@@ -67,7 +67,7 @@ export function AuthPageShell({ activeTab, children }: AuthPageShellProps) {
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
-          بياناتك محمية وآمنة — نستخدم تشفير SSL لحماية معلوماتك
+          بياناتك محمية وآمنة — نستخدم تشفير الاتصال لحماية معلوماتك
         </p>
       </main>
 

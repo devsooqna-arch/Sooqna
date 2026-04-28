@@ -41,7 +41,7 @@ export default async function ListingDetailsPage({ params }: ListingDetailsPageP
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: listing?.title || `Listing ${listingId}`,
+    name: listing?.title || `إعلان رقم ${listingId}`,
     sku: listingId,
     url: buildAbsoluteUrl(`/listings/${listingId}`),
     image: listing?.images?.[0]?.url || undefined,
@@ -55,7 +55,7 @@ export default async function ListingDetailsPage({ params }: ListingDetailsPageP
     },
     brand: {
       "@type": "Brand",
-      name: "Sooqna",
+      name: "سوقنا",
     },
   };
 

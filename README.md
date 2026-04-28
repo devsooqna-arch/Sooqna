@@ -147,7 +147,8 @@ Run these checks on the production server before first deployment:
 ```bash
 cd backend/sooqna-backend
 npm install
-npm run dev
+npm run db:check
+npm run dev:strict
 ```
 
 Backend base URL: `http://localhost:5000/api`
@@ -166,6 +167,13 @@ Web URL: `http://localhost:3000`
 
 - Web: `apps/web/.env.example` (copy to `apps/web/.env.local`)
 - Backend: `backend/sooqna-backend/.env.example` (copy to `backend/sooqna-backend/.env`)
+
+### Runtime Parity Rule (Local = Deploy)
+
+- Always keep `ENABLE_CATEGORIES_JSON_FALLBACK=false` in local and production.
+- Always set a valid `DATABASE_URL` in backend `.env` and deployment secrets.
+- If `npm run db:check` fails, do not start backend until DB credentials are fixed.
+- This prevents silent JSON fallback in local while production uses PostgreSQL.
 
 ## Active API Modules
 

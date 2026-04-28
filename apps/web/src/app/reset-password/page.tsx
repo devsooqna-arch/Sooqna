@@ -3,7 +3,7 @@ import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 
 export const metadata: Metadata = {
-  title: "استعادة كلمة المرور | Sooqna",
+  title: "استعادة كلمة المرور | سوقنا",
   description: "استرجاع الوصول إلى حسابك في سوقنا.",
 };
 

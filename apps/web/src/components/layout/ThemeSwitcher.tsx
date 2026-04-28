@@ -3,9 +3,9 @@
 import { useTheme, type AppTheme } from "@/contexts/theme-context";
 
 const THEME_LABELS: Record<AppTheme, string> = {
-  classic: "Classic",
-  light: "Light",
-  dark: "Dark",
+  classic: "كلاسيكي",
+  light: "فاتح",
+  dark: "داكن",
 };
 
 export function ThemeSwitcher() {

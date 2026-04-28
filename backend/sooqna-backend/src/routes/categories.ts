@@ -29,8 +29,7 @@ const categoriesFilePath = path.resolve(
 async function ensureSeededIfEmpty(): Promise<void> {
   const existing = await categoriesRepo.list(false);
   if (existing.length) return;
-  if (env.nodeEnv === "production") return;
-  if (env.enableCategoriesJsonFallback !== "true") return;
+  if (!env.enableCategoriesJsonFallback) return;
   if (!fs.existsSync(categoriesFilePath)) return;
   const seedRecords = readJsonArrayFile<CategoryRecord>(categoriesFilePath);
   if (!seedRecords.length) return;
@@ -45,7 +44,7 @@ categoriesRouter.get("/", validateRequest({ query: categoriesQuerySchema }), asy
     res.json({ success: true, data });
     return;
   } catch (error) {
-    if (env.enableCategoriesJsonFallback !== "true") {
+    if (!env.enableCategoriesJsonFallback) {
       throw new AppError(503, "Categories storage unavailable.", "SERVICE_UNAVAILABLE");
     }
 

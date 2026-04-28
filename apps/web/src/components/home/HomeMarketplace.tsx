@@ -27,6 +27,7 @@ export function HomeMarketplace() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeHeroIndex, setActiveHeroIndex] = useState(0);
 
   useEffect(() => {
     let mounted = true;
@@ -50,18 +51,45 @@ export function HomeMarketplace() {
     };
   }, []);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveHeroIndex((current) => (current + 1) % 2);
+    }, 7000);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, []);
+
   const featuredListings = useMemo(() => listings.slice(0, 9), [listings]);
   const topCategories = useMemo(() => categories.slice(0, 10), [categories]);
-  const heroImage =
-    featuredListings[0]?.images.find((img) => img.isPrimary)?.url || featuredListings[0]?.images[0]?.url;
+  const heroSlides = ["/hero/slide-1.png", "/hero/slide-2.png"];
 
   return (
     <div className="space-y-7">
       <section className="overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)] shadow-sm">
         <div className="relative h-[235px]">
-          {heroImage ? (
-            <Image src={heroImage} alt="Hero listing" fill className="object-cover" unoptimized priority />
-          ) : null}
+          {heroSlides.map((slideSrc, index) => {
+            const isActive = index === activeHeroIndex;
+            const isBeforeActive = (index + 1) % heroSlides.length === activeHeroIndex;
+            const positionClass = isActive
+              ? "translate-x-0 opacity-100"
+              : isBeforeActive
+                ? "translate-x-full opacity-0"
+                : "-translate-x-full opacity-0";
+
+            return (
+              <Image
+                key={slideSrc}
+                src={slideSrc}
+                alt={`صورة رئيسية ${index + 1}`}
+                fill
+                unoptimized
+                className={`object-cover transition-all duration-700 ease-in-out ${positionClass}`}
+                priority={index === 0}
+              />
+            );
+          })}
           <div className="absolute inset-0 bg-black/45" />
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center text-white">
             <h2 className="text-xl font-bold sm:text-2xl">اكتشف أفضل الإعلانات بسهولة وأمان</h2>
@@ -82,6 +110,24 @@ export function HomeMarketplace() {
                 أضف إعلان
               </Link>
             </div>
+          </div>
+          <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2">
+            {heroSlides.map((slideSrc, index) => {
+              const isActive = index === activeHeroIndex;
+              return (
+                <button
+                  key={slideSrc}
+                  type="button"
+                  aria-label={`الانتقال إلى الشريحة ${index + 1}`}
+                  onClick={() => setActiveHeroIndex(index)}
+                  className={`h-2.5 w-2.5 rounded-full border transition ${
+                    isActive
+                      ? "border-white bg-white"
+                      : "border-white/70 bg-white/40 hover:bg-white/70"
+                  }`}
+                />
+              );
+            })}
           </div>
         </div>
 

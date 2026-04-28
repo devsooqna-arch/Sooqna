@@ -36,6 +36,7 @@ function ListingsSkeleton() {
 function PublicListingsPageInner() {
   const params = useSearchParams();
   const categoryFilter = params.get("category");
+  const cityFilter = params.get("city")?.toLowerCase() ?? "";
   const searchFilter = params.get("search")?.toLowerCase() ?? "";
 
   const [listings, setListings] = useState<Listing[]>([]);
@@ -72,6 +73,9 @@ function PublicListingsPageInner() {
       const target = categoryFilter.toLowerCase();
       result = result.filter((l) => l.categoryId.toLowerCase() === target);
     }
+    if (cityFilter) {
+      result = result.filter((l) => l.location.city.toLowerCase() === cityFilter);
+    }
     if (searchFilter) {
       result = result.filter(
         (l) =>
@@ -82,7 +86,7 @@ function PublicListingsPageInner() {
     if (sort === "price_asc") result = [...result].sort((a, b) => a.price - b.price);
     if (sort === "price_desc") result = [...result].sort((a, b) => b.price - a.price);
     return result;
-  }, [listings, categoryFilter, searchFilter, sort]);
+  }, [listings, categoryFilter, cityFilter, searchFilter, sort]);
 
   if (loading) {
     return <ListingsSkeleton />;
@@ -137,12 +141,16 @@ function PublicListingsPageInner() {
         {/* Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            {(categoryFilter || searchFilter) ? (
+            {(categoryFilter || cityFilter || searchFilter) ? (
               <p className="text-sm text-[var(--text-muted)]">
                 {categoryFilter && (
                   <>فلتر التصنيف: <span className="font-semibold text-[var(--text)]">{categoryFilter}</span></>
                 )}
-                {categoryFilter && searchFilter && " • "}
+                {categoryFilter && (cityFilter || searchFilter) && " • "}
+                {cityFilter && (
+                  <>المدينة: <span className="font-semibold text-[var(--text)]">{cityFilter}</span></>
+                )}
+                {cityFilter && searchFilter && " • "}
                 {searchFilter && (
                   <>بحث: <span className="font-semibold text-[var(--text)]">{searchFilter}</span></>
                 )}

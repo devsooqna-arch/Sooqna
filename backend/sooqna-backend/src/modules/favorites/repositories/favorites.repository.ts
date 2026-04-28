@@ -16,7 +16,7 @@ const favoritesDataPath = path.resolve(
 );
 
 function useJsonFallback(): boolean {
-  return env.enableCategoriesJsonFallback === "true";
+  return env.enableCategoriesJsonFallback;
 }
 
 export class PrismaFavoritesRepository implements FavoritesRepository {

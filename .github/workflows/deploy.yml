@@ -195,20 +195,21 @@ jobs:
             DB_URL="${DB_URL//$'\r'/}"
             DB_URL="${DB_URL//$'\n'/}"
             echo "BACKEND_DATABASE_URL normalized length: ${#DB_URL}"
-            if [ -n "$DB_URL" ]; then
-              DB_SCHEME="${DB_URL%%://*}"
-              echo "Detected DB URL scheme: ${DB_SCHEME:-<none>}"
-              if [[ "$DB_URL" != postgresql://* && "$DB_URL" != postgres://* ]]; then
-                echo "BACKEND_DATABASE_URL is invalid. Expected to start with postgresql:// or postgres://"
-                echo "Save the GitHub secret as URL value only (no DATABASE_URL= prefix, no quotes)."
-                exit 1
-              fi
-              echo "BACKEND_DATABASE_URL is present and normalized."
-              export DATABASE_URL="$DB_URL"
-              echo "DATABASE_URL exported successfully."
-            else
-              echo "BACKEND_DATABASE_URL is not set; skipping prisma migrations and DATABASE_URL in .env."
+            if [ -z "$DB_URL" ]; then
+              echo "BACKEND_DATABASE_URL is required and cannot be empty."
+              exit 1
             fi
+
+            DB_SCHEME="${DB_URL%%://*}"
+            echo "Detected DB URL scheme: ${DB_SCHEME:-<none>}"
+            if [[ "$DB_URL" != postgresql://* && "$DB_URL" != postgres://* ]]; then
+              echo "BACKEND_DATABASE_URL is invalid. Expected to start with postgresql:// or postgres://"
+              echo "Save the GitHub secret as URL value only (no DATABASE_URL= prefix, no quotes)."
+              exit 1
+            fi
+            echo "BACKEND_DATABASE_URL is present and normalized."
+            export DATABASE_URL="$DB_URL"
+            echo "DATABASE_URL exported successfully."
 
             # ─────────────────────────────────────────────────────────────
             # Write production backend .env
@@ -224,37 +225,53 @@ jobs:
               echo "PORT=5000"
               echo "CORS_ORIGIN=${NEXT_PUBLIC_SITE_URL}"
               echo "FIREBASE_PROJECT_ID=${BACKEND_FIREBASE_PROJECT_ID}"
-              echo "ENABLE_CATEGORIES_JSON_FALLBACK=true"
-              if [ -n "${DATABASE_URL:-}" ]; then
-                echo "DATABASE_URL=${DATABASE_URL}"
-              fi
+              echo "ENABLE_CATEGORIES_JSON_FALLBACK=false"
+              echo "DATABASE_URL=${DATABASE_URL}"
             } > .env
-            echo "Backend .env written (NODE_ENV=production, CORS_ORIGIN=${NEXT_PUBLIC_SITE_URL}, FIREBASE_PROJECT_ID set, DATABASE_URL=$([ -n "${DATABASE_URL:-}" ] && echo 'SET' || echo 'NOT SET'))."
+            echo "Backend .env written (NODE_ENV=production, CORS_ORIGIN=${NEXT_PUBLIC_SITE_URL}, FIREBASE_PROJECT_ID set, DATABASE_URL=SET)."
+
+            echo "Running backend DB preflight check..."
+            npm run db:check
 
             echo "Listing prisma directory..."
             ls -lah prisma || true
             echo "Listing prisma migrations directory..."
             ls -lah prisma/migrations || true
 
-            if [ -n "${DATABASE_URL:-}" ]; then
-              echo "Running prisma migrate deploy..."
-              migrate_exit=0
-              set +e
-              npx prisma migrate deploy > /tmp/prisma-migrate.log 2>&1
-              migrate_exit=$?
-              set -Eeo pipefail
+            echo "Running prisma migrate deploy..."
+            migrate_exit=0
+            set +e
+            npx prisma migrate deploy > /tmp/prisma-migrate.log 2>&1
+            migrate_exit=$?
+            set -Eeo pipefail
 
-              echo "prisma_migrate_exit=$migrate_exit"
-              echo "========== prisma-migrate.log =========="
-              cat /tmp/prisma-migrate.log || true
-              echo "========================================"
+            echo "prisma_migrate_exit=$migrate_exit"
+            echo "========== prisma-migrate.log =========="
+            cat /tmp/prisma-migrate.log || true
+            echo "========================================"
 
-              if [ "$migrate_exit" -ne 0 ]; then
-                echo "Prisma migrate deploy failed with exit code: $migrate_exit"
-                exit "$migrate_exit"
-              fi
+            if [ "$migrate_exit" -ne 0 ]; then
+              echo "Prisma migrate deploy failed with exit code: $migrate_exit"
+              exit "$migrate_exit"
+            fi
 
-              echo "Prisma migrate deploy finished successfully."
+            echo "Prisma migrate deploy finished successfully."
+
+            echo "Seeding categories from JSON (idempotent upsert — required for deploy parity)..."
+            seed_exit=0
+            set +e
+            npm run db:migrate-json > /tmp/db-seed.log 2>&1
+            seed_exit=$?
+            set -Eeo pipefail
+
+            echo "seed_exit=$seed_exit"
+            echo "========== db-seed.log =========="
+            cat /tmp/db-seed.log || true
+            echo "================================="
+
+            if [ "$seed_exit" -ne 0 ]; then
+              echo "Category seed failed (exit $seed_exit). Failing deploy to avoid partial rollout."
+              exit "$seed_exit"
             fi
 
             echo "Checking dist output..."

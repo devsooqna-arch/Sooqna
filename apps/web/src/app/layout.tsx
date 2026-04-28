@@ -10,22 +10,22 @@ export const metadata: Metadata = {
     default: "سوقنا — أكبر سوق إلكتروني في الأردن",
     template: "%s | سوقنا",
   },
-  description: "Marketplace",
+  description: "منصة إعلانات مبوبة للبيع والشراء في الأردن",
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
     locale: "ar_JO",
-    siteName: "Sooqna",
-    title: "Sooqna",
-    description: "Marketplace",
+    siteName: "سوقنا",
+    title: "سوقنا",
+    description: "منصة إعلانات مبوبة للبيع والشراء في الأردن",
     url: "/",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Sooqna",
-    description: "Marketplace",
+    title: "سوقنا",
+    description: "منصة إعلانات مبوبة للبيع والشراء في الأردن",
   },
   icons: {
     icon: "/branding/favicon.png",

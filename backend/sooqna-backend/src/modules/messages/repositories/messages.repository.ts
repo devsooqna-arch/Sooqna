@@ -25,7 +25,7 @@ const messagesDataPath = path.resolve(
 );
 
 function useJsonFallback(): boolean {
-  return env.enableCategoriesJsonFallback === "true";
+  return env.enableCategoriesJsonFallback;
 }
 
 export class PrismaMessagesRepository implements MessagesRepository {

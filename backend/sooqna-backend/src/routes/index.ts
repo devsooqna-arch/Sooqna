@@ -8,6 +8,7 @@ import { favoritesRouter } from "../modules/favorites/favorites.routes";
 import { messagesRouter } from "../modules/messages/messages.routes";
 import { categoriesRouter } from "../modules/categories/categories.routes";
 import { prisma } from "../config/prisma";
+import { env } from "../config/env";
 import { readJsonArrayFile } from "../utils/fileStore";
 
 export const apiRouter = Router();
@@ -33,6 +34,10 @@ apiRouter.get("/dev/seed-summary", async (_req, res) => {
     });
     return;
   } catch {
+    if (!env.enableCategoriesJsonFallback) {
+      throw new Error("Database seed summary unavailable and JSON fallback is disabled.");
+    }
+
     const usersPath = path.resolve(process.cwd(), "src/modules/users/repositories/users.data.json");
     const categoriesPath = path.resolve(
       process.cwd(),

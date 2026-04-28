@@ -16,7 +16,7 @@ export default function HomePage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "Sooqna",
+    name: "سوقنا",
     url: buildAbsoluteUrl("/"),
     potentialAction: {
       "@type": "SearchAction",

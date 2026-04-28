@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import { DevToolsPanel } from "@/components/dev/DevToolsPanel";
 
 export const metadata: Metadata = {
-  title: "Dev Tools | Sooqna",
-  description: "Backend integration testing panel for auth, listings, favorites, uploads, and messages.",
+  title: "أدوات المطور | سوقنا",
+  description: "لوحة اختبار تكامل الخادم الخلفي للمصادقة والإعلانات والمفضلة والرفع والرسائل.",
 };
 
 export default function DevToolsPage() {

@@ -34,11 +34,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const saved = window.localStorage.getItem(STORAGE_KEY);
     if (isTheme(saved)) {
       setThemeState(saved);
-      return;
     }
-
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    setThemeState(prefersDark ? "dark" : "classic");
   }, []);
 
   useEffect(() => {
