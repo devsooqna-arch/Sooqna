@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sooqna Web UI Kit</title>
+<link rel="stylesheet" href="../../colors_and_type.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="Shell.jsx"></script>
+<script type="text/babel" src="ListingCard.jsx"></script>
+<script type="text/babel" src="HomePage.jsx"></script>
+<script type="text/babel" src="ListingsPage.jsx"></script>
+<script type="text/babel" src="ListingDetail.jsx"></script>
+<style>
+  * { box-sizing: border-box; }
+  html { direction: rtl; }
+  body { margin: 0; font-family: "Cairo","Segoe UI",system-ui,sans-serif; }
+</style>
+</head>
+<body data-theme="classic">
+<div id="root"></div>
+
+<script type="text/babel">
+const SCREENS = {
+  home: "home",
+  listings: "listings",
+  detail: "detail",
+  submit: "submit",
+  messages: "messages",
+  login: "login",
+};
+
+function SubmitListingPage({ onBack }) {
+  const [step, setStep] = React.useState(1);
+  const [form, setForm] = React.useState({ title: "", category: "", price: "", city: "", condition: "used", description: "" });
+
+  const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
+
+  const inputStyle = { width: "100%", border: "1px solid var(--color-border)", borderRadius: 8, background: "var(--color-input-bg)", color: "var(--color-text)", fontFamily: "inherit", fontSize: 13, padding: "9px 12px", outline: "none", boxSizing: "border-box" };
+  const labelStyle = { display: "block", fontSize: 12, fontWeight: 600, color: "var(--color-text)", marginBottom: 5 };
+  const btnStyle = { background: "var(--color-brand)", color: "#fff", border: "none", borderRadius: 9999, padding: "10px 28px", fontSize: 13, fontWeight: 700, fontFamily: "inherit", cursor: "pointer" };
+
+  if (step === 2) return (
+    <div style={{ borderRadius: 12, border: "1px solid var(--color-border)", background: "var(--color-surface)", padding: 32, maxWidth: 500, margin: "0 auto", textAlign: "center", boxShadow: "0 1px 3px rgba(0,0,0,.08)" }}>
+      <div style={{ fontSize: 48, marginBottom: 14 }}>✅</div>
+      <h2 style={{ margin: "0 0 10px", color: "var(--color-text)" }}>تم نشر إعلانك بنجاح!</h2>
+      <p style={{ color: "var(--color-text-muted)", fontSize: 13 }}>سيظهر إعلانك للمستخدمين خلال دقائق.</p>
+      <button style={btnStyle} onClick={() => { setStep(1); onBack && onBack(); }}>تصفح الإعلانات</button>
+    </div>
+  );
+
+  return (
+    <div style={{ borderRadius: 12, border: "1px solid var(--color-border)", background: "var(--color-surface)", padding: 24, maxWidth: 600, boxShadow: "0 1px 3px rgba(0,0,0,.08)" }}>
+      <h2 style={{ margin: "0 0 20px", fontSize: 20, fontWeight: 700 }}>إضافة إعلان جديد</h2>
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <div><label style={labelStyle}>عنوان الإعلان *</label><input style={inputStyle} value={form.title} onChange={set("title")} placeholder="مثال: تويوتا كامري 2020 فل كامل" /></div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div><label style={labelStyle}>التصنيف *</label>
+            <select style={{ ...inputStyle, appearance: "none" }} value={form.category} onChange={set("category")}>
+              <option value="">اختر التصنيف</option>
+              <option value="cars">سيارات</option>
+              <option value="real-estate">عقارات</option>
+              <option value="electronics">موبايلات</option>
+              <option value="furniture">أثاث</option>
+              <option value="jobs">وظائف</option>
+            </select>
+          </div>
+          <div><label style={labelStyle}>المدينة *</label>
+            <select style={{ ...inputStyle, appearance: "none" }} value={form.city} onChange={set("city")}>
+              <option value="">اختر المدينة</option>
+              <option value="amman">عمّان</option>
+              <option value="zarqa">الزرقاء</option>
+              <option value="irbid">إربد</option>
+              <option value="aqaba">العقبة</option>
+            </select>
+          </div>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div><label style={labelStyle}>السعر</label><input style={inputStyle} value={form.price} onChange={set("price")} placeholder="مثال: 850" /></div>
+          <div><label style={labelStyle}>حالة المنتج</label>
+            <select style={{ ...inputStyle, appearance: "none" }} value={form.condition} onChange={set("condition")}>
+              <option value="new">جديد</option>
+              <option value="used">مستعمل</option>
+            </select>
+          </div>
+        </div>
+        <div><label style={labelStyle}>الوصف</label>
+          <textarea style={{ ...inputStyle, resize: "vertical" }} rows={4} value={form.description} onChange={set("description")} placeholder="اكتب وصفاً تفصيلياً..." />
+        </div>
+        <div style={{ background: "var(--color-surface-muted)", borderRadius: 8, border: "2px dashed var(--color-border)", padding: "24px 16px", textAlign: "center" }}>
+          <div style={{ fontSize: 24, marginBottom: 6 }}>📷</div>
+          <p style={{ margin: 0, fontSize: 12, color: "var(--color-text-muted)" }}>اضغط لرفع الصور أو اسحبها هنا</p>
+        </div>
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <button style={btnStyle} onClick={() => setStep(2)}>نشر الإعلان</button>
+          <button onClick={onBack} style={{ background: "var(--color-chip)", border: "1px solid var(--color-chip-border)", borderRadius: 9999, padding: "10px 20px", fontSize: 13, fontWeight: 600, fontFamily: "inherit", color: "var(--color-text-muted)", cursor: "pointer" }}>إلغاء</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MessagesPage() {
+  const [active, setActive] = React.useState(0);
+  const convs = [
+    { id: 0, name: "محمد السالم", listing: "تويوتا كامري ٢٠٢٠", time: "منذ ٥ دقائق", last: "هل لا يزال متاحاً؟", unread: 2 },
+    { id: 1, name: "سارة خالد", listing: "شقة للإيجار — الرابية", time: "أمس", last: "شكراً على الرد!", unread: 0 },
+    { id: 2, name: "علي محمود", listing: "آيفون ١٥ برو", time: "منذ ٣ أيام", last: "سأتواصل معك لاحقاً", unread: 0 },
+  ];
+  const msgs = [
+    [{ from: "them", text: "السلام عليكم، هل السيارة لا تزال متاحة؟" }, { from: "me", text: "وعليكم السلام، نعم متاحة." }, { from: "them", text: "ما هو أقل سعر؟" }, { from: "them", text: "هل لا يزال متاحاً؟" }],
+    [{ from: "them", text: "متى يمكن معاينة الشقة؟" }, { from: "me", text: "يمكنك الزيارة غداً الساعة ١٠ صباحاً." }, { from: "them", text: "شكراً على الرد!" }],
+    [{ from: "them", text: "ما حالة الجهاز؟" }, { from: "me", text: "حالة ممتازة، بدون أي خدوش." }, { from: "them", text: "سأتواصل معك لاحقاً" }],
+  ];
+
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 0, borderRadius: 12, border: "1px solid var(--color-border)", background: "var(--color-surface)", overflow: "hidden", height: 480, boxShadow: "0 1px 3px rgba(0,0,0,.08)" }}>
+      <div style={{ borderLeft: "1px solid var(--color-border)", overflowY: "auto" }}>
+        <div style={{ padding: "12px 14px", borderBottom: "1px solid var(--color-border)", fontWeight: 700, fontSize: 14 }}>المحادثات</div>
+        {convs.map(c =>
+          <div key={c.id} onClick={() => setActive(c.id)} style={{ padding: "12px 14px", borderBottom: "1px solid var(--color-border)", cursor: "pointer", background: active === c.id ? "var(--color-accent-soft)" : "transparent", display: "flex", gap: 10, alignItems: "flex-start" }}>
+            <div style={{ width: 38, height: 38, borderRadius: 9999, background: "var(--color-accent-soft)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>👤</div>
+            <div style={{ flex: 1, overflow: "hidden" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: 13, fontWeight: 700 }}>{c.name}</span>
+                <span style={{ fontSize: 10, color: "var(--color-text-muted)" }}>{c.time}</span>
+              </div>
+              <div style={{ fontSize: 11, color: "var(--color-brand)", marginBottom: 2 }}>{c.listing}</div>
+              <div style={{ fontSize: 12, color: "var(--color-text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", justifyContent: "space-between" }}>
+                <span>{c.last}</span>
+                {c.unread > 0 && <span style={{ background: "var(--color-brand)", color: "#fff", borderRadius: 9999, fontSize: 10, fontWeight: 700, padding: "1px 7px" }}>{c.unread}</span>}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--color-border)", fontWeight: 700, fontSize: 13 }}>{convs[active].name} — {convs[active].listing}</div>
+        <div style={{ flex: 1, overflowY: "auto", padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
+          {msgs[active].map((m, i) =>
+            <div key={i} style={{ display: "flex", justifyContent: m.from === "me" ? "flex-start" : "flex-end" }}>
+              <div style={{ maxWidth: "70%", padding: "8px 14px", borderRadius: m.from === "me" ? "12px 12px 4px 12px" : "12px 12px 12px 4px", background: m.from === "me" ? "var(--color-brand)" : "var(--color-surface-muted)", color: m.from === "me" ? "#fff" : "var(--color-text)", fontSize: 13 }}>{m.text}</div>
+            </div>
+          )}
+        </div>
+        <div style={{ padding: "10px 14px", borderTop: "1px solid var(--color-border)", display: "flex", gap: 8 }}>
+          <input style={{ flex: 1, border: "1px solid var(--color-border)", borderRadius: 9999, padding: "8px 14px", fontSize: 13, fontFamily: "inherit", outline: "none", background: "var(--color-input-bg)" }} placeholder="اكتب رسالتك..." />
+          <button style={{ background: "var(--color-brand)", color: "#fff", border: "none", borderRadius: 9999, padding: "8px 16px", fontSize: 12, fontWeight: 700, fontFamily: "inherit", cursor: "pointer" }}>إرسال</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LoginPage({ onLogin, onBack }) {
+  const [email, setEmail] = React.useState("");
+  const [pw, setPw] = React.useState("");
+  const inputStyle = { width: "100%", border: "1px solid var(--color-border)", borderRadius: 8, background: "var(--color-input-bg)", color: "var(--color-text)", fontFamily: "inherit", fontSize: 13, padding: "9px 12px", outline: "none", boxSizing: "border-box" };
+  return (
+    <div style={{ maxWidth: 380, margin: "0 auto", borderRadius: 12, border: "1px solid var(--color-border)", background: "var(--color-surface)", padding: "28px 24px", boxShadow: "0 1px 3px rgba(0,0,0,.08)" }}>
+      <div style={{ textAlign: "center", marginBottom: 20 }}>
+        <img src="../../assets/logo.png" alt="سوقنا" style={{ height: 48, width: "auto", marginBottom: 10 }} />
+        <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>تسجيل الدخول</h2>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div><label style={{ display: "block", fontSize: 12, fontWeight: 600, marginBottom: 4 }}>البريد الإلكتروني</label><input style={inputStyle} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="example@email.com" /></div>
+        <div><label style={{ display: "block", fontSize: 12, fontWeight: 600, marginBottom: 4 }}>كلمة المرور</label><input style={inputStyle} type="password" value={pw} onChange={e => setPw(e.target.value)} placeholder="••••••••" /></div>
+        <button onClick={onLogin} style={{ background: "var(--color-brand)", color: "#fff", border: "none", borderRadius: 9999, padding: "11px", fontSize: 14, fontWeight: 700, fontFamily: "inherit", cursor: "pointer" }}>دخول</button>
+        <div style={{ textAlign: "center", fontSize: 12, color: "var(--color-text-muted)" }}>
+          ليس لديك حساب؟ <a href="#" style={{ color: "var(--color-brand)", fontWeight: 600 }}>إنشاء حساب</a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [screen, setScreen] = React.useState("home");
+  const [activeListing, setActiveListing] = React.useState(null);
+
+  const navigate = (s, data) => {
+    setScreen(s);
+    if (data) setActiveListing(data);
+  };
+
+  const screenContent = () => {
+    switch (screen) {
+      case "home": return <window.HomePage onNavigate={navigate} />;
+      case "listings": return <window.ListingsPage onNavigate={navigate} />;
+      case "detail": return <window.ListingDetail listing={activeListing} onBack={() => navigate("listings")} onMessage={() => navigate("messages")} />;
+      case "submit": return <SubmitListingPage onBack={() => navigate("listings")} />;
+      case "messages": return <MessagesPage />;
+      case "login": return <LoginPage onLogin={() => navigate("home")} onBack={() => navigate("home")} />;
+      default: return null;
+    }
+  };
+
+  return <window.SooqnaShell activePath={"/" + (screen === "home" ? "" : screen)}>
+    {screenContent()}
+  </window.SooqnaShell>;
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+</script>
+</body>
+</html>

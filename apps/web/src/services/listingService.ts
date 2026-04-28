@@ -87,7 +87,7 @@ export async function getListingById(id: string): Promise<Listing | null> {
 
 export async function updateListing(
   listingId: string,
-  patch: Partial<Pick<Listing, "title" | "description" | "price" | "status">>
+  patch: Partial<Pick<Listing, "title" | "description" | "price">>
 ): Promise<Listing> {
   const response = await apiFetch<{ success: true; listing: Listing }>(`/listings/${listingId}`, {
     method: "PATCH",
@@ -100,6 +100,42 @@ export async function updateListing(
 export async function deleteListing(listingId: string): Promise<Listing> {
   const response = await apiFetch<{ success: true; listing: Listing }>(`/listings/${listingId}`, {
     method: "DELETE",
+    authenticated: true,
+  });
+  return response.listing;
+}
+
+export async function publishListing(listingId: string): Promise<Listing> {
+  const response = await apiFetch<{ success: true; listing: Listing }>(`/listings/${listingId}/publish`, {
+    method: "POST",
+    authenticated: true,
+  });
+  return response.listing;
+}
+
+export async function unpublishListing(listingId: string): Promise<Listing> {
+  const response = await apiFetch<{ success: true; listing: Listing }>(
+    `/listings/${listingId}/unpublish`,
+    {
+      method: "POST",
+      authenticated: true,
+    }
+  );
+  return response.listing;
+}
+
+export async function renewListing(listingId: string, durationDays?: number): Promise<Listing> {
+  const response = await apiFetch<{ success: true; listing: Listing }>(`/listings/${listingId}/renew`, {
+    method: "POST",
+    authenticated: true,
+    body: JSON.stringify(durationDays ? { durationDays } : {}),
+  });
+  return response.listing;
+}
+
+export async function expireListing(listingId: string): Promise<Listing> {
+  const response = await apiFetch<{ success: true; listing: Listing }>(`/listings/${listingId}/expire`, {
+    method: "POST",
     authenticated: true,
   });
   return response.listing;

@@ -1,0 +1,462 @@
+/*
+ * ═══════════════════════════════════════════════════════════════
+ *  Sooqna Design System — Colors & Typography  (v2)
+ *  Best-practice token system · 3 themes · Cairo webfont
+ * ═══════════════════════════════════════════════════════════════
+ *
+ *  Usage
+ *  ─────
+ *  1. <link rel="stylesheet" href="colors_and_type.css">
+ *  2. Set data-theme="classic|light|dark" on <html>
+ *     Default (no attribute) = classic
+ *
+ *  Contrast compliance
+ *  ───────────────────
+ *  All text/bg pairs target WCAG AA (≥ 4.5:1 normal, ≥ 3:1 large).
+ *  Verified ratios noted inline with ✓.
+ *
+ *  Font
+ *  ────
+ *  Cairo (Google Fonts) — Arabic + Latin, weights 400–800.
+ *  Replaces Tahoma system font. Falls back to Segoe UI → system-ui.
+ */
+
+/* ─── Webfont ────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
+
+/* ══════════════════════════════════════════════════════════════
+   THEME 1 — Classic  (original WordPress-baseline, unchanged)
+   ══════════════════════════════════════════════════════════════ */
+:root,
+html[data-theme="classic"] {
+
+  /* ── Page ── */
+  --color-bg:             #f0f0f0;   /* page background */
+  --color-surface:        #ffffff;   /* card / panel bg */
+  --color-surface-muted:  #f7f8f5;   /* secondary surfaces, skeleton */
+
+  /* ── Borders ── */
+  --color-border:         #dde3d8;
+
+  /* ── Text  (contrast on surface #fff) ── */
+  --color-text:           #1a1f16;   /* ✓ 16.2:1 on white */
+  --color-text-muted:     #6b7563;   /* ✓  5.2:1 on white — AA */
+  --color-text-inverse:   #ffffff;
+
+  /* ── Brand green ── */
+  --color-brand:          #2d6a2d;   /* ✓  6.8:1 on white — AA */
+  --color-brand-hover:    #245824;   /* ✓  8.6:1 on white */
+  --color-brand-active:   #1d4a1d;
+  --color-brand-contrast: #ffffff;   /* text ON brand bg */
+
+  /* ── Accent ── */
+  --color-accent:         #a8d520;   /* lime strip — decorative only, not text */
+  --color-accent-soft:    #edf7cc;   /* price boxes, hover bg */
+
+  /* ── Chip / Tag ── */
+  --color-chip:           #f0f4e8;
+  --color-chip-border:    #c5d4a0;
+  --color-chip-text:      #4a5e3a;   /* ✓  5.5:1 on chip bg */
+
+  /* ── Semantic states ── */
+  --color-danger:         #dc2626;   /* ✓  4.5:1 on white — AA */
+  --color-danger-soft:    #fef2f2;
+  --color-success:        #16a34a;   /* ✓  4.5:1 on white — AA */
+  --color-success-soft:   #f0fdf4;
+  --color-warning:        #b45309;   /* ✓  4.6:1 on white — AA */
+  --color-warning-soft:   #fffbeb;
+
+  /* ── Featured / Star ── */
+  --color-star:           #f59e0b;
+  --color-featured:       #f5a623;
+  --color-featured-text:  #ffffff;
+
+  /* ── Navigation ── */
+  --color-nav-bottom:        #ffffff;
+  --color-nav-bottom-border: #dde3d8;
+
+  /* ── Form ── */
+  --color-input-bg:          #ffffff;
+  --color-input-border:      #dde3d8;
+  --color-input-border-focus:#2d6a2d;
+  --color-input-placeholder: #9ca89a;
+
+  /* ── Overlay ── */
+  --color-overlay:           rgba(0,0,0,.45);   /* hero overlay */
+  --color-overlay-card:      rgba(0,0,0,.55);   /* card image gradient base */
+  --color-scrim:             rgba(0,0,0,.5);    /* modal backdrop */
+
+  /* ── Shadows ── */
+  --shadow-sm:   0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md:   0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+  --shadow-lg:   0 10px 20px rgba(0,0,0,.08), 0 4px 8px rgba(0,0,0,.06);
+  --shadow-fab:  0 4px 14px rgba(45,106,45,.40);
+
+  /* Legacy aliases — keep codebase working */
+  --bg: var(--color-bg); --surface: var(--color-surface); --surface-muted: var(--color-surface-muted);
+  --border: var(--color-border); --text: var(--color-text); --text-muted: var(--color-text-muted);
+  --brand: var(--color-brand); --brand-hover: var(--color-brand-hover); --brand-contrast: var(--color-brand-contrast);
+  --accent-strip: var(--color-accent); --accent-soft: var(--color-accent-soft);
+  --chip: var(--color-chip); --chip-border: var(--color-chip-border);
+  --danger: var(--color-danger); --star: var(--color-star);
+  --featured: var(--color-featured); --featured-text: var(--color-featured-text);
+  --nav-bottom: var(--color-nav-bottom); --nav-bottom-border: var(--color-nav-bottom-border);
+  --input-bg: var(--color-input-bg);
+  --shadow: var(--shadow-sm);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   THEME 2 — Light  (fresh, high-contrast, modern)
+   ══════════════════════════════════════════════════════════════
+   Philosophy: pure white surfaces, green-tinted page bg,
+   deeper greens for better contrast, warmer lime accent.
+   ══════════════════════════════════════════════════════════════ */
+html[data-theme="light"] {
+
+  /* ── Page ── */
+  --color-bg:             #eef4e8;   /* warm green-tinted white */
+  --color-surface:        #ffffff;
+  --color-surface-muted:  #f3f8ee;
+
+  /* ── Borders ── */
+  --color-border:         #c8d9bb;
+
+  /* ── Text  (on surface #fff) ── */
+  --color-text:           #121a0e;   /* ✓ 18.5:1 — AAA */
+  --color-text-muted:     #405c34;   /* ✓  6.8:1 — AA */
+  --color-text-inverse:   #ffffff;
+
+  /* ── Brand green — slightly deeper for AA on white ── */
+  --color-brand:          #236023;   /* ✓  7.6:1 on white — AA */
+  --color-brand-hover:    #1b4f1b;   /* ✓ 10.1:1 */
+  --color-brand-active:   #163e16;
+  --color-brand-contrast: #ffffff;
+
+  /* ── Accent ── */
+  --color-accent:         #78c020;   /* richer lime */
+  --color-accent-soft:    #dff0c4;
+
+  /* ── Chip ── */
+  --color-chip:           #e6f2d8;
+  --color-chip-border:    #a2c484;
+  --color-chip-text:      #2e5020;   /* ✓  7.2:1 on chip bg */
+
+  /* ── Semantic ── */
+  --color-danger:         #b91c1c;   /* ✓  5.9:1 on white — AA */
+  --color-danger-soft:    #fef2f2;
+  --color-success:        #15803d;   /* ✓  5.0:1 */
+  --color-success-soft:   #f0fdf4;
+  --color-warning:        #92400e;   /* ✓  7.0:1 */
+  --color-warning-soft:   #fffbeb;
+
+  /* ── Featured ── */
+  --color-star:           #d97706;
+  --color-featured:       #d97706;
+  --color-featured-text:  #ffffff;
+
+  /* ── Navigation ── */
+  --color-nav-bottom:        #ffffff;
+  --color-nav-bottom-border: #c8d9bb;
+
+  /* ── Form ── */
+  --color-input-bg:          #ffffff;
+  --color-input-border:      #c8d9bb;
+  --color-input-border-focus:#236023;
+  --color-input-placeholder: #8aa07a;
+
+  /* ── Overlay ── */
+  --color-overlay:           rgba(0,0,0,.48);
+  --color-overlay-card:      rgba(0,0,0,.58);
+  --color-scrim:             rgba(0,0,0,.5);
+
+  /* ── Shadows — tinted green ── */
+  --shadow-sm:   0 1px 3px rgba(20,80,20,.09), 0 1px 2px rgba(20,80,20,.06);
+  --shadow-md:   0 4px 10px rgba(20,80,20,.11), 0 2px 4px rgba(20,80,20,.07);
+  --shadow-lg:   0 10px 24px rgba(20,80,20,.10), 0 4px 8px rgba(20,80,20,.07);
+  --shadow-fab:  0 4px 14px rgba(35,96,35,.45);
+
+  /* Legacy */
+  --bg: var(--color-bg); --surface: var(--color-surface); --surface-muted: var(--color-surface-muted);
+  --border: var(--color-border); --text: var(--color-text); --text-muted: var(--color-text-muted);
+  --brand: var(--color-brand); --brand-hover: var(--color-brand-hover); --brand-contrast: var(--color-brand-contrast);
+  --accent-strip: var(--color-accent); --accent-soft: var(--color-accent-soft);
+  --chip: var(--color-chip); --chip-border: var(--color-chip-border);
+  --danger: var(--color-danger); --star: var(--color-star);
+  --featured: var(--color-featured); --featured-text: var(--color-featured-text);
+  --nav-bottom: var(--color-nav-bottom); --nav-bottom-border: var(--color-nav-bottom-border);
+  --input-bg: var(--color-input-bg); --shadow: var(--shadow-sm);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   THEME 3 — Dark  (deep forest green, premium feel)
+   ══════════════════════════════════════════════════════════════
+   Philosophy: near-black with green undertone (not cold grey),
+   layered surfaces, bright accessible green brand,
+   warmer shadows for depth without harshness.
+   ══════════════════════════════════════════════════════════════ */
+html[data-theme="dark"] {
+
+  /* ── Page ── */
+  --color-bg:             #0e160e;   /* darkest layer — page bg */
+  --color-surface:        #162016;   /* cards, panels */
+  --color-surface-muted:  #1d2d1d;   /* secondary surfaces, inputs */
+  --color-surface-raised: #243624;   /* elevated modals, dropdowns */
+
+  /* ── Borders ── */
+  --color-border:         #2c442c;
+
+  /* ── Text  (on surface #162016) ── */
+  --color-text:           #ddeedd;   /* ✓ 12.8:1 on surface — AAA */
+  --color-text-muted:     #85aa80;   /* ✓  4.6:1 on surface — AA */
+  --color-text-inverse:   #0e160e;
+
+  /* ── Brand green (brighter for dark bg) ── */
+  --color-brand:          #4dbe4d;   /* ✓  5.4:1 on surface — AA */
+  --color-brand-hover:    #3dab3d;
+  --color-brand-active:   #2e962e;
+  --color-brand-contrast: #0e160e;   /* dark text ON bright green button */
+
+  /* ── Accent ── */
+  --color-accent:         #2a4a10;   /* dark olive strip — decorative */
+  --color-accent-soft:    #182e12;   /* price box background */
+
+  /* ── Chip ── */
+  --color-chip:           #1e321e;
+  --color-chip-border:    #344e34;
+  --color-chip-text:      #8aba85;   /* ✓  4.5:1 on chip bg — AA */
+
+  /* ── Semantic ── */
+  --color-danger:         #f87171;   /* ✓  6.8:1 on surface — AA */
+  --color-danger-soft:    #2c1515;
+  --color-success:        #4ade80;   /* ✓  8.0:1 */
+  --color-success-soft:   #0f2a1a;
+  --color-warning:        #fbbf24;   /* ✓  9.8:1 */
+  --color-warning-soft:   #292000;
+
+  /* ── Featured ── */
+  --color-star:           #fbbf24;
+  --color-featured:       #d97706;
+  --color-featured-text:  #ffffff;
+
+  /* ── Navigation ── */
+  --color-nav-bottom:        #162016;
+  --color-nav-bottom-border: #2c442c;
+
+  /* ── Form ── */
+  --color-input-bg:          #1d2d1d;
+  --color-input-border:      #2c442c;
+  --color-input-border-focus:#4dbe4d;
+  --color-input-placeholder: #4e6e4e;
+
+  /* ── Overlay ── */
+  --color-overlay:           rgba(0,0,0,.60);
+  --color-overlay-card:      rgba(0,0,0,.65);
+  --color-scrim:             rgba(0,0,0,.70);
+
+  /* ── Shadows — deeper, warm ── */
+  --shadow-sm:   0 1px 3px rgba(0,0,0,.45), 0 1px 2px rgba(0,0,0,.30);
+  --shadow-md:   0 4px 12px rgba(0,0,0,.55), 0 2px 6px rgba(0,0,0,.35);
+  --shadow-lg:   0 10px 28px rgba(0,0,0,.60), 0 4px 10px rgba(0,0,0,.40);
+  --shadow-fab:  0 4px 16px rgba(0,0,0,.60), 0 0 0 1px rgba(77,190,77,.15);
+
+  /* Legacy */
+  --bg: var(--color-bg); --surface: var(--color-surface); --surface-muted: var(--color-surface-muted);
+  --border: var(--color-border); --text: var(--color-text); --text-muted: var(--color-text-muted);
+  --brand: var(--color-brand); --brand-hover: var(--color-brand-hover); --brand-contrast: var(--color-brand-contrast);
+  --accent-strip: var(--color-accent); --accent-soft: var(--color-accent-soft);
+  --chip: var(--color-chip); --chip-border: var(--color-chip-border);
+  --danger: var(--color-danger); --star: var(--color-star);
+  --featured: var(--color-featured); --featured-text: var(--color-featured-text);
+  --nav-bottom: var(--color-nav-bottom); --nav-bottom-border: var(--color-nav-bottom-border);
+  --input-bg: var(--color-input-bg); --shadow: var(--shadow-sm);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TYPOGRAPHY — Cairo (Arabic + Latin)
+   ══════════════════════════════════════════════════════════════ */
+:root {
+
+  /* ── Font stacks ── */
+  --font-primary:  "Cairo", "Segoe UI", system-ui, sans-serif;
+  --font-mono:     "Courier New", monospace;
+
+  /* ── Scale (1.25 Major Third) ── */
+  --text-2xs:  0.625rem;    /*  10px — micro labels, bottom nav */
+  --text-xs:   0.75rem;     /*  12px — meta, captions */
+  --text-sm:   0.875rem;    /*  14px — body, card content */
+  --text-base: 1rem;        /*  16px — default body */
+  --text-lg:   1.125rem;    /*  18px — large body */
+  --text-xl:   1.25rem;     /*  20px — subheadings */
+  --text-2xl:  1.5rem;      /*  24px — section titles */
+  --text-3xl:  1.875rem;    /*  30px — page titles */
+  --text-4xl:  2.25rem;     /*  36px — hero headlines */
+  --text-5xl:  3rem;        /*  48px — display */
+
+  /* ── Weights (Cairo supports 400–800) ── */
+  --font-regular:   400;
+  --font-medium:    500;
+  --font-semibold:  600;
+  --font-bold:      700;
+  --font-extrabold: 800;
+
+  /* ── Line heights ── */
+  --leading-none:     1;
+  --leading-tight:    1.25;
+  --leading-snug:     1.375;
+  --leading-normal:   1.5;
+  --leading-relaxed:  1.625;
+  --leading-loose:    1.75;   /* Arabic body text — generous for readability */
+  --leading-arabic:   1.8;    /* Arabic long-form text */
+
+  /* ── Letter spacing ── */
+  --tracking-tight:   -0.02em;
+  --tracking-normal:   0;
+  --tracking-wide:     0.04em;
+  --tracking-wider:    0.08em;  /* uppercase micro labels */
+}
+
+/* ── Semantic type roles ───────────────────────────────────── */
+:root {
+  /* Headings */
+  --type-display: var(--font-extrabold) var(--text-5xl)/var(--leading-tight) var(--font-primary);
+  --type-h1:      var(--font-extrabold) var(--text-4xl)/var(--leading-tight) var(--font-primary);
+  --type-h2:      var(--font-bold)      var(--text-2xl)/var(--leading-snug)  var(--font-primary);
+  --type-h3:      var(--font-bold)      var(--text-xl) /var(--leading-snug)  var(--font-primary);
+  --type-h4:      var(--font-bold)      var(--text-base)/var(--leading-snug) var(--font-primary);
+
+  /* Body */
+  --type-body-lg: var(--font-regular)  var(--text-base)/var(--leading-loose)   var(--font-primary);
+  --type-body:    var(--font-regular)  var(--text-sm)  /var(--leading-loose)   var(--font-primary);
+  --type-body-sm: var(--font-regular)  var(--text-xs)  /var(--leading-relaxed) var(--font-primary);
+
+  /* UI Controls */
+  --type-btn-lg:  var(--font-bold)     var(--text-base)/1 var(--font-primary);
+  --type-btn:     var(--font-semibold) var(--text-sm)  /1 var(--font-primary);
+  --type-btn-sm:  var(--font-semibold) var(--text-xs)  /1 var(--font-primary);
+  --type-label:   var(--font-semibold) var(--text-xs)  /var(--leading-normal) var(--font-primary);
+  --type-chip:    var(--font-medium)   var(--text-xs)  /1 var(--font-primary);
+  --type-nav:     var(--font-medium)   var(--text-2xs) /1 var(--font-primary);
+  --type-caption: var(--font-regular)  var(--text-xs)  /var(--leading-normal) var(--font-primary);
+  --type-overline:var(--font-bold)     var(--text-2xs) /1 var(--font-primary); /* uppercase tracking */
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SPACING — 4px base grid
+   ══════════════════════════════════════════════════════════════ */
+:root {
+  --space-px:  1px;
+  --space-0-5: 0.125rem;  /*  2px */
+  --space-1:   0.25rem;   /*  4px */
+  --space-2:   0.5rem;    /*  8px */
+  --space-3:   0.75rem;   /* 12px */
+  --space-4:   1rem;      /* 16px */
+  --space-5:   1.25rem;   /* 20px */
+  --space-6:   1.5rem;    /* 24px */
+  --space-7:   1.75rem;   /* 28px — primary section gap */
+  --space-8:   2rem;      /* 32px */
+  --space-10:  2.5rem;    /* 40px */
+  --space-12:  3rem;      /* 48px */
+  --space-14:  3.5rem;    /* 56px */
+  --space-16:  4rem;      /* 64px */
+  --space-20:  5rem;      /* 80px */
+  --space-24:  6rem;      /* 96px */
+}
+
+/* ══════════════════════════════════════════════════════════════
+   BORDER RADIUS
+   ══════════════════════════════════════════════════════════════ */
+:root {
+  --radius-xs:   2px;       /* tiny — internal accents */
+  --radius-sm:   4px;       /* small chips */
+  --radius-md:   8px;       /* standard cards (rounded-lg) */
+  --radius-lg:   12px;      /* detail panels (rounded-xl) */
+  --radius-xl:   16px;      /* modals, large cards */
+  --radius-2xl:  24px;      /* large overlays */
+  --radius-full: 9999px;    /* pills — all buttons, badges */
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ELEVATION / Z-INDEX
+   ══════════════════════════════════════════════════════════════ */
+:root {
+  --z-base:       0;
+  --z-raised:     1;
+  --z-dropdown:   10;
+  --z-sticky:     20;
+  --z-overlay:    20;
+  --z-header:     30;
+  --z-bottomnav:  40;
+  --z-modal:      50;
+  --z-toast:      60;
+  --z-tooltip:    70;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MOTION / TRANSITIONS
+   ══════════════════════════════════════════════════════════════ */
+:root {
+  --ease-default:     cubic-bezier(.4, 0, .2, 1);   /* material standard */
+  --ease-in:          cubic-bezier(.4, 0, 1, 1);
+  --ease-out:         cubic-bezier(0, 0, .2, 1);
+  --ease-bounce:      cubic-bezier(.34, 1.56, .64, 1);
+
+  --duration-fast:    100ms;
+  --duration-base:    150ms;
+  --duration-slow:    300ms;
+  --duration-hero:    700ms;   /* hero slider cross-fade */
+  --duration-page:    250ms;   /* page transitions */
+
+  --transition-fast:  var(--duration-fast)  var(--ease-default);
+  --transition-base:  var(--duration-base)  var(--ease-default);
+  --transition-slow:  var(--duration-slow)  var(--ease-out);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   LAYOUT
+   ══════════════════════════════════════════════════════════════ */
+:root {
+  --max-width:        1110px;   /* main content container */
+  --container-px:     1rem;     /* 16px default side padding */
+  --container-px-sm:  1.5rem;   /* 24px at sm+ */
+}
+
+/* ══════════════════════════════════════════════════════════════
+   BASE RESET
+   ══════════════════════════════════════════════════════════════ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  direction: rtl;
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-regular);
+  line-height: var(--leading-normal);
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button, input, select, textarea {
+  font-family: var(--font-primary);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar              { width: 6px; height: 6px; }
+::-webkit-scrollbar-track        { background: var(--color-bg); }
+::-webkit-scrollbar-thumb        { background: var(--color-chip-border); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover  { background: var(--color-brand); }

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="classic">
+<head><meta charset="UTF-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+body { margin: 0; padding: 16px; background: var(--color-bg); font-family: var(--font-arabic); color: var(--color-text); }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.label { font-size: 10px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .06em; width: 100%; margin-bottom: 4px; }
+.chip { border-radius: 9999px; padding: 4px 14px; font-size: 12px; font-family: var(--font-arabic); }
+.chip-cat { background: var(--color-chip); border: 1px solid var(--color-chip-border); color: var(--color-text-muted); }
+.chip-active { background: var(--color-accent-soft); border: 1px solid var(--color-brand); color: var(--color-brand); font-weight: 600; }
+.chip-clear { background: var(--color-brand); color: var(--color-brand-contrast); font-weight: 600; }
+.badge-featured { background: var(--color-featured); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 9999px; }
+.badge-new { background: var(--color-accent-soft); color: var(--color-brand); border: 1px solid var(--color-chip-border); font-size: 11px; padding: 3px 10px; border-radius: 9999px; }
+.badge-used { background: var(--color-surface-muted); color: var(--color-text-muted); border: 1px solid var(--color-border); font-size: 11px; padding: 3px 10px; border-radius: 9999px; }
+.filter-chip { border-radius: 9999px; padding: 4px 12px; font-size: 11px; font-family: var(--font-arabic); cursor: pointer; }
+</style></head>
+<body>
+<div class="row">
+  <div class="label">Category Chips</div>
+  <span class="chip chip-cat">سيارات</span>
+  <span class="chip chip-cat">عقارات</span>
+  <span class="chip chip-active">موبايلات</span>
+  <span class="chip chip-cat">أثاث</span>
+  <span class="chip chip-cat">وظائف</span>
+  <span class="chip chip-cat">مستلزمات الأطفال</span>
+</div>
+<div class="row">
+  <div class="label">Listing Badges</div>
+  <span class="badge-featured">مميز ★</span>
+  <span class="badge-new">جديد</span>
+  <span class="badge-used">مستعمل</span>
+</div>
+<div class="row">
+  <div class="label">Active Filter Chips (with dismiss)</div>
+  <span class="filter-chip" style="background:#ecfdf5;border:1px solid #6ee7b7;color:#065f46">🏷️ التصنيف: سيارات ×</span>
+  <span class="filter-chip" style="background:#eff6ff;border:1px solid #93c5fd;color:#1e40af">📍 المدينة: عمّان ×</span>
+  <span class="filter-chip" style="background:#f5f3ff;border:1px solid #c4b5fd;color:#5b21b6">🔎 بحث: تويوتا ×</span>
+  <span class="chip chip-clear">مسح الفلاتر</span>
+</div>
+<div class="row">
+  <div class="label">Category Icon Chips</div>
+  <span class="chip chip-cat">🚗 سيارات</span>
+  <span class="chip chip-cat">🏠 عقارات</span>
+  <span class="chip chip-cat">📱 موبايلات</span>
+  <span class="chip chip-cat">💼 وظائف</span>
+  <span class="chip chip-cat">🛋️ أثاث</span>
+</div>
+</body></html>

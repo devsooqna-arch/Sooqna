@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head><meta charset="UTF-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+body { margin: 0; padding: 16px; background: var(--color-bg); font-family: var(--font-primary); color: var(--color-text); }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+.swatch { border-radius: 8px; overflow: hidden; }
+.sw-color { height: 40px; }
+.sw-info { padding: 6px 8px; background: var(--color-surface); border: 1px solid var(--color-border); border-top: none; border-radius: 0 0 8px 8px; }
+.sw-name { font-size: 10px; font-weight: 700; color: var(--color-text); }
+.sw-val  { font-size: 9px; color: var(--color-text-muted); margin-top: 1px; }
+.st { font-size: 9px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .08em; margin: 12px 0 6px; }
+.preview-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.btn-p { background: var(--color-brand); color: var(--color-brand-contrast); border: none; border-radius: 9999px; padding: 8px 20px; font-size: 13px; font-weight: 700; font-family: var(--font-primary); cursor: default; }
+.btn-g { background: var(--color-chip); border: 1px solid var(--color-chip-border); color: var(--color-chip-text); border-radius: 9999px; padding: 8px 20px; font-size: 13px; font-weight: 600; font-family: var(--font-primary); cursor: default; }
+.chip { background: var(--color-chip); border: 1px solid var(--color-chip-border); color: var(--color-chip-text); font-size: 11px; padding: 3px 12px; border-radius: 9999px; display: inline-block; }
+.card-demo { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 10px; padding: 12px 14px; box-shadow: var(--shadow-md); font-size: 13px; min-width: 180px; }
+.price-box { background: var(--color-accent-soft); border-radius: 6px; padding: 8px 12px; margin-top: 8px; }
+</style></head>
+<body>
+
+<div class="st">Surfaces</div>
+<div class="grid">
+  <div class="swatch">
+    <div class="sw-color" style="background:#eef4e8"></div>
+    <div class="sw-info"><div class="sw-name">--bg</div><div class="sw-val">#eef4e8 · Page</div></div>
+  </div>
+  <div class="swatch">
+    <div class="sw-color" style="background:#ffffff;border:1px solid #c8d9bb"></div>
+    <div class="sw-info"><div class="sw-name">--surface</div><div class="sw-val">#ffffff · Cards</div></div>
+  </div>
+  <div class="swatch">
+    <div class="sw-color" style="background:#f3f8ee"></div>
+    <div class="sw-info"><div class="sw-name">--surface-muted</div><div class="sw-val">#f3f8ee</div></div>
+  </div>
+  <div class="swatch">
+    <div class="sw-color" style="background:#e6f2d8"></div>
+    <div class="sw-info"><div class="sw-name">--chip</div><div class="sw-val">#e6f2d8</div></div>
+  </div>
+</div>
+
+<div class="st">Brand — improved contrast vs Classic</div>
+<div class="grid">
+  <div class="swatch">
+    <div class="sw-color" style="background:#236023"></div>
+    <div class="sw-info"><div class="sw-name">--brand</div><div class="sw-val">#236023 · 7.6:1 ✓</div></div>
+  </div>
+  <div class="swatch">
+    <div class="sw-color" style="background:#1b4f1b"></div>
+    <div class="sw-info"><div class="sw-name">--brand-hover</div><div class="sw-val">#1b4f1b · 10.1:1</div></div>
+  </div>
+  <div class="swatch">
+    <div class="sw-color" style="background:#78c020"></div>
+    <div class="sw-info"><div class="sw-name">--accent</div><div class="sw-val">#78c020 · Strip</div></div>
+  </div>
+  <div class="swatch">
+    <div class="sw-color" style="background:#dff0c4"></div>
+    <div class="sw-info"><div class="sw-name">--accent-soft</div><div class="sw-val">#dff0c4</div></div>
+  </div>
+</div>
+
+<div class="st">Live components in Light Mode</div>
+<div class="preview-row">
+  <button class="btn-p">+ أعلن</button>
+  <button class="btn-g">تصفح الكل</button>
+  <span class="chip">سيارات</span>
+  <span class="chip">عقارات</span>
+</div>
+<div style="margin-top:12px">
+  <div class="card-demo">
+    <div style="font-size:13px;font-weight:700">شقة للإيجار — الرابية عمّان</div>
+    <div style="font-size:11px;color:var(--color-text-muted);margin-top:4px">عمّان · منذ ٣ ساعات</div>
+    <div class="price-box">
+      <div style="font-size:10px;color:var(--color-text-muted)">السعر</div>
+      <div style="font-size:18px;font-weight:800;color:var(--color-brand)">١٢٠ JOD / شهر</div>
+    </div>
+  </div>
+</div>
+
+</body></html>

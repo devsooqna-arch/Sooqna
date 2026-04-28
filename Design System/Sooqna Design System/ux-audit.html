@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>Sooqna — UX/UI Audit & Creative Roadmap</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --brand: #2d6a2d;
+    --accent: #a8d520;
+    --accent-soft: #edf7cc;
+    --bg: #f4f6f1;
+    --surface: #ffffff;
+    --border: #dde3d8;
+    --text: #1a1f16;
+    --muted: #6b7563;
+    --danger: #dc2626;
+    --warn: #d97706;
+    --good: #16a34a;
+    --info: #2563eb;
+  }
+  body { font-family: 'Noto Sans Arabic', 'Tahoma', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* NAV */
+  .top-nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+  .top-nav .logo { font-size: 20px; font-weight: 800; color: var(--brand); }
+  .top-nav .tabs { display: flex; gap: 6px; }
+  .tab-btn { border: none; background: transparent; padding: 7px 16px; border-radius: 9999px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--muted); transition: all .15s; }
+  .tab-btn.active { background: var(--brand); color: #fff; }
+
+  /* LAYOUT */
+  .page { display: none; padding: 32px; max-width: 960px; margin: 0 auto; }
+  .page.visible { display: block; }
+
+  /* HERO SCORE */
+  .score-hero { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 32px; margin-bottom: 28px; display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; }
+  .score-ring { width: 120px; height: 120px; border-radius: 9999px; border: 6px solid var(--accent); display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
+  .score-num { font-size: 40px; font-weight: 800; color: var(--brand); line-height: 1; }
+  .score-denom { font-size: 13px; color: var(--muted); font-weight: 500; }
+  .score-meta h2 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+  .score-meta p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  /* DIMENSION SCORES */
+  .dim-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
+  .dim-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .dim-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+  .dim-bar-wrap { height: 8px; background: var(--bg); border-radius: 9999px; overflow: hidden; margin-bottom: 6px; }
+  .dim-bar { height: 100%; border-radius: 9999px; }
+  .dim-score { font-size: 13px; font-weight: 700; }
+
+  /* SECTIONS */
+  .section-title { font-size: 18px; font-weight: 800; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .section-title .icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+
+  /* ISSUE CARDS */
+  .issues { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+  .issue { border-radius: 10px; padding: 14px 16px; border: 1px solid; display: grid; grid-template-columns: 24px 1fr; gap: 10px; align-items: start; }
+  .issue.crit { background: #fef2f2; border-color: #fca5a5; }
+  .issue.warn { background: #fffbeb; border-color: #fcd34d; }
+  .issue.info { background: #eff6ff; border-color: #93c5fd; }
+  .issue-icon { font-size: 14px; margin-top: 1px; }
+  .issue-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+  .issue-body { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .issue-tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 8px; border-radius: 9999px; margin-top: 5px; }
+  .tag-crit { background: #fee2e2; color: var(--danger); }
+  .tag-warn { background: #fef3c7; color: var(--warn); }
+  .tag-info { background: #dbeafe; color: var(--info); }
+
+  /* CREATIVE CARDS */
+  .ideas { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+  .idea-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .idea-card .idea-icon { font-size: 26px; margin-bottom: 8px; }
+  .idea-card h4 { font-size: 14px; font-weight: 800; margin-bottom: 5px; color: var(--text); }
+  .idea-card p { font-size: 12px; color: var(--muted); line-height: 1.65; }
+  .idea-tag { display: inline-block; margin-top: 8px; font-size: 10px; font-weight: 700; padding: 2px 10px; border-radius: 9999px; background: var(--accent-soft); color: var(--brand); }
+
+  /* PRIORITY TABLE */
+  .prio-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 28px; }
+  .prio-table th { background: var(--brand); color: #fff; padding: 10px 14px; font-size: 12px; font-weight: 700; text-align: right; }
+  .prio-table td { padding: 10px 14px; font-size: 12px; border-bottom: 1px solid var(--border); }
+  .prio-table tr:last-child td { border-bottom: none; }
+  .prio-table tr:hover td { background: var(--bg); }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 9999px; font-size: 10px; font-weight: 700; }
+  .pill-high { background: #fee2e2; color: #dc2626; }
+  .pill-med { background: #fef3c7; color: #b45309; }
+  .pill-low { background: #dcfce7; color: #166534; }
+  .pill-sprint { background: #ede9fe; color: #6d28d9; }
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="logo">سوقنا — تقييم UX/UI</div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showPage('audit')">التقييم</button>
+    <button class="tab-btn" onclick="showPage('issues')">المشاكل</button>
+    <button class="tab-btn" onclick="showPage('ideas')">الاقتراحات الإبداعية</button>
+    <button class="tab-btn" onclick="showPage('roadmap')">خارطة الطريق</button>
+  </div>
+</nav>
+
+<!-- PAGE 1: AUDIT -->
+<div class="page visible" id="page-audit">
+
+  <div class="score-hero">
+    <div class="score-ring">
+      <span class="score-num">6.8</span>
+      <span class="score-denom">من ١٠</span>
+    </div>
+    <div class="score-meta">
+      <h2>تقييم UX/UI الكلي — جيد مع فرص واضحة</h2>
+      <p>
+        سوقنا بنيته التقنية قوية وكوده نظيف، والتصميم وظيفي ومفهوم. لكن التصميم البصري ما زال في مرحلة "يشتغل" — ما وصل لمرحلة "يبيع". المنافسون المباشرون (OLX، OpenSooq) يملكون هوية بصرية أقوى وتجربة موبايل أكثر انسيابية. الأساس موجود — يحتاج صقل.
+      </p>
+    </div>
+  </div>
+
+  <div class="dim-grid">
+    <div class="dim-card">
+      <div class="dim-label">البنية المعلوماتية</div>
+      <div class="dim-bar-wrap"><div class="dim-bar" style="width:80%;background:#2d6a2d"></div></div>
+      <div class="dim-score" style="color:#2d6a2d">٨ / ١٠</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">التنقل واضح، التصنيفات منطقية، التدفق سليم</div>
+    </div>
+    <div class="dim-card">
+      <div class="dim-label">الهوية البصرية</div>
+      <div class="dim-bar-wrap"><div class="dim-bar" style="width:55%;background:#d97706"></div></div>
+      <div class="dim-score" style="color:#d97706">٥.٥ / ١٠</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">الشعار قوي لكن اللوجو لا يتناغم مع الـ UI</div>
+    </div>
+    <div class="dim-card">
+      <div class="dim-label">تجربة الموبايل</div>
+      <div class="dim-bar-wrap"><div class="dim-bar" style="width:65%;background:#2563eb"></div></div>
+      <div class="dim-score" style="color:#2563eb">٦.٥ / ١٠</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Bottom nav ذكي، لكن الـ spacing ضيق على الشاشات الصغيرة</div>
+    </div>
+    <div class="dim-card">
+      <div class="dim-label">Typography</div>
+      <div class="dim-bar-wrap"><div class="dim-bar" style="width:50%;background:#dc2626"></div></div>
+      <div class="dim-score" style="color:#dc2626">٥ / ١٠</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Tahoma قديمة ومسطحة — تحتاج webfont عربي حديث</div>
+    </div>
+    <div class="dim-card">
+      <div class="dim-label">الـ Conversion</div>
+      <div class="dim-bar-wrap"><div class="dim-bar" style="width:60%;background:#2563eb"></div></div>
+      <div class="dim-score" style="color:#2563eb">٦ / ١٠</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">CTAs واضحة لكن ما فيه urgency أو social proof</div>
+    </div>
+    <div class="dim-card">
+      <div class="dim-label">الـ Empty States</div>
+      <div class="dim-bar-wrap"><div class="dim-bar" style="width:30%;background:#dc2626"></div></div>
+      <div class="dim-score" style="color:#dc2626">٣ / ١٠</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">الموقع الحي فاضي — ما فيه onboarding أو seeded content</div>
+    </div>
+  </div>
+
+  <div class="section-title"><div class="icon" style="background:#dcfce7">✅</div> ما يشتغل كويس</div>
+  <div class="issues">
+    <div class="issue info">
+      <div class="issue-icon">👍</div>
+      <div><div class="issue-title">نظام الألوان (CSS vars + 3 themes)</div><div class="issue-body">بناء التوكنز نظيف جداً — كلاسيكي / فاتح / داكن يتبدلون بسلاسة. هذا أساس ممتاز للتوسع.</div></div>
+    </div>
+    <div class="issue info">
+      <div class="issue-icon">👍</div>
+      <div><div class="issue-title">Bottom Nav الموبايل — فكرة الـ floating "+" زكية</div><div class="issue-body">زر الإضافة المرفوع فوق الـ nav بيجذب النظر بشكل صح ويشجع على النشر — pattern ناجح.</div></div>
+    </div>
+    <div class="issue info">
+      <div class="issue-icon">👍</div>
+      <div><div class="issue-title">بنية الكود — modules واضحة وقابلة للتوسع</div><div class="issue-body">فصل الـ categories، listings، messages، auth في modules منفصلة يسهل الإضافة مستقبلاً.</div></div>
+    </div>
+    <div class="issue info">
+      <div class="issue-icon">👍</div>
+      <div><div class="issue-title">الـ Accent Strip الليموني تحت الهيدر</div><div class="issue-body">ذكي بصرياً — يعطي تمييز بين "navigation" و"action zone" ويلفت النظر لزر الإعلان والبحث.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2: ISSUES -->
+<div class="page" id="page-issues">
+
+  <div class="section-title"><div class="icon" style="background:#fee2e2">🔴</div> مشاكل حرجة — يجب إصلاحها</div>
+  <div class="issues">
+    <div class="issue crit">
+      <div class="issue-icon">🔴</div>
+      <div>
+        <div class="issue-title">الموقع فاضي تماماً — لا إعلانات، لا تصنيفات</div>
+        <div class="issue-body">أول مستخدم يفتح الموقع يشوف صفحة بيضاء. ما فيه onboarding، ما فيه sample listings، ما فيه رسالة تشرح له شو هاد الموقع. هذا أكبر killer للـ conversion. حتى لو البيانات الحقيقية فاضية، لازم يكون فيه content طوارئ (seeded categories على الأقل).</div>
+        <span class="issue-tag tag-crit">حرجي — P0</span>
+      </div>
+    </div>
+    <div class="issue crit">
+      <div class="issue-icon">🔴</div>
+      <div>
+        <div class="issue-title">الخط Tahoma — قديم وضعيف بصرياً</div>
+        <div class="issue-body">Tahoma هو خط الـ 2005 للعربي. المنافسون يستخدمون Noto Sans Arabic أو IBM Plex Arabic أو Cairo. الخط يؤثر على الـ first impression بشكل كبير — المستخدم يحس إنه في موقع قديم.</div>
+        <span class="issue-tag tag-crit">حرجي — يؤثر على الـ Perception</span>
+      </div>
+    </div>
+    <div class="issue crit">
+      <div class="issue-icon">🔴</div>
+      <div>
+        <div class="issue-title">الشعار (Logo) ما يتناسب مع الـ UI</div>
+        <div class="issue-body">اللوجو ملوّن كثير وكارتوني — بينما الـ UI هادئ ونظيف. هاد التناقض يكسر الـ brand cohesion. اللوجو يحتاج نسخة مبسطة (single color / monochrome) للاستخدام داخل الـ UI.</div>
+        <span class="issue-tag tag-crit">هوية بصرية — P1</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title"><div class="icon" style="background:#fef3c7">🟡</div> مشاكل متوسطة — تضعف التجربة</div>
+  <div class="issues">
+    <div class="issue warn">
+      <div class="issue-icon">🟡</div>
+      <div>
+        <div class="issue-title">Listing Card — صورة الـ placeholder ضعيفة جداً</div>
+        <div class="issue-body">SVG أيقونة صغيرة على خلفية فاتحة تبدو فاضية وغير جذابة. لازم يكون فيه gradient placeholder أو skeleton بألوان أجمل، مع إمكانية إضافة category icon كبير كـ fallback.</div>
+        <span class="issue-tag tag-warn">UX — P2</span>
+      </div>
+    </div>
+    <div class="issue warn">
+      <div class="issue-icon">🟡</div>
+      <div>
+        <div class="issue-title">Hero Banner — نص على صورة ما فيه تباين كافٍ</div>
+        <div class="issue-body">الـ overlay الحالي 45% opacity قد يكون خفيفاً مع بعض الصور الفاتحة. يحتاج اختبار accessibility (WCAG AA) على كلا الصورتين. اقتراح: رفع الـ overlay لـ 55% أو إضافة text-shadow أقوى.</div>
+        <span class="issue-tag tag-warn">Accessibility — P2</span>
+      </div>
+    </div>
+    <div class="issue warn">
+      <div class="issue-icon">🟡</div>
+      <div>
+        <div class="issue-title">صفحة الـ Listings — فلاتر ضعيفة على الموبايل</div>
+        <div class="issue-body">شريط الفلاتر (التصنيف + المدينة + بحث) يتضغط على الموبايل. يحتاج bottom sheet أو drawer للفلاتر على الشاشات الصغيرة بدل ما يتكدسوا.</div>
+        <span class="issue-tag tag-warn">Mobile UX — P2</span>
+      </div>
+    </div>
+    <div class="issue warn">
+      <div class="issue-icon">🟡</div>
+      <div>
+        <div class="issue-title">ما فيه حالة "Success" بعد نشر الإعلان</div>
+        <div class="issue-body">بعد submit listing، المستخدم يحتاج confirmation واضحة مع رابط للإعلان الجديد وشارة "تم النشر". حالياً التجربة ما واضحة.</div>
+        <span class="issue-tag tag-warn">Feedback Loop — P2</span>
+      </div>
+    </div>
+    <div class="issue warn">
+      <div class="issue-icon">🟡</div>
+      <div>
+        <div class="issue-title">Social Proof غائب تماماً</div>
+        <div class="issue-body">ما فيه عدد الإعلانات الكلي، ما فيه "X إعلان جديد اليوم"، ما فيه تقييمات بائعين. المستخدم الجديد ما يعرف حجم السوق.</div>
+        <span class="issue-tag tag-warn">Conversion — P2</span>
+      </div>
+    </div>
+    <div class="issue warn">
+      <div class="issue-icon">🟡</div>
+      <div>
+        <div class="issue-title">أيقونات السوشيال ميديا في الـ Footer — مكسورة</div>
+        <div class="issue-body">الأيقونات حرفية (f, in, ▶, ◎) بدل SVG icons حقيقية. يبدو unprofessional.</div>
+        <span class="issue-tag tag-warn">UI Polish — P3</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title"><div class="icon" style="background:#dbeafe">🔵</div> ملاحظات بسيطة</div>
+  <div class="issues">
+    <div class="issue info">
+      <div class="issue-icon">🔵</div>
+      <div><div class="issue-title">الـ Theme Switcher مخفي — المستخدم ما يلاقيه بسهولة</div><div class="issue-body">زر تغيير الثيم مدفون في الهيدر بدون label واضح. يمكن نقله لأيقونة ☀️/🌙 واضحة.</div><span class="issue-tag tag-info">Discoverability</span></div>
+    </div>
+    <div class="issue info">
+      <div class="issue-icon">🔵</div>
+      <div><div class="issue-title">صفحة الـ Listing Detail — السايدبار ثقيل على الموبايل</div><div class="issue-body">الـ seller card وأزرار الـ action يجيون تحت الصور على الموبايل، وهذا صح. لكن زر "راسل البائع" يجب أن يكون sticky في أسفل الشاشة على الموبايل (CTA دائماً مرئي).</div><span class="issue-tag tag-info">Mobile CTA</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 3: CREATIVE IDEAS -->
+<div class="page" id="page-ideas">
+
+  <p style="font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.7">
+    هاي اقتراحات تخلي سوقنا يتمايز عن OLX وOpenSooq — مش بس ينافسهم. كل فكرة ممكن تتنفذ مستقلة.
+  </p>
+
+  <div class="section-title"><div class="icon" style="background:#dcfce7">🚀</div> تطوير الهوية البصرية</div>
+  <div class="ideas">
+    <div class="idea-card">
+      <div class="idea-icon">✍️</div>
+      <h4>ترقية الـ Typography — Cairo أو IBM Plex Arabic</h4>
+      <p>استبدال Tahoma بـ Cairo (Google Fonts — مجاني) أو IBM Plex Arabic. الفرق بصري فوري ويعطي إحساس بالحداثة. Cairo بخاصة ملائم جداً للـ marketplace لأنه واضح بالأحجام الصغيرة.</p>
+      <span class="idea-tag">سريع التنفيذ ٢ ساعة</span>
+    </div>
+    <div class="idea-card">
+      <div class="idea-icon">🎨</div>
+      <h4>نسخة Monochrome من اللوجو</h4>
+      <p>إنشاء نسخة بيضاء وأخرى بلون الـ brand من الشعار للاستخدام داخل الـ UI (header على الخلفيات الداكنة، footer، التطبيق). اللوجو الملوّن يبقى للـ marketing materials.</p>
+      <span class="idea-tag">Brand Work</span>
+    </div>
+    <div class="idea-card">
+      <div class="idea-icon">🌄</div>
+      <h4>Hero مخصص لكل تصنيف</h4>
+      <p>بدل hero عام، لما المستخدم يفلتر على "سيارات" يتغير الـ hero لصورة سيارات. على "عقارات" — صورة عقار أردني. يعطي إحساس بالشخصية ويرفع الـ engagement.</p>
+      <span class="idea-tag">UX Enhancement</span>
+    </div>
+    <div class="idea-card">
+      <div class="idea-icon">🌙</div>
+      <h4>Dark Mode أول — تطوير الثيم الداكن</h4>
+      <p>الثيم الداكن الحالي functional لكن مش premium. إضافة subtle grain texture أو توهج خضري خفيف على الـ cards يخلي الـ dark mode تجربة مختلفة كلياً وليس نفس الـ UI بألوان داكنة.</p>
+      <span class="idea-tag">Visual Polish</span>
+    </div>
+  </div>
+
+  <div class="section-title"><div class="icon" style="background:#ede9fe">✨</div> ميزات UX مميزة</div>
+  <div class="ideas">
+    <div class="idea-card">
+      <div class="idea-icon">📍</div>
+      <h4>خريطة الإعلانات — Map View</h4>
+      <p>زر toggle بين Grid View وMap View في صفحة الإعلانات. على الخريطة تظهر pins للإعلانات في المدن الأردنية. تجربة ما يوفرها OpenSooq بشكل جيد وسوقنا يقدر يسبقهم.</p>
+      <span class="idea-tag">Feature Differentiator</span>
+    </div>
+    <div class="idea-card">
+      <div class="idea-icon">🔔</div>
+      <h4>تنبيهات البحث — "أخبرني لما يجي"</h4>
+      <p>لما المستخدم يبحث عن "كامري عمّان" ويضغط على "أنبهني"، يوصله إشعار لما يُضاف إعلان مشابه. يحوّل الزوار المرة الواحدة لـ retention.</p>
+      <span class="idea-tag">Retention Feature</span>
+    </div>
+    <div class="idea-card">
+      <div class="idea-icon">⚡</div>
+      <h4>Quick Post — نشر في ٣ خطوات فقط</h4>
+      <p>نموذج مبسط للنشر: (١) صورة + (٢) عنوان + سعر + (٣) رقم التواصل. بدون categories أو تفاصيل. للمستخدمين اللي يبوا ينشروا بسرعة من الموبايل. يزيد عدد الإعلانات.</p>
+      <span class="idea-tag">Growth Feature</span>
+    </div>
+    <div class="idea-card">
+      <div class="idea-icon">🏅</div>
+      <h4>البائع الموثق — Verified Badge</h4>
+      <p>شارة خضراء للبائعين اللي وثّقوا هويتهم أو رقمهم. يرفع الـ trust ويشجع المشترين على التواصل. يمكن ربطه بباقة مدفوعة.</p>
+      <span class="idea-tag">Trust + Monetization</span>
+    </div>
+    <div class="idea-card">
+      <div class="idea-icon">📊</div>
+      <h4>إحصائيات الإعلان للبائع</h4>
+      <p>في صفحة "إعلاناتي": كم شخص شاف إعلانك هاليوم؟ كم واحد ضاف المفضلة؟ كم مكالمة؟ هالبيانات تزيد engagement وتشجع على الترقية للـ Featured.</p>
+      <span class="idea-tag">Engagement</span>
+    </div>
+    <div class="idea-card">
+      <div class="idea-icon">🔄</div>
+      <h4>مقارنة الإعلانات — Compare</h4>
+      <p>زر "أضف للمقارنة" في كل كارد. يتجمع ٢-٣ إعلانات في جدول مقارنة جنباً لجنب (سعر، موقع، حالة، تاريخ). مفيد خصوصاً للسيارات والعقارات.</p>
+      <span class="idea-tag">Power User Feature</span>
+    </div>
+  </div>
+
+  <div class="section-title"><div class="icon" style="background:#fef3c7">💡</div> تحسينات الـ Micro-UX</div>
+  <div class="ideas">
+    <div class="idea-card">
+      <div class="idea-icon">🎭</div>
+      <h4>Animated Empty States</h4>
+      <p>بدل رسالة نص فاضية، استخدام Lottie animation خفيفة لـ empty state — مثلاً شخص يبحث مع ظل الكلب. يخلي الـ app يبدو حي حتى لو ما فيه بيانات.</p>
+      <span class="idea-tag">Polish</span>
+    </div>
+    <div class="idea-card">
+      <div class="idea-icon">🃏</div>
+      <h4>Swipe للمفضلة على الموبايل</h4>
+      <p>Swipe يمين على الكارد = إضافة للمفضلة (مع heart animation). Swipe يسار = تخطي. نفس pattern تطبيقات المواعدة — مجرب ومحبوب.</p>
+      <span class="idea-tag">Mobile Delight</span>
+    </div>
+    <div class="idea-card">
+      <div class="idea-icon">🕐</div>
+      <h4>"نشر منذ X" بدل التاريخ</h4>
+      <p>استبدال "٢٠ أبريل ٢٠٢٦" بـ "منذ ٣ ساعات" أو "منذ يومين". يعطي urgency ويحفز المستخدم على التصرف قبل ما ياخذه شخص آخر.</p>
+      <span class="idea-tag">Conversion</span>
+    </div>
+    <div class="idea-card">
+      <div class="idea-icon">💬</div>
+      <h4>Sticky CTA على الموبايل في صفحة الإعلان</h4>
+      <p>زر "راسل البائع" يثبت في أسفل الشاشة على الموبايل أثناء التمرير. أي لحظة بالتمرير يقدر المستخدم يضغط — يرفع معدل الـ contact بشكل كبير.</p>
+      <span class="idea-tag">Mobile CTA — Quick Win</span>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 4: ROADMAP -->
+<div class="page" id="page-roadmap">
+
+  <p style="font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.7">
+    ترتيب أولويات بحسب الأثر والسرعة — Sprint 1 هو الأهم قبل أي إطلاق حقيقي.
+  </p>
+
+  <table class="prio-table">
+    <thead>
+      <tr>
+        <th>المهمة</th>
+        <th>الأثر</th>
+        <th>الجهد</th>
+        <th>الأولوية</th>
+        <th>Sprint</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Seed الـ categories في الـ DB</strong> — الموقع يبدو فاضي</td>
+        <td>🔴 عالي جداً</td>
+        <td>ساعة</td>
+        <td><span class="pill pill-high">P0</span></td>
+        <td><span class="pill pill-sprint">١</span></td>
+      </tr>
+      <tr>
+        <td><strong>ترقية الخط</strong> — Cairo أو IBM Plex Arabic</td>
+        <td>🔴 عالي</td>
+        <td>٢ ساعة</td>
+        <td><span class="pill pill-high">P0</span></td>
+        <td><span class="pill pill-sprint">١</span></td>
+      </tr>
+      <tr>
+        <td><strong>Sticky CTA</strong> "راسل البائع" على الموبايل</td>
+        <td>🔴 عالي</td>
+        <td>٣ ساعات</td>
+        <td><span class="pill pill-high">P1</span></td>
+        <td><span class="pill pill-sprint">١</span></td>
+      </tr>
+      <tr>
+        <td><strong>إصلاح أيقونات السوشيال</strong> في الـ Footer</td>
+        <td>🟡 متوسط</td>
+        <td>ساعة</td>
+        <td><span class="pill pill-high">P1</span></td>
+        <td><span class="pill pill-sprint">١</span></td>
+      </tr>
+      <tr>
+        <td><strong>نسخة Monochrome من اللوجو</strong></td>
+        <td>🔴 عالي</td>
+        <td>يوم (تصميم)</td>
+        <td><span class="pill pill-high">P1</span></td>
+        <td><span class="pill pill-sprint">١</span></td>
+      </tr>
+      <tr>
+        <td><strong>تحسين Listing Card placeholder</strong></td>
+        <td>🟡 متوسط</td>
+        <td>٢ ساعة</td>
+        <td><span class="pill pill-med">P2</span></td>
+        <td><span class="pill pill-sprint">٢</span></td>
+      </tr>
+      <tr>
+        <td><strong>"منذ X" بدل التاريخ</strong> في الكروت</td>
+        <td>🟡 متوسط</td>
+        <td>ساعة</td>
+        <td><span class="pill pill-med">P2</span></td>
+        <td><span class="pill pill-sprint">٢</span></td>
+      </tr>
+      <tr>
+        <td><strong>Success state</strong> بعد نشر الإعلان</td>
+        <td>🟡 متوسط</td>
+        <td>٣ ساعات</td>
+        <td><span class="pill pill-med">P2</span></td>
+        <td><span class="pill pill-sprint">٢</span></td>
+      </tr>
+      <tr>
+        <td><strong>Filters Drawer</strong> على الموبايل</td>
+        <td>🟡 متوسط</td>
+        <td>يوم</td>
+        <td><span class="pill pill-med">P2</span></td>
+        <td><span class="pill pill-sprint">٢</span></td>
+      </tr>
+      <tr>
+        <td><strong>Social Proof</strong> — عداد الإعلانات في الـ Hero</td>
+        <td>🟡 متوسط</td>
+        <td>ساعتان</td>
+        <td><span class="pill pill-med">P2</span></td>
+        <td><span class="pill pill-sprint">٢</span></td>
+      </tr>
+      <tr>
+        <td><strong>Verified Badge</strong> للبائعين</td>
+        <td>🟢 عالي (trust)</td>
+        <td>أسبوع</td>
+        <td><span class="pill pill-low">P3</span></td>
+        <td><span class="pill pill-sprint">٣</span></td>
+      </tr>
+      <tr>
+        <td><strong>تنبيهات البحث</strong></td>
+        <td>🟢 عالي (retention)</td>
+        <td>أسبوع</td>
+        <td><span class="pill pill-low">P3</span></td>
+        <td><span class="pill pill-sprint">٣</span></td>
+      </tr>
+      <tr>
+        <td><strong>Map View</strong> للإعلانات</td>
+        <td>🟢 تمايز</td>
+        <td>أسبوعان</td>
+        <td><span class="pill pill-low">P3</span></td>
+        <td><span class="pill pill-sprint">٤</span></td>
+      </tr>
+      <tr>
+        <td><strong>إحصائيات البائع</strong></td>
+        <td>🟢 engagement</td>
+        <td>أسبوع</td>
+        <td><span class="pill pill-low">P3</span></td>
+        <td><span class="pill pill-sprint">٤</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="background:var(--surface);border-radius:12px;border:1px solid var(--border);padding:20px;margin-top:8px">
+    <div style="font-size:14px;font-weight:800;margin-bottom:10px">🎯 الهدف الأساسي قبل الإطلاق الحقيقي</div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.75">
+      Sprint 1 ما يحتاج أكثر من أسبوع عمل. بعده الموقع جاهز يستقبل مستخدمين فعليين ويعطي انطباع أولي احترافي.
+      أهم خطوة واحدة: <strong style="color:var(--brand)">seed الـ categories + ٣-٥ إعلانات تجريبية</strong> — لأن موقع فارغ بيرفض المستخدم الجديد فوراً.
+    </p>
+  </div>
+</div>
+
+<script>
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('visible'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('visible');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

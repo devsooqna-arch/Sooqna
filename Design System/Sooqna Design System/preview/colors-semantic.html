@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="classic">
+<head><meta charset="UTF-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+body { margin: 0; padding: 16px; background: var(--color-bg); font-family: var(--font-arabic); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+.token { border-radius: 8px; overflow: hidden; border: 1px solid var(--color-border); }
+.token-color { height: 36px; }
+.token-info { padding: 6px 8px; background: var(--color-surface); }
+.token-name { font-size: 10px; font-weight: 700; color: var(--color-text); }
+.token-val { font-size: 9px; color: var(--color-text-muted); margin-top: 2px; }
+</style></head>
+<body>
+<div class="grid">
+  <div class="token"><div class="token-color" style="background:var(--color-bg)"></div><div class="token-info"><div class="token-name">--bg</div><div class="token-val">Page background</div></div></div>
+  <div class="token"><div class="token-color" style="background:var(--color-surface);border-bottom:1px solid var(--color-border)"></div><div class="token-info"><div class="token-name">--surface</div><div class="token-val">Cards, panels</div></div></div>
+  <div class="token"><div class="token-color" style="background:var(--color-surface-muted)"></div><div class="token-info"><div class="token-name">--surface-muted</div><div class="token-val">Secondary bg</div></div></div>
+  <div class="token"><div class="token-color" style="background:var(--color-border)"></div><div class="token-info"><div class="token-name">--border</div><div class="token-val">Dividers, card borders</div></div></div>
+  <div class="token"><div class="token-color" style="background:var(--color-text)"></div><div class="token-info"><div class="token-name">--text</div><div class="token-val">Primary text</div></div></div>
+  <div class="token"><div class="token-color" style="background:var(--color-text-muted)"></div><div class="token-info"><div class="token-name">--text-muted</div><div class="token-val">Secondary text</div></div></div>
+  <div class="token"><div class="token-color" style="background:var(--color-chip)"></div><div class="token-info"><div class="token-name">--chip</div><div class="token-val">Tags, chips bg</div></div></div>
+  <div class="token"><div class="token-color" style="background:var(--color-chip-border)"></div><div class="token-info"><div class="token-name">--chip-border</div><div class="token-val">Chip borders</div></div></div>
+  <div class="token"><div class="token-color" style="background:var(--color-input-bg);border-bottom:1px solid var(--color-border)"></div><div class="token-info"><div class="token-name">--input-bg</div><div class="token-val">Form inputs</div></div></div>
+  <div class="token"><div class="token-color" style="background:var(--color-danger)"></div><div class="token-info"><div class="token-name">--danger</div><div class="token-val">Errors</div></div></div>
+  <div class="token"><div class="token-color" style="background:var(--color-star)"></div><div class="token-info"><div class="token-name">--star / --featured</div><div class="token-val">Stars, featured badge</div></div></div>
+</div>
+</body></html>

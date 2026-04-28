@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head><meta charset="UTF-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+body { margin: 0; padding: 16px; background: var(--color-bg); font-family: var(--font-primary); color: var(--color-text); }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+.swatch { border-radius: 8px; overflow: hidden; }
+.sw-color { height: 40px; }
+.sw-info { padding: 6px 8px; background: var(--color-surface); border: 1px solid var(--color-border); border-top: none; border-radius: 0 0 8px 8px; }
+.sw-name { font-size: 10px; font-weight: 700; color: var(--color-text); }
+.sw-val  { font-size: 9px; color: var(--color-text-muted); margin-top: 1px; }
+.st { font-size: 9px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .08em; margin: 12px 0 6px; }
+
+/* Live component preview in dark */
+.preview-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.btn-p { background: var(--color-brand); color: var(--color-brand-contrast); border: none; border-radius: 9999px; padding: 8px 20px; font-size: 13px; font-weight: 700; font-family: var(--font-primary); cursor: default; }
+.btn-g { background: var(--color-chip); border: 1px solid var(--color-chip-border); color: var(--color-chip-text); border-radius: 9999px; padding: 8px 20px; font-size: 13px; font-weight: 600; font-family: var(--font-primary); cursor: default; }
+.card-demo { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 10px; padding: 12px 14px; box-shadow: var(--shadow-md); font-size: 13px; min-width: 180px; }
+.price-box { background: var(--color-accent-soft); border-radius: 6px; padding: 8px 12px; margin-top: 8px; }
+.badge { background: var(--color-featured); color: var(--color-featured-text); font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; display: inline-block; }
+.chip { background: var(--color-chip); border: 1px solid var(--color-chip-border); color: var(--color-chip-text); font-size: 11px; padding: 3px 12px; border-radius: 9999px; display: inline-block; }
+.input-demo { background: var(--color-input-bg); border: 1px solid var(--color-input-border); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: var(--font-primary); color: var(--color-input-placeholder); min-width: 200px; }
+</style></head>
+<body>
+
+<div class="st">Surfaces — 3 layers of depth</div>
+<div class="grid">
+  <div class="swatch">
+    <div class="sw-color" style="background:#0e160e"></div>
+    <div class="sw-info"><div class="sw-name">--bg</div><div class="sw-val">#0e160e · Page</div></div>
+  </div>
+  <div class="swatch">
+    <div class="sw-color" style="background:#162016;border:1px solid #2c442c"></div>
+    <div class="sw-info"><div class="sw-name">--surface</div><div class="sw-val">#162016 · Cards</div></div>
+  </div>
+  <div class="swatch">
+    <div class="sw-color" style="background:#1d2d1d"></div>
+    <div class="sw-info"><div class="sw-name">--surface-muted</div><div class="sw-val">#1d2d1d · Inputs</div></div>
+  </div>
+  <div class="swatch">
+    <div class="sw-color" style="background:#243624"></div>
+    <div class="sw-info"><div class="sw-name">--surface-raised</div><div class="sw-val">#243624 · Dropdowns</div></div>
+  </div>
+</div>
+
+<div class="st">Text — Contrast verified</div>
+<div class="grid">
+  <div class="swatch">
+    <div class="sw-color" style="background:#ddeedd"></div>
+    <div class="sw-info"><div class="sw-name">--text</div><div class="sw-val">#ddeedd · 12.8:1 ✓ AAA</div></div>
+  </div>
+  <div class="swatch">
+    <div class="sw-color" style="background:#85aa80"></div>
+    <div class="sw-info"><div class="sw-name">--text-muted</div><div class="sw-val">#85aa80 · 4.6:1 ✓ AA</div></div>
+  </div>
+  <div class="swatch">
+    <div class="sw-color" style="background:#4dbe4d"></div>
+    <div class="sw-info"><div class="sw-name">--brand</div><div class="sw-val">#4dbe4d · 5.4:1 ✓ AA</div></div>
+  </div>
+  <div class="swatch">
+    <div class="sw-color" style="background:#f87171"></div>
+    <div class="sw-info"><div class="sw-name">--danger</div><div class="sw-val">#f87171 · 6.8:1 ✓ AA</div></div>
+  </div>
+</div>
+
+<div class="st">Live components in Dark Mode</div>
+<div class="preview-row">
+  <button class="btn-p">+ أعلن</button>
+  <button class="btn-g">تصفح الكل</button>
+  <span class="badge">مميز ★</span>
+  <span class="chip">سيارات</span>
+  <span class="chip">عقارات</span>
+  <div class="input-demo">ابحث عن إعلانات...</div>
+</div>
+
+<div style="margin-top:12px">
+  <div class="card-demo">
+    <div style="font-size:13px;font-weight:700;color:var(--color-text)">تويوتا كامري ٢٠٢٠ — فل كامل</div>
+    <div style="font-size:11px;color:var(--color-text-muted);margin-top:4px;display:flex;align-items:center;gap:4px">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--color-brand)"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+      الزرقاء · منذ يومين
+    </div>
+    <div class="price-box">
+      <div style="font-size:10px;color:var(--color-text-muted)">السعر</div>
+      <div style="font-size:18px;font-weight:800;color:var(--color-brand)">٨٥٠٠ JOD</div>
+    </div>
+  </div>
+</div>
+
+</body></html>

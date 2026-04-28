@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="classic">
+<head><meta charset="UTF-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+body { margin: 0; padding: 24px; background: var(--color-bg); font-family: var(--font-arabic); color: var(--color-text); }
+.row { display: flex; gap: 20px; flex-wrap: wrap; }
+.shadow-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; padding: 16px 20px; min-width: 150px; text-align: center; }
+.shadow-name { font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+.shadow-val { font-size: 9px; color: var(--color-text-muted); line-height: 1.5; }
+</style></head>
+<body>
+<div class="row">
+  <div class="shadow-card" style="box-shadow:none;border:2px dashed var(--color-border)">
+    <div class="shadow-name">None</div>
+    <div class="shadow-val">no shadow</div>
+  </div>
+  <div class="shadow-card" style="box-shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06)">
+    <div class="shadow-name">--shadow-sm</div>
+    <div class="shadow-val">0 1px 3px rgba(0,0,0,.08)<br>0 1px 2px rgba(0,0,0,.06)</div>
+  </div>
+  <div class="shadow-card" style="box-shadow:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.06)">
+    <div class="shadow-name">--shadow-md</div>
+    <div class="shadow-val">0 4px 6px rgba(0,0,0,.07)<br>0 2px 4px rgba(0,0,0,.06)</div>
+  </div>
+</div>
+<div style="margin-top:16px;font-size:10px;color:var(--color-text-muted)">
+  Cards default to <b>shadow-sm</b>. On hover they elevate to <b>shadow-md</b>. No inner shadows used.
+</div>
+</body></html>

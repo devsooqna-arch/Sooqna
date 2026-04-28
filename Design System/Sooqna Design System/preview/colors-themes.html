@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+body { margin: 0; padding: 14px; font-family: var(--font-primary); background: #e5e7e5; }
+.themes { display: flex; gap: 10px; }
+.theme-card { border-radius: 10px; padding: 14px 16px; flex: 1; }
+.theme-title { font-size: 11px; font-weight: 700; margin-bottom: 10px; opacity: .8; letter-spacing: .04em; }
+.row { display: flex; gap: 5px; margin-bottom: 6px; }
+.dot { width: 30px; height: 30px; border-radius: 7px; font-size: 9px; display:flex; align-items:center; justify-content:center; font-weight:700; }
+.info { font-size: 9px; margin-top: 6px; opacity: .65; }
+</style>
+</head>
+<body>
+<div class="themes">
+  <!-- Classic -->
+  <div class="theme-card" style="background:#f0f0f0; border:1px solid #dde3d8; color:#1a1f16">
+    <div class="theme-title">Classic (Default)</div>
+    <div class="row">
+      <div class="dot" style="background:#2d6a2d;color:#fff">Br</div>
+      <div class="dot" style="background:#a8d520;color:#1a1f16">Ac</div>
+      <div class="dot" style="background:#edf7cc;color:#1a1f16">As</div>
+      <div class="dot" style="background:#fff;border:1px solid #dde3d8;color:#1a1f16">Su</div>
+      <div class="dot" style="background:#f0f4e8;border:1px solid #c5d4a0;color:#4a5e3a">Ch</div>
+    </div>
+    <div class="info">bg #f0f0f0 · text #1a1f16 · brand #2d6a2d</div>
+  </div>
+
+  <!-- Light -->
+  <div class="theme-card" style="background:#eef4e8; border:1px solid #c8d9bb; color:#121a0e">
+    <div class="theme-title">Light (v2 — improved contrast)</div>
+    <div class="row">
+      <div class="dot" style="background:#236023;color:#fff">Br</div>
+      <div class="dot" style="background:#78c020;color:#121a0e">Ac</div>
+      <div class="dot" style="background:#dff0c4;color:#121a0e">As</div>
+      <div class="dot" style="background:#fff;border:1px solid #c8d9bb;color:#121a0e">Su</div>
+      <div class="dot" style="background:#e6f2d8;border:1px solid #a2c484;color:#2e5020">Ch</div>
+    </div>
+    <div class="info">bg #eef4e8 · text #121a0e · brand #236023 (7.6:1 ✓ AA)</div>
+  </div>
+
+  <!-- Dark -->
+  <div class="theme-card" style="background:#0e160e; border:1px solid #2c442c; color:#ddeedd">
+    <div class="theme-title" style="color:#85aa80">Dark (v2 — deep forest)</div>
+    <div class="row">
+      <div class="dot" style="background:#4dbe4d;color:#0e160e">Br</div>
+      <div class="dot" style="background:#2a4a10;color:#ddeedd">Ac</div>
+      <div class="dot" style="background:#182e12;color:#ddeedd">As</div>
+      <div class="dot" style="background:#162016;border:1px solid #2c442c;color:#ddeedd">Su</div>
+      <div class="dot" style="background:#1e321e;border:1px solid #344e34;color:#8aba85">Ch</div>
+    </div>
+    <div class="info" style="color:#85aa80">bg #0e160e · text #ddeedd · brand #4dbe4d (5.4:1 ✓ AA)</div>
+  </div>
+</div>
+</body></html>

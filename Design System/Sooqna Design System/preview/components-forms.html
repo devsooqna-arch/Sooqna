@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="classic">
+<head><meta charset="UTF-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+body { margin: 0; padding: 16px; background: var(--color-bg); font-family: var(--font-arabic); color: var(--color-text); }
+.form-row { margin-bottom: 14px; }
+.form-label { font-size: 12px; font-weight: 600; color: var(--color-text); margin-bottom: 5px; display: block; }
+.form-input { width: 100%; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-input-bg); color: var(--color-text); font-family: var(--font-arabic); font-size: 13px; padding: 9px 12px; outline: none; box-sizing: border-box; }
+.form-input:focus { border-color: var(--color-brand); }
+.form-input::placeholder { color: var(--color-text-muted); }
+.search-wrap { position: relative; }
+.search-wrap .form-input { border-radius: 9999px; padding-right: 40px; padding-left: 12px; border: 1px solid var(--color-chip-border); background: var(--color-input-bg); }
+.search-icon { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted); pointer-events: none; }
+select.form-input { appearance: none; cursor: pointer; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.error-msg { font-size: 11px; color: var(--color-danger); margin-top: 4px; }
+</style></head>
+<body>
+<div class="grid2">
+  <div>
+    <div class="form-row">
+      <label class="form-label">عنوان الإعلان</label>
+      <input class="form-input" type="text" placeholder="مثال: تويوتا كامري 2020 للبيع">
+    </div>
+    <div class="form-row">
+      <label class="form-label">السعر</label>
+      <input class="form-input" type="text" placeholder="١٢٠٠" value="١٢٠٠">
+    </div>
+    <div class="form-row">
+      <label class="form-label">التصنيف</label>
+      <select class="form-input">
+        <option>اختر التصنيف</option>
+        <option selected>سيارات</option>
+        <option>عقارات</option>
+        <option>موبايلات</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-label">البحث</label>
+      <div class="search-wrap">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="form-input" type="text" placeholder="ابحث في الإعلانات...">
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">بريد إلكتروني (خطأ)</label>
+      <input class="form-input" style="border-color:var(--color-danger)" type="email" value="invalid@">
+      <div class="error-msg">صيغة البريد الإلكتروني غير صحيحة</div>
+    </div>
+  </div>
+  <div>
+    <div class="form-row">
+      <label class="form-label">الوصف</label>
+      <textarea class="form-input" rows="5" placeholder="اكتب وصفاً تفصيلياً للإعلان..."></textarea>
+    </div>
+    <div class="form-row">
+      <label class="form-label">المدينة</label>
+      <select class="form-input">
+        <option>اختر المدينة</option>
+        <option selected>عمّان</option>
+        <option>الزرقاء</option>
+        <option>إربد</option>
+      </select>
+    </div>
+  </div>
+</div>
+</body></html>

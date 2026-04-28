@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="classic">
+<head><meta charset="UTF-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+body { margin: 0; padding: 16px; background: var(--color-bg); font-family: var(--font-arabic); color: var(--color-text); }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.label { font-size: 10px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .06em; min-width: 110px; }
+.btn-primary { background: var(--color-brand); color: var(--color-brand-contrast); border: none; border-radius: 9999px; padding: 8px 20px; font-size: 14px; font-weight: 600; font-family: var(--font-arabic); cursor: pointer; }
+.btn-primary:hover { background: var(--color-brand-hover); }
+.btn-sm { padding: 6px 14px; font-size: 12px; }
+.btn-wide { padding: 12px 24px; font-size: 14px; width: 100%; max-width: 200px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-ghost { background: var(--color-chip); color: var(--color-text-muted); border: 1px solid var(--color-chip-border); border-radius: 9999px; padding: 8px 20px; font-size: 14px; font-weight: 600; font-family: var(--font-arabic); cursor: pointer; }
+.btn-outline { background: transparent; color: var(--color-brand); border: 1px solid var(--color-brand); border-radius: 9999px; padding: 8px 20px; font-size: 14px; font-weight: 600; font-family: var(--font-arabic); cursor: pointer; }
+.btn-danger-outline { background: transparent; color: var(--color-danger); border: 1px solid #fca5a5; background: #fef2f2; border-radius: 9999px; padding: 8px 20px; font-size: 14px; font-weight: 600; font-family: var(--font-arabic); cursor: pointer; }
+.btn-white { background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.7); border-radius: 9999px; padding: 6px 20px; font-size: 12px; font-weight: 600; font-family: var(--font-arabic); cursor: pointer; }
+.btn-icon { width: 36px; height: 36px; border-radius: 9999px; background: rgba(255,255,255,.9); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+</style></head>
+<body>
+<div class="row"><div class="label">Primary</div>
+  <button class="btn-primary">+ أعلن</button>
+  <button class="btn-primary btn-sm">تصفح الإعلانات</button>
+  <button class="btn-primary btn-wide">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    راسل البائع
+  </button>
+</div>
+<div class="row"><div class="label">Ghost / Chip</div>
+  <button class="btn-ghost">العودة إلى الإعلانات</button>
+  <button class="btn-ghost btn-sm">عرض الكل</button>
+</div>
+<div class="row"><div class="label">Outline</div>
+  <button class="btn-outline">متابعة</button>
+</div>
+<div class="row"><div class="label">Danger</div>
+  <button class="btn-danger-outline">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-left:4px"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    إزالة من المفضلة
+  </button>
+</div>
+<div class="row"><div class="label">On Dark / Hero</div>
+  <div style="background:#1a1f16;padding:10px 14px;border-radius:8px;display:flex;gap:8px;align-items:center">
+    <button class="btn-primary btn-sm">تصفح الإعلانات</button>
+    <button class="btn-white">أضف إعلان</button>
+  </div>
+</div>
+<div class="row"><div class="label">Icon Button</div>
+  <button class="btn-icon">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+  </button>
+  <button class="btn-icon" style="background:rgba(255,255,255,.9)">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+  </button>
+</div>
+</body></html>

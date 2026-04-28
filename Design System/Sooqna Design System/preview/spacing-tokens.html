@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="classic">
+<head><meta charset="UTF-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+body { margin: 0; padding: 16px; background: var(--color-bg); font-family: var(--font-arabic); color: var(--color-text); }
+.section-title { font-size: 10px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .08em; margin: 12px 0 8px; }
+.spacing-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.spacing-bar { background: var(--color-brand); border-radius: 2px; height: 12px; opacity: .75; }
+.spacing-label { font-size: 10px; color: var(--color-text-muted); min-width: 80px; }
+.radius-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.radius-box { width: 56px; height: 40px; background: var(--color-brand); opacity: .7; display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:700; }
+</style></head>
+<body>
+<div class="section-title">Spacing Scale</div>
+<div class="spacing-row"><div class="spacing-bar" style="width:4px"></div><div class="spacing-label">space-1 · 4px</div></div>
+<div class="spacing-row"><div class="spacing-bar" style="width:8px"></div><div class="spacing-label">space-2 · 8px</div></div>
+<div class="spacing-row"><div class="spacing-bar" style="width:12px"></div><div class="spacing-label">space-3 · 12px</div></div>
+<div class="spacing-row"><div class="spacing-bar" style="width:16px"></div><div class="spacing-label">space-4 · 16px</div></div>
+<div class="spacing-row"><div class="spacing-bar" style="width:20px"></div><div class="spacing-label">space-5 · 20px</div></div>
+<div class="spacing-row"><div class="spacing-bar" style="width:28px"></div><div class="spacing-label">space-7 · 28px (section gap)</div></div>
+<div class="spacing-row"><div class="spacing-bar" style="width:40px"></div><div class="spacing-label">space-10 · 40px</div></div>
+
+<div class="section-title">Border Radius</div>
+<div class="radius-row">
+  <div><div class="radius-box" style="border-radius:4px">4px</div><div style="font-size:9px;color:var(--color-text-muted);margin-top:3px">sm</div></div>
+  <div><div class="radius-box" style="border-radius:8px">8px</div><div style="font-size:9px;color:var(--color-text-muted);margin-top:3px">md · cards</div></div>
+  <div><div class="radius-box" style="border-radius:12px">12px</div><div style="font-size:9px;color:var(--color-text-muted);margin-top:3px">lg · panels</div></div>
+  <div><div class="radius-box" style="border-radius:9999px;width:72px">pill</div><div style="font-size:9px;color:var(--color-text-muted);margin-top:3px">full · btns</div></div>
+</div>
+</body></html>
