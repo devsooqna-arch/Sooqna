@@ -44,7 +44,6 @@ jobs:
             DEPLOY_APP_DIR
             DEPLOY_SSH_KEY
             BACKEND_DATABASE_URL
-            BACKEND_FIREBASE_PROJECT_ID
             NEXT_PUBLIC_BACKEND_API_BASE_URL
             NEXT_PUBLIC_SITE_URL
             NEXT_PUBLIC_FIREBASE_API_KEY
@@ -54,6 +53,11 @@ jobs:
             NEXT_PUBLIC_FIREBASE_APP_ID
             NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
           )
+
+          # BACKEND_FIREBASE_PROJECT_ID is optional — falls back to NEXT_PUBLIC_FIREBASE_PROJECT_ID
+          if [ -z "$BACKEND_FIREBASE_PROJECT_ID" ]; then
+            export BACKEND_FIREBASE_PROJECT_ID="$NEXT_PUBLIC_FIREBASE_PROJECT_ID"
+          fi
 
           missing=0
           for var_name in "${required_vars[@]}"; do
@@ -211,6 +215,9 @@ jobs:
             # This overwrites the file on every deploy so values always
             # reflect the current GitHub secrets — no manual edits needed.
             # ─────────────────────────────────────────────────────────────
+            # Use NEXT_PUBLIC_FIREBASE_PROJECT_ID as fallback if BACKEND_FIREBASE_PROJECT_ID not set
+            BACKEND_FIREBASE_PROJECT_ID="${BACKEND_FIREBASE_PROJECT_ID:-${NEXT_PUBLIC_FIREBASE_PROJECT_ID}}"
+
             echo "Writing production backend .env..."
             {
               echo "NODE_ENV=production"
