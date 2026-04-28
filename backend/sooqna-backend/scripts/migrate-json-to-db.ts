@@ -3,14 +3,12 @@ dotenv.config();
 
 import * as path from "node:path";
 import * as fs from "node:fs";
-import { PrismaClient } from "@prisma/client";
 import { parseIso } from "../src/shared/utils/dates";
+import { prisma } from "../src/config/prisma";
 import type { UserProfile } from "../src/modules/users/users.types";
 import type { Listing } from "../src/modules/listings/listings.types";
 import type { FavoriteRecord } from "../src/modules/favorites/favorites.types";
 import type { Conversation, Message } from "../src/modules/messages/messages.types";
-
-const prisma = new PrismaClient();
 
 function readJsonFile<T>(relativePath: string): T[] {
   const filePath = path.resolve(process.cwd(), relativePath);
