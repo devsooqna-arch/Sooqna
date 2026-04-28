@@ -24,12 +24,12 @@ function SearchBarFallback() {
           type="text"
           disabled
           placeholder="ماذا تبحث؟"
-          className="h-11 flex-1 rounded-full border border-[var(--chip-border)] bg-[var(--surface)] px-5 text-sm outline-none focus:border-[var(--brand)]"
+          className="h-11 flex-1 rounded-full border border-[var(--chip-border)] bg-[var(--surface)] px-5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--accent-soft)]"
         />
-        <button disabled className="h-11 rounded-full border border-[var(--chip-border)] bg-[var(--chip)] px-5 text-sm text-[var(--text-muted)]">
+        <button disabled className="h-11 rounded-full border border-[var(--chip-border)] bg-[var(--chip)] px-5 text-sm text-[var(--text-muted)] opacity-70">
           كل التصنيفات ▾
         </button>
-        <button disabled className="h-11 rounded-full border border-[var(--chip-border)] bg-[var(--chip)] px-5 text-sm text-[var(--text-muted)]">
+        <button disabled className="h-11 rounded-full border border-[var(--chip-border)] bg-[var(--chip)] px-5 text-sm text-[var(--text-muted)] opacity-70">
           كل المدن ▾
         </button>
         <button
@@ -45,7 +45,7 @@ function SearchBarFallback() {
           type="text"
           disabled
           placeholder="بحث..."
-          className="h-10 flex-1 rounded-full border border-[var(--chip-border)] bg-[var(--surface)] px-4 text-sm outline-none focus:border-[var(--brand)]"
+          className="h-10 flex-1 rounded-full border border-[var(--chip-border)] bg-[var(--surface)] px-4 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--accent-soft)]"
         />
         <button
           disabled
@@ -151,7 +151,7 @@ function SearchBarInner() {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           placeholder="ماذا تبحث؟"
-          className="h-11 flex-1 rounded-full border border-[var(--chip-border)] bg-[var(--surface)] px-5 text-sm outline-none focus:border-[var(--brand)]"
+          className="h-11 flex-1 rounded-full border border-[var(--chip-border)] bg-[var(--surface)] px-5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--accent-soft)]"
         />
         <select
           value={category}
@@ -160,7 +160,7 @@ function SearchBarInner() {
             setCategory(nextCategory);
             applyFiltersImmediately(query, nextCategory, city);
           }}
-          className="h-11 rounded-full border border-[var(--chip-border)] bg-[var(--chip)] px-5 text-sm text-[var(--text-muted)] outline-none focus:border-[var(--brand)]"
+          className="h-11 rounded-full border border-[var(--chip-border)] bg-[var(--chip)] px-5 text-sm text-[var(--text-muted)] outline-none transition-[border-color,box-shadow] duration-150 focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--accent-soft)]"
         >
           <option value="">كل التصنيفات</option>
           {categories.map((item) => {
@@ -180,7 +180,7 @@ function SearchBarInner() {
             setCity(nextCity);
             applyFiltersImmediately(query, category, nextCity);
           }}
-          className="h-11 rounded-full border border-[var(--chip-border)] bg-[var(--chip)] px-5 text-sm text-[var(--text-muted)] outline-none focus:border-[var(--brand)]"
+          className="h-11 rounded-full border border-[var(--chip-border)] bg-[var(--chip)] px-5 text-sm text-[var(--text-muted)] outline-none transition-[border-color,box-shadow] duration-150 focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--accent-soft)]"
         >
           <option value="">كل المدن</option>
           {CITY_OPTIONS.map((cityOption) => (
@@ -191,7 +191,7 @@ function SearchBarInner() {
         </select>
         <button
           onClick={handleSearch}
-          className="h-11 rounded-full bg-[var(--brand)] px-8 text-sm font-semibold text-[var(--brand-contrast)]"
+          className="h-11 rounded-full bg-[var(--brand)] px-8 text-sm font-semibold text-[var(--brand-contrast)] shadow-[var(--shadow-sm)] transition duration-150 hover:bg-[var(--brand-hover)]"
         >
           بحث
         </button>
@@ -204,11 +204,11 @@ function SearchBarInner() {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           placeholder="بحث..."
-          className="h-10 flex-1 rounded-full border border-[var(--chip-border)] bg-[var(--surface)] px-4 text-sm outline-none focus:border-[var(--brand)]"
+          className="h-10 flex-1 rounded-full border border-[var(--chip-border)] bg-[var(--surface)] px-4 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--accent-soft)]"
         />
         <button
           onClick={handleSearch}
-          className="h-10 rounded-full bg-[var(--brand)] px-4 text-xs font-semibold text-[var(--brand-contrast)]"
+          className="h-10 rounded-full bg-[var(--brand)] px-4 text-xs font-semibold text-[var(--brand-contrast)] shadow-[var(--shadow-sm)] transition duration-150 hover:bg-[var(--brand-hover)]"
         >
           بحث
         </button>

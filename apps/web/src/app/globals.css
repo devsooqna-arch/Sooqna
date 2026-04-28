@@ -1,100 +1,135 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap");
 
-/* ─── Classic (WordPress baseline) ────────────────────────── */
+/* ─── Theme Tokens (Design System) ────────────────────────── */
 :root,
 html[data-theme="classic"] {
-  --bg:             #f0f0f0;
-  --surface:        #ffffff;
-  --surface-muted:  #f7f8f5;
-  --border:         #dde3d8;
-  --text:           #1a1f16;
-  --text-muted:     #6b7563;
-  --brand:          #2d6a2d;
-  --brand-hover:    #245824;
-  --brand-contrast: #ffffff;
-  --accent-strip:   #a8d520;
-  --accent-soft:    #edf7cc;
-  --chip:           #f0f4e8;
-  --chip-border:    #c5d4a0;
-  --danger:         #dc2626;
-  --star:           #f5a623;
-  --featured:       #f5a623;
-  --featured-text:  #ffffff;
-  --nav-bottom:     #ffffff;
-  --nav-bottom-border: #dde3d8;
-  --input-bg:       #ffffff;
-  --shadow:         0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
-  --shadow-md:      0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+  --color-bg: #f0f0f0;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f7f8f5;
+  --color-border: #dde3d8;
+  --color-text: #1a1f16;
+  --color-text-muted: #6b7563;
+  --color-brand: #2d6a2d;
+  --color-brand-hover: #245824;
+  --color-brand-contrast: #ffffff;
+  --color-accent: #a8d520;
+  --color-accent-soft: #edf7cc;
+  --color-chip: #f0f4e8;
+  --color-chip-border: #c5d4a0;
+  --color-danger: #dc2626;
+  --color-star: #f5a623;
+  --color-featured: #f5a623;
+  --color-featured-text: #ffffff;
+  --color-nav-bottom: #ffffff;
+  --color-nav-bottom-border: #dde3d8;
+  --color-input-bg: #ffffff;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
-/* ─── Light ────────────────────────────────────────────────── */
 html[data-theme="light"] {
-  --bg:             #f8faf4;
-  --surface:        #ffffff;
-  --surface-muted:  #f2f6ec;
-  --border:         #d4dfca;
-  --text:           #1a2416;
-  --text-muted:     #5c7052;
-  --brand:          #2d6a2d;
-  --brand-hover:    #245824;
-  --brand-contrast: #ffffff;
-  --accent-strip:   #8bc34a;
-  --accent-soft:    #e8f5e0;
-  --chip:           #edf5e4;
-  --chip-border:    #b8d49a;
-  --danger:         #dc2626;
-  --star:           #f5a623;
-  --featured:       #f5a623;
-  --featured-text:  #ffffff;
-  --nav-bottom:     #ffffff;
-  --nav-bottom-border: #d4dfca;
-  --input-bg:       #ffffff;
-  --shadow:         0 1px 3px rgba(45,106,45,.08), 0 1px 2px rgba(45,106,45,.05);
-  --shadow-md:      0 4px 8px rgba(45,106,45,.10), 0 2px 4px rgba(45,106,45,.06);
+  --color-bg: #eef4e8;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f3f8ee;
+  --color-border: #c8d9bb;
+  --color-text: #121a0e;
+  --color-text-muted: #405c34;
+  --color-brand: #236023;
+  --color-brand-hover: #1b4f1b;
+  --color-brand-contrast: #ffffff;
+  --color-accent: #78c020;
+  --color-accent-soft: #dff0c4;
+  --color-chip: #e6f2d8;
+  --color-chip-border: #a2c484;
+  --color-danger: #b91c1c;
+  --color-star: #d97706;
+  --color-featured: #d97706;
+  --color-featured-text: #ffffff;
+  --color-nav-bottom: #ffffff;
+  --color-nav-bottom-border: #c8d9bb;
+  --color-input-bg: #ffffff;
+  --shadow-sm: 0 1px 3px rgba(20, 80, 20, 0.09), 0 1px 2px rgba(20, 80, 20, 0.06);
+  --shadow-md: 0 4px 10px rgba(20, 80, 20, 0.11), 0 2px 4px rgba(20, 80, 20, 0.07);
 }
 
-/* ─── Dark ─────────────────────────────────────────────────── */
 html[data-theme="dark"] {
-  --bg:             #0d1a0d;
-  --surface:        #152415;
-  --surface-muted:  #1a2e1a;
-  --border:         #243d24;
-  --text:           #dceedd;
-  --text-muted:     #86ab87;
-  --brand:          #5cb85c;
-  --brand-hover:    #4aa04a;
-  --brand-contrast: #0d1a0d;
-  --accent-strip:   #1e3d1e;
-  --accent-soft:    #1a3020;
-  --chip:           #1e341e;
-  --chip-border:    #2e502e;
-  --danger:         #f87171;
-  --star:           #f5c842;
-  --featured:       #d4880a;
-  --featured-text:  #ffffff;
-  --nav-bottom:     #152415;
-  --nav-bottom-border: #243d24;
-  --input-bg:       #1a2e1a;
-  --shadow:         0 1px 3px rgba(0,0,0,.30), 0 1px 2px rgba(0,0,0,.20);
-  --shadow-md:      0 4px 6px rgba(0,0,0,.40), 0 2px 4px rgba(0,0,0,.30);
+  --color-bg: #0e160e;
+  --color-surface: #162016;
+  --color-surface-muted: #1d2d1d;
+  --color-border: #2c442c;
+  --color-text: #ddeedd;
+  --color-text-muted: #85aa80;
+  --color-brand: #4dbe4d;
+  --color-brand-hover: #3dab3d;
+  --color-brand-contrast: #0e160e;
+  --color-accent: #2a4a10;
+  --color-accent-soft: #182e12;
+  --color-chip: #1e321e;
+  --color-chip-border: #344e34;
+  --color-danger: #f87171;
+  --color-star: #fbbf24;
+  --color-featured: #d97706;
+  --color-featured-text: #ffffff;
+  --color-nav-bottom: #162016;
+  --color-nav-bottom-border: #2c442c;
+  --color-input-bg: #1d2d1d;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+/* Legacy aliases for current codebase */
+:root,
+html[data-theme="classic"],
+html[data-theme="light"],
+html[data-theme="dark"] {
+  --bg: var(--color-bg);
+  --surface: var(--color-surface);
+  --surface-muted: var(--color-surface-muted);
+  --border: var(--color-border);
+  --text: var(--color-text);
+  --text-muted: var(--color-text-muted);
+  --brand: var(--color-brand);
+  --brand-hover: var(--color-brand-hover);
+  --brand-contrast: var(--color-brand-contrast);
+  --accent-strip: var(--color-accent);
+  --accent-soft: var(--color-accent-soft);
+  --chip: var(--color-chip);
+  --chip-border: var(--color-chip-border);
+  --danger: var(--color-danger);
+  --star: var(--color-star);
+  --featured: var(--color-featured);
+  --featured-text: var(--color-featured-text);
+  --nav-bottom: var(--color-nav-bottom);
+  --nav-bottom-border: var(--color-nav-bottom-border);
+  --input-bg: var(--color-input-bg);
+  --shadow: var(--shadow-sm);
+  --font-primary: "Cairo", "Segoe UI", system-ui, sans-serif;
 }
 
 /* ─── Base ──────────────────────────────────────────────────── */
 @layer base {
   * { box-sizing: border-box; }
 
-  html { scroll-behavior: smooth; }
+  html {
+    scroll-behavior: smooth;
+    direction: rtl;
+  }
 
   body {
     margin: 0;
-    font-family: "Tahoma", "Segoe UI", system-ui, sans-serif;
+    font-family: var(--font-primary);
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
     /* space for mobile bottom nav */
     padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  input, textarea, select, button {
+    font-family: inherit;
   }
 
   a { color: inherit; text-decoration: none; }

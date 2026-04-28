@@ -45,7 +45,7 @@ export function PublicShell({
           <div className="mx-auto flex max-w-[1110px] items-center gap-3 px-4 py-2 sm:px-6">
             <Link
               href="/submit-listing"
-              className="rounded-full bg-[var(--brand)] px-5 py-2 text-sm font-semibold text-[var(--brand-contrast)]"
+              className="rounded-full bg-[var(--brand)] px-5 py-2 text-sm font-semibold text-[var(--brand-contrast)] shadow-[var(--shadow-sm)] transition duration-150 hover:bg-[var(--brand-hover)]"
             >
               + أعلن
             </Link>
@@ -67,7 +67,7 @@ export function PublicShell({
       <main className="mx-auto w-full max-w-[1110px] px-4 py-7 pb-24 sm:px-6 md:pb-7">
         {pageTitle ? (
           <section className="mb-6">
-            <h1 className="text-4xl font-extrabold tracking-tight text-[var(--text)] sm:text-5xl">
+              <h1 className="text-4xl font-extrabold tracking-tight text-[var(--text)] sm:text-5xl" style={{ lineHeight: 1.25 }}>
               {pageTitle}
             </h1>
             {pageDescription ? (

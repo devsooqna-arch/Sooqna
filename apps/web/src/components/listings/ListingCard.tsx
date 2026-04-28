@@ -7,7 +7,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
   const detailsHref = `/listings/${encodeURIComponent(listing.id)}`;
 
   return (
-    <article className="group relative overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow)] transition-shadow hover:shadow-[var(--shadow-md)]">
+    <article className="group relative overflow-hidden rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow)] transition-shadow duration-150 hover:shadow-[var(--shadow-md)]">
       {/* Image */}
       <div className="relative h-44 w-full overflow-hidden bg-[var(--surface-muted)]">
         {firstImage?.url ? (
@@ -62,7 +62,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
       <Link
         href={detailsHref}
         aria-label={`عرض تفاصيل الإعلان: ${listing.title}`}
-        className="absolute inset-0 z-10"
+        className="absolute inset-0 z-10 rounded-[var(--radius-md)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/50"
       />
     </article>
   );
