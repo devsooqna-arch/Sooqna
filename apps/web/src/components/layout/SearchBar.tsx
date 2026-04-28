@@ -1,11 +1,20 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useCallback } from "react";
 import { getCategories } from "@/services/categoryService";
 import type { Category } from "@/types/category";
 
-const CITY_OPTIONS = ["عمّان", "الزرقاء", "إربد", "العقبة", "السلط", "مادبا", "الكرك", "جرش"];
+const CITY_OPTIONS = [
+  { value: "amman", label: "عمّان" },
+  { value: "zarqa", label: "الزرقاء" },
+  { value: "irbid", label: "إربد" },
+  { value: "aqaba", label: "العقبة" },
+  { value: "salt", label: "السلط" },
+  { value: "madaba", label: "مادبا" },
+  { value: "karak", label: "الكرك" },
+  { value: "jerash", label: "جرش" },
+];
 
 function SearchBarFallback() {
   return (
@@ -84,25 +93,32 @@ function SearchBarInner() {
     setCity(cityParam);
   }, [searchParam, categoryParam, cityParam]);
 
-  function buildListingsUrl(nextQuery: string, nextCategory: string, nextCity: string): string {
+  const buildListingsUrl = useCallback((nextQuery: string, nextCategory: string, nextCity: string): string => {
     const trimmedSearch = nextQuery.trim();
-    const trimmedCategory = nextCategory.trim();
-    const trimmedCity = nextCity.trim();
-    const nextParams = new URLSearchParams();
+    const trimmedCategory = nextCategory.trim().toLowerCase();
+    const trimmedCity = nextCity.trim().toLowerCase();
+    const nextParams = new URLSearchParams(params.toString());
 
     if (trimmedSearch) {
       nextParams.set("search", trimmedSearch);
+    } else {
+      nextParams.delete("search");
     }
     if (trimmedCategory) {
       nextParams.set("category", trimmedCategory);
+    } else {
+      nextParams.delete("category");
     }
     if (trimmedCity) {
       nextParams.set("city", trimmedCity);
+    } else {
+      nextParams.delete("city");
     }
+    nextParams.set("page", "1");
 
     const queryString = nextParams.toString();
     return queryString ? `/listings?${queryString}` : "/listings";
-  }
+  }, [params]);
 
   function applyFiltersImmediately(nextQuery: string, nextCategory: string, nextCity: string) {
     router.replace(buildListingsUrl(nextQuery, nextCategory, nextCity));
@@ -124,7 +140,7 @@ function SearchBarInner() {
     return () => {
       window.clearTimeout(timer);
     };
-  }, [query, category, city, searchParam, categoryParam, cityParam, router]);
+  }, [query, category, city, searchParam, categoryParam, cityParam, router, buildListingsUrl]);
 
   return (
     <>
@@ -148,7 +164,7 @@ function SearchBarInner() {
         >
           <option value="">كل التصنيفات</option>
           {categories.map((item) => {
-            const value = item.slug || item.id;
+            const value = (item.slug || item.id).toLowerCase();
             const label = item.name.ar || item.name.en || value;
             return (
               <option key={item.id} value={value}>
@@ -168,8 +184,8 @@ function SearchBarInner() {
         >
           <option value="">كل المدن</option>
           {CITY_OPTIONS.map((cityOption) => (
-            <option key={cityOption} value={cityOption}>
-              {cityOption}
+            <option key={cityOption.value} value={cityOption.value}>
+              {cityOption.label}
             </option>
           ))}
         </select>

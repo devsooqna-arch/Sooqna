@@ -2,6 +2,7 @@ import { generateId } from "../../utils/ids";
 import { nowIso } from "../../utils/time";
 import { AppError } from "../../shared/errors/appError";
 import { env } from "../../config/env";
+import { CATEGORY_IDS, CITY_IDS } from "../../shared/constants/domain";
 import { PrismaUsersRepository } from "../users/repositories/users.repository";
 import type { ListingsRepository, PaginationOptions } from "./repositories/listings.repository";
 import type { Listing } from "./listings.types";
@@ -37,6 +38,26 @@ type AttachImageInput = {
 
 export class ListingsService {
   private readonly usersRepo = new PrismaUsersRepository();
+  private readonly cityAliases: Record<string, string> = {
+    amman: "amman",
+    "عمّان": "amman",
+    "عمان": "amman",
+    zarqa: "zarqa",
+    "الزرقاء": "zarqa",
+    irbid: "irbid",
+    "إربد": "irbid",
+    "اربد": "irbid",
+    aqaba: "aqaba",
+    "العقبة": "aqaba",
+    salt: "salt",
+    "السلط": "salt",
+    madaba: "madaba",
+    "مادبا": "madaba",
+    karak: "karak",
+    "الكرك": "karak",
+    jerash: "jerash",
+    "جرش": "jerash",
+  };
 
   constructor(private readonly repo: ListingsRepository) {}
 
@@ -109,7 +130,9 @@ export class ListingsService {
   }
 
   async list(pagination?: PaginationOptions): Promise<{ items: Listing[]; total: number }> {
-    return this.repo.list(pagination);
+    const normalized = this.normalizeFilters(pagination);
+    const result = await this.repo.list(normalized);
+    return result;
   }
 
   async listForOwner(ownerId: string): Promise<Listing[]> {
@@ -293,6 +316,29 @@ export class ListingsService {
     if (new Date(listing.expiresAt).getTime() > Date.now()) return;
     listing.status = "archived";
     listing.updatedAt = nowIso();
+  }
+
+  normalizeFilters(pagination?: PaginationOptions): PaginationOptions {
+    const categoryInput = pagination?.category?.trim().toLowerCase() ?? "";
+    const cityInput = pagination?.city?.trim().toLowerCase() ?? "";
+    const category = CATEGORY_IDS.includes(categoryInput as (typeof CATEGORY_IDS)[number])
+      ? categoryInput
+      : undefined;
+    const cityAlias = this.cityAliases[cityInput];
+    const city = cityAlias && CITY_IDS.includes(cityAlias as (typeof CITY_IDS)[number]) ? cityAlias : undefined;
+    const sort =
+      pagination?.sort === "price_asc" || pagination?.sort === "price_desc" || pagination?.sort === "newest"
+        ? pagination.sort
+        : "newest";
+
+    return {
+      limit: pagination?.limit,
+      offset: pagination?.offset,
+      category,
+      city,
+      search: pagination?.search?.trim() || undefined,
+      sort,
+    };
   }
 }
 

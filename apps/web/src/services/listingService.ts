@@ -51,6 +51,12 @@ export async function getListingsFiltered(params: ListingsFilterParams): Promise
   total: number;
   limit: number;
   offset: number;
+  filters?: {
+    category: string | null;
+    city: string | null;
+    search: string | null;
+    sort: "newest" | "price_asc" | "price_desc";
+  };
 }> {
   const query = new URLSearchParams();
   if (typeof params.limit === "number") query.set("limit", String(params.limit));
@@ -61,7 +67,19 @@ export async function getListingsFiltered(params: ListingsFilterParams): Promise
   if (params.sort) query.set("sort", params.sort);
 
   const suffix = query.toString() ? `?${query.toString()}` : "";
-  return apiFetch<{ success: true; listings: Listing[]; total: number; limit: number; offset: number }>(
+  return apiFetch<{
+    success: true;
+    listings: Listing[];
+    total: number;
+    limit: number;
+    offset: number;
+    filters?: {
+      category: string | null;
+      city: string | null;
+      search: string | null;
+      sort: "newest" | "price_asc" | "price_desc";
+    };
+  }>(
     `/listings${suffix}`
   );
 }

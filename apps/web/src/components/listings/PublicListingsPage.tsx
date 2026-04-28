@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, Suspense } from "react";
+import { useCallback, useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ListingCard } from "@/components/listings/ListingCard";
 import { getListingsFiltered } from "@/services/listingService";
@@ -56,21 +56,26 @@ function ListingsSkeleton() {
 function PublicListingsPageInner() {
   const router = useRouter();
   const params = useSearchParams();
-  const categoryFilter = params.get("category");
-  const cityFilterRaw = params.get("city") ?? "";
-  const cityFilter = cityFilterRaw.toLowerCase();
+  const categoryFilter = (params.get("category") ?? "").toLowerCase();
+  const cityFilterRaw = (params.get("city") ?? "").toLowerCase();
+  const cityFilter = cityFilterRaw;
   const searchFilterRaw = params.get("search") ?? "";
   const searchFilter = searchFilterRaw.toLowerCase();
+  const sortParam = params.get("sort");
+  const sort: SortKey =
+    sortParam === "newest" || sortParam === "price_asc" || sortParam === "price_desc"
+      ? sortParam
+      : "newest";
   const pageRaw = Number(params.get("page") ?? "1");
   const currentPage = Number.isFinite(pageRaw) && pageRaw > 0 ? Math.floor(pageRaw) : 1;
 
-  function buildListingsHref(overrides?: {
+  const buildListingsHref = useCallback((overrides?: {
     category?: string | null;
     city?: string | null;
     search?: string | null;
     sort?: SortKey | null;
     page?: number | null;
-  }): string {
+  }): string => {
     const nextParams = new URLSearchParams(params.toString());
     const entries: Array<[string, string | null | undefined]> = [
       ["category", overrides?.category],
@@ -91,24 +96,13 @@ function PublicListingsPageInner() {
 
     const queryString = nextParams.toString();
     return queryString ? `/listings?${queryString}` : "/listings";
-  }
+  }, [params]);
 
   const [listings, setListings] = useState<Listing[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sort, setSort] = useState<SortKey>("newest");
-
-  useEffect(() => {
-    const sortParam = params.get("sort");
-    if (sortParam === "newest" || sortParam === "price_asc" || sortParam === "price_desc") {
-      setSort(sortParam);
-    } else {
-      setSort("newest");
-    }
-  }, [params]);
-
   useEffect(() => {
     let mounted = true;
     setLoading(true);
@@ -116,7 +110,7 @@ function PublicListingsPageInner() {
 
     void Promise.all([
       getListingsFiltered({
-        category: categoryFilter ?? undefined,
+        category: categoryFilter || undefined,
         city: cityFilterRaw || undefined,
         search: searchFilterRaw || undefined,
         sort,
@@ -130,6 +124,19 @@ function PublicListingsPageInner() {
         setListings(result.listings);
         setTotal(result.total);
         setCategories(cats);
+        if (result.filters) {
+          const normalizedUrl = buildListingsHref({
+            category: result.filters.category,
+            city: result.filters.city,
+            search: result.filters.search,
+            sort: result.filters.sort,
+            page: currentPage,
+          });
+          const currentUrl = buildListingsHref({});
+          if (normalizedUrl !== currentUrl) {
+            router.replace(normalizedUrl);
+          }
+        }
       })
       .catch((err) => {
         if (!mounted) return;
@@ -143,7 +150,7 @@ function PublicListingsPageInner() {
     return () => {
       mounted = false;
     };
-  }, [categoryFilter, cityFilterRaw, searchFilterRaw, sort, currentPage]);
+  }, [categoryFilter, cityFilterRaw, searchFilterRaw, sort, currentPage, router, buildListingsHref]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const safeCurrentPage = Math.min(currentPage, totalPages);
@@ -155,7 +162,7 @@ function PublicListingsPageInner() {
     if (currentPage > totalPages) {
       router.replace(buildListingsHref({ page: totalPages }));
     }
-  }, [currentPage, totalPages, router]);
+  }, [currentPage, totalPages, router, buildListingsHref]);
 
   if (loading) {
     return <ListingsSkeleton />;
@@ -281,7 +288,6 @@ function PublicListingsPageInner() {
             value={sort}
             onChange={(e) => {
               const nextSort = e.target.value as SortKey;
-              setSort(nextSort);
               router.replace(buildListingsHref({ sort: nextSort, page: 1 }));
             }}
             className="rounded-full border border-[var(--border)] bg-[var(--input-bg)] px-4 py-1.5 text-xs text-[var(--text)] outline-none focus:border-[var(--brand)]"

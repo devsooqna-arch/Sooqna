@@ -45,8 +45,21 @@ export async function listListings(req: Request, res: Response): Promise<void> {
       ? sortRaw
       : undefined;
 
-  const { items, total } = await service.list({ limit, offset, category, city, search, sort });
-  res.json({ success: true, listings: items, total, limit, offset });
+  const normalizedFilters = service.normalizeFilters({ limit, offset, category, city, search, sort });
+  const { items, total } = await service.list(normalizedFilters);
+  res.json({
+    success: true,
+    listings: items,
+    total,
+    limit,
+    offset,
+    filters: {
+      category: normalizedFilters.category ?? null,
+      city: normalizedFilters.city ?? null,
+      search: normalizedFilters.search ?? null,
+      sort: normalizedFilters.sort ?? "newest",
+    },
+  });
 }
 
 export async function listMyListings(req: Request, res: Response): Promise<void> {

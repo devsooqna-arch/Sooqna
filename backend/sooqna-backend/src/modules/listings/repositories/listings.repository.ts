@@ -165,12 +165,12 @@ export class PrismaListingsRepository implements ListingsRepository {
           : []),
       ],
     };
-    const orderBy =
+    const orderBy: Array<{ price?: "asc" | "desc"; createdAt?: "asc" | "desc"; id?: "asc" | "desc" }> =
       sort === "price_asc"
-        ? ({ price: "asc" } as const)
+        ? [{ price: "asc" }, { createdAt: "desc" }, { id: "desc" }]
         : sort === "price_desc"
-          ? ({ price: "desc" } as const)
-          : ({ createdAt: "desc" } as const);
+          ? [{ price: "desc" }, { createdAt: "desc" }, { id: "desc" }]
+          : [{ createdAt: "desc" }, { id: "desc" }];
 
     try {
       const [listings, total] = await prisma.$transaction([
