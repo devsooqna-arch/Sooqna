@@ -1,0 +1,24 @@
+[
+  {
+    "id": "aud_1777375061593_230661a85115",
+    "actorId": "q5x3acmBlBh12fXM3TQn9boHEVv1",
+    "action": "message.read",
+    "targetType": "conversation",
+    "targetId": "conv-demo-005",
+    "metadata": {
+      "updatedCount": 1
+    },
+    "createdAt": "2026-04-28T11:17:41.593Z"
+  },
+  {
+    "id": "aud_1777375074578_8e206dfd68ad",
+    "actorId": "q5x3acmBlBh12fXM3TQn9boHEVv1",
+    "action": "message.read",
+    "targetType": "conversation",
+    "targetId": "conv_1777283416443_fb6dba4775da",
+    "metadata": {
+      "updatedCount": 0
+    },
+    "createdAt": "2026-04-28T11:17:54.578Z"
+  }
+]
