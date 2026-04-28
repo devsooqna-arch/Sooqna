@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { verifyFirebaseToken } from "../../middleware/verifyFirebaseToken";
 import { requireVerifiedEmail } from "../../middleware/requireVerifiedEmail";
+import { contentFilter } from "../../middleware/contentFilter";
 import { validateRequest } from "../../middleware/validateRequest";
 import {
   conversationIdParamsSchema,
@@ -24,6 +25,7 @@ messagesRouter.post(
   "/conversations",
   verifyFirebaseToken,
   requireVerifiedEmail,
+  contentFilter,
   validateRequest({ body: createConversationBodySchema }),
   createConversation
 );
@@ -33,6 +35,7 @@ messagesRouter.post(
   "/conversations/:conversationId/messages",
   verifyFirebaseToken,
   requireVerifiedEmail,
+  contentFilter,
   validateRequest({
     params: conversationIdParamsSchema,
     body: createMessageBodySchema,

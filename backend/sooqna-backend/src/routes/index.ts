@@ -8,6 +8,7 @@ import { favoritesRouter } from "../modules/favorites/favorites.routes";
 import { messagesRouter } from "../modules/messages/messages.routes";
 import { categoriesRouter } from "../modules/categories/categories.routes";
 import { engagementRouter } from "../modules/engagement/engagement.routes";
+import { reportsRouter } from "../modules/reports/reports.routes";
 import { prisma } from "../config/prisma";
 import { env } from "../config/env";
 import { readJsonArrayFile } from "../utils/fileStore";
@@ -84,4 +85,5 @@ apiRouter.use("/favorites", favoritesRouter);
 apiRouter.use("/messages", messagesRouter);
 apiRouter.use("/categories", categoriesRouter);
 apiRouter.use("/engagement", engagementRouter);
+apiRouter.use("/reports", reportsRouter);
 

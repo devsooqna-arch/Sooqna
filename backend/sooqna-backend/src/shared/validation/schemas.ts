@@ -110,6 +110,24 @@ export const categoriesQuerySchema = z
   })
   .strict();
 
+export const createReportBodySchema = z
+  .object({
+    targetType: z.enum(["listing", "message", "user"]),
+    targetId: z.string().trim().min(1).max(120),
+    reasonCode: z
+      .enum(["spam", "abuse", "fraud", "inappropriate", "other"])
+      .default("other"),
+    details: z.string().trim().max(2000).optional().default(""),
+  })
+  .strict();
+
+export const updateReportStatusBodySchema = z
+  .object({
+    status: z.enum(["open", "in_review", "resolved", "rejected"]),
+    note: z.string().trim().max(1000).optional(),
+  })
+  .strict();
+
 export const idParamsSchema = idParamSchema;
 export const listingIdParamsSchema = listingIdParamSchema;
 export const conversationIdParamsSchema = conversationIdParamSchema;

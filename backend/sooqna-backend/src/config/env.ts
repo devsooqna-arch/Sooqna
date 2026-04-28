@@ -33,6 +33,14 @@ function parsePositiveInt(
   return normalized;
 }
 
+function parseCsv(value: string | undefined): string[] {
+  if (!value) return [];
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 const enableCategoriesJsonFallback = parseBoolean(
   process.env.ENABLE_CATEGORIES_JSON_FALLBACK,
   false
@@ -61,6 +69,10 @@ export const env = {
   recaptchaEnabled: parseBoolean(process.env.RECAPTCHA_ENABLED, isProduction),
   recaptchaSecretKey: process.env.RECAPTCHA_SECRET_KEY ?? "",
   requireEmailVerified: parseBoolean(process.env.REQUIRE_EMAIL_VERIFIED, isProduction),
+  adminUids: parseCsv(process.env.ADMIN_UIDS),
+  moderationBlockedKeywords: parseCsv(process.env.MODERATION_BLOCKED_KEYWORDS).map((item) =>
+    item.toLowerCase()
+  ),
   listingDefaultExpiryDays: parsePositiveInt(process.env.LISTING_DEFAULT_EXPIRY_DAYS, 30, 1, 365),
   listingRenewDays: parsePositiveInt(process.env.LISTING_RENEW_DAYS, 30, 1, 365),
   databaseUrl,

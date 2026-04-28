@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { verifyFirebaseToken } from "../../middleware/verifyFirebaseToken";
 import { requireVerifiedEmail } from "../../middleware/requireVerifiedEmail";
+import { contentFilter } from "../../middleware/contentFilter";
 import { validateRequest } from "../../middleware/validateRequest";
 import {
   attachListingImageBodySchema,
@@ -33,6 +34,7 @@ listingsRouter.post(
   "/",
   verifyFirebaseToken,
   requireVerifiedEmail,
+  contentFilter,
   validateRequest({ body: createListingBodySchema }),
   createListing
 );
@@ -40,6 +42,7 @@ listingsRouter.patch(
   "/:id",
   verifyFirebaseToken,
   requireVerifiedEmail,
+  contentFilter,
   validateRequest({ params: idParamsSchema, body: patchListingBodySchema }),
   patchListing
 );
