@@ -7,8 +7,8 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: {
-    default: "Sooqna",
-    template: "%s | Sooqna",
+    default: "سوقنا — أكبر سوق إلكتروني في الأردن",
+    template: "%s | سوقنا",
   },
   description: "Marketplace",
   alternates: {
