@@ -7,7 +7,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
   const detailsHref = `/listings/${encodeURIComponent(listing.id)}`;
 
   return (
-    <article className="group relative overflow-hidden rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow)] transition-shadow duration-150 hover:shadow-[var(--shadow-md)]">
+    <article className="ui-card ui-card-hover group relative overflow-hidden">
       {/* Image */}
       <div className="relative h-44 w-full overflow-hidden bg-[var(--surface-muted)]">
         {firstImage?.url ? (
@@ -29,7 +29,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
 
         {/* Featured badge */}
         {listing.isFeatured && (
-          <span className="absolute right-2 top-2 z-20 rounded-full bg-[var(--featured)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--featured-text)] shadow">
+          <span className="absolute right-2 top-2 z-20 rounded-full bg-[var(--featured)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--featured-text)] shadow-[var(--shadow-sm)]">
             مميز ★
           </span>
         )}
@@ -62,7 +62,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
       <Link
         href={detailsHref}
         aria-label={`عرض تفاصيل الإعلان: ${listing.title}`}
-        className="absolute inset-0 z-10 rounded-[var(--radius-md)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/50"
+        className="absolute inset-0 z-10 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/50"
       />
     </article>
   );

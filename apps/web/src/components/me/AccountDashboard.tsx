@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { RequireAuthGate } from "@/components/auth/RequireAuthGate";
 import { getBackendMe, type BackendProfile } from "@/services/backendAuthService";
+import { ModernAvatar } from "@/components/ui/ModernAvatar";
 
 type DashCard = {
   title: string;
@@ -59,20 +59,13 @@ export function AccountDashboard() {
         <section className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow)]">
           <div className="absolute inset-0 bg-gradient-to-l from-[var(--accent-soft)] to-transparent opacity-60" />
           <div className="relative flex items-center gap-4">
-            {photoURL ? (
-              <Image
-                src={photoURL}
-                alt={displayName}
-                width={64}
-                height={64}
-                className="h-16 w-16 rounded-full border-2 border-[var(--brand)] object-cover"
-                unoptimized
-              />
-            ) : (
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--brand)] text-3xl text-[var(--brand-contrast)]">
-                {displayName.charAt(0).toUpperCase() || "م"}
-              </div>
-            )}
+            <ModernAvatar
+              src={photoURL}
+              name={displayName}
+              size="lg"
+              status="online"
+              verified={Boolean(profile?.emailVerified ?? currentUser?.emailVerified)}
+            />
             <div>
               <p className="text-xs text-[var(--text-muted)]">مرحباً بعودتك</p>
               <h2 className="text-2xl font-extrabold text-[var(--text)]">{displayName}</h2>

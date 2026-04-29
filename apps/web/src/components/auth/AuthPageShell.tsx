@@ -35,7 +35,7 @@ export function AuthPageShell({ activeTab, children }: AuthPageShellProps) {
       {/* Centered form card */}
       <main className="mx-auto flex min-h-[calc(100vh-64px)] max-w-md flex-col items-center justify-center px-4 py-10">
         {/* Tab switcher */}
-        <div className="mb-6 flex w-full overflow-hidden rounded-full border border-[var(--border)] bg-[var(--surface)]">
+        <div className="mb-6 flex w-full overflow-hidden rounded-full border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-sm)]">
           <Link
             href="/login"
             className={`flex-1 py-2.5 text-center text-sm font-semibold transition ${
@@ -58,7 +58,7 @@ export function AuthPageShell({ activeTab, children }: AuthPageShellProps) {
           </Link>
         </div>
 
-        <div className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-md)]">
+        <div className="ui-card w-full p-6 shadow-[var(--shadow-md)]">
           {children}
         </div>
 

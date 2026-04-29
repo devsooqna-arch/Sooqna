@@ -290,7 +290,7 @@ function PublicListingsPageInner() {
               const nextSort = e.target.value as SortKey;
               router.replace(buildListingsHref({ sort: nextSort, page: 1 }));
             }}
-            className="rounded-full border border-[var(--border)] bg-[var(--input-bg)] px-4 py-1.5 text-xs text-[var(--text)] outline-none focus:border-[var(--brand)]"
+            className="ui-pill-input ui-select h-9 border-[var(--border)] py-1.5 text-xs"
           >
             {Object.entries(SORT_LABELS).map(([value, label]) => (
               <option key={value} value={value}>{label}</option>

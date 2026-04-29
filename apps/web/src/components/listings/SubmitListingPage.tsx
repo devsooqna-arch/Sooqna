@@ -245,7 +245,7 @@ export function SubmitListingPage() {
               </div>
               <label className="space-y-1">
                 <span className="text-sm font-medium">التصنيف</span>
-                <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]" disabled={busy || categoryLoading}>
+                <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="ui-input ui-select w-full" disabled={busy || categoryLoading}>
                   {categoryOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
                 </select>
                 {categoryLoading ? <p className="text-xs text-[var(--text-muted)]">جاري تحميل التصنيفات...</p> : null}

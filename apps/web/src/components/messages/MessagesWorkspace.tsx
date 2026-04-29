@@ -22,6 +22,7 @@ import {
   markConversationRead,
 } from "@/services/messageService";
 import type { Conversation, Message } from "@/types/message";
+import { ModernAvatar } from "@/components/ui/ModernAvatar";
 
 export function MessagesWorkspace({ initialConversationId = "" }: { initialConversationId?: string }) {
   const { currentUser } = useAuth();
@@ -205,17 +206,35 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
                   key={item.id}
                   type="button"
                   onClick={() => setConversationId(item.id)}
-                  className="block w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-start text-sm transition hover:border-[var(--brand)]"
+                  className="block w-full rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-start text-sm shadow-[var(--shadow-sm)] transition hover:border-[var(--brand)] hover:shadow-[var(--shadow-md)]"
                 >
-                  <p className="font-medium">{item.listingSnapshot.title || "بدون عنوان"}</p>
-                  <p className="text-xs text-[var(--text-muted)]">
-                    {item.lastMessageText || "لا يوجد رسائل بعد"} • {formatDate(item.updatedAt)}
-                  </p>
-                  {(item.unreadCount ?? 0) > 0 ? (
-                    <span className="mt-1 inline-block rounded-full bg-[var(--brand)] px-2 py-0.5 text-[10px] font-bold text-[var(--brand-contrast)]">
-                      {item.unreadCount} غير مقروءة
-                    </span>
-                  ) : null}
+                  <div className="flex items-center gap-2">
+                    <ModernAvatar
+                      src={
+                        item.participants[
+                          item.participantIds.find((id) => id !== currentUser?.uid) || item.participantIds[0]
+                        ]?.photoURL
+                      }
+                      name={
+                        item.participants[
+                          item.participantIds.find((id) => id !== currentUser?.uid) || item.participantIds[0]
+                        ]?.fullName || "مستخدم"
+                      }
+                      size="sm"
+                      status="online"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium">{item.listingSnapshot.title || "بدون عنوان"}</p>
+                      <p className="truncate text-xs text-[var(--text-muted)]">
+                        {item.lastMessageText || "لا يوجد رسائل بعد"} • {formatDate(item.updatedAt)}
+                      </p>
+                    </div>
+                    {(item.unreadCount ?? 0) > 0 ? (
+                      <span className="inline-block rounded-full bg-[var(--brand)] px-2 py-0.5 text-[10px] font-bold text-[var(--brand-contrast)]">
+                        {item.unreadCount}
+                      </span>
+                    ) : null}
+                  </div>
                 </button>
               ))}
             </div>
@@ -315,12 +334,21 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
               {messages.map((message) => (
                 <article
                   key={message.id}
-                  className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm"
+                  className="rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm shadow-[var(--shadow-sm)]"
                 >
-                  <p className="text-xs text-[var(--text-muted)]">
-                    {message.senderId} • {formatDate(message.createdAt)}
-                  </p>
-                  <p className="mt-1">{message.text || "(بدون نص)"}</p>
+                  <div className="flex items-start gap-2">
+                    <ModernAvatar
+                      src={conversation?.participants[message.senderId]?.photoURL}
+                      name={conversation?.participants[message.senderId]?.fullName || "مستخدم"}
+                      size="sm"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-[var(--text-muted)]">
+                        {conversation?.participants[message.senderId]?.fullName || message.senderId} • {formatDate(message.createdAt)}
+                      </p>
+                      <p className="mt-1">{message.text || "(بدون نص)"}</p>
+                    </div>
+                  </div>
                 </article>
               ))}
             </div>

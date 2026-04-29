@@ -278,7 +278,7 @@ function LabeledSelect({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
+        className="ui-input ui-select w-full"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>

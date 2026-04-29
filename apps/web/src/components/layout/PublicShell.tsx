@@ -45,7 +45,7 @@ export function PublicShell({
           <div className="mx-auto flex max-w-[1110px] items-center gap-3 px-4 py-2 sm:px-6">
             <Link
               href="/submit-listing"
-              className="rounded-full bg-[var(--brand)] px-5 py-2 text-sm font-semibold text-[var(--brand-contrast)] shadow-[var(--shadow-sm)] transition duration-150 hover:bg-[var(--brand-hover)]"
+              className="ui-btn-primary rounded-full px-5"
             >
               + أعلن
             </Link>
@@ -121,10 +121,10 @@ export function PublicShell({
             <div>
               <h3 className="mb-4 text-base font-bold">التواصل الاجتماعي</h3>
               <div className="flex items-center gap-2">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--chip-border)] text-xs">f</span>
-                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--chip-border)] text-xs">in</span>
-                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--chip-border)] text-xs">▶</span>
-                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--chip-border)] text-xs">◎</span>
+                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--chip-border)] bg-[var(--surface-muted)] text-xs shadow-[var(--shadow-sm)]">f</span>
+                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--chip-border)] bg-[var(--surface-muted)] text-xs shadow-[var(--shadow-sm)]">in</span>
+                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--chip-border)] bg-[var(--surface-muted)] text-xs shadow-[var(--shadow-sm)]">▶</span>
+                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--chip-border)] bg-[var(--surface-muted)] text-xs shadow-[var(--shadow-sm)]">◎</span>
               </div>
             </div>
           </div>
@@ -136,7 +136,7 @@ export function PublicShell({
                 (chip) => (
                   <span
                     key={chip}
-                    className="rounded-full border border-[var(--chip-border)] bg-[var(--chip)] px-4 py-1.5 text-xs text-[var(--text-muted)]"
+                    className="ui-chip px-4 py-1.5"
                   >
                     {chip}
                   </span>
@@ -146,7 +146,7 @@ export function PublicShell({
           </div>
 
           <div className="mt-7 flex flex-wrap items-center justify-between gap-3 text-xs text-[var(--text-muted)]">
-            <p>جميع الحقوق محفوظة © 2005-2026 .dev</p>
+            <p>جميع الحقوق محفوظة © 2026 سوقنا</p>
             <ScrollToTopButton />
           </div>
         </div>

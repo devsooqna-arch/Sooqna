@@ -159,7 +159,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
 
       {success && (
         <div
-          className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-center text-sm text-emerald-800"
+          className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-center text-sm text-emerald-800"
           role="status"
         >
           تم تسجيل الدخول بنجاح
@@ -168,7 +168,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
 
       {submitError && (
         <div
-          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-center text-sm text-red-800"
+          className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-center text-sm text-red-800"
           role="alert"
         >
           {submitError}
@@ -177,7 +177,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
 
       {verificationRequired && (
         <div
-          className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-center text-sm text-amber-900"
+          className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-center text-sm text-amber-900"
           role="status"
         >
           <p>يرجى التحقق من بريدك الإلكتروني قبل متابعة الدخول.</p>
@@ -208,7 +208,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
               autoComplete="name"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text)] shadow-sm outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--brand)]"
+              className="ui-input w-full"
               placeholder="الاسم الكامل"
               disabled={busy || authLoading}
               aria-invalid={!!fieldErrors.fullName}
@@ -241,7 +241,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
                 setFieldErrors((p) => ({ ...p, email: undefined }));
               }
             }}
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text)] shadow-sm outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--brand)]"
+            className="ui-input w-full"
             placeholder="you@example.com"
             disabled={busy || authLoading}
             aria-invalid={!!fieldErrors.email}
@@ -273,7 +273,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
                 setFieldErrors((p) => ({ ...p, password: undefined }));
               }
             }}
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text)] shadow-sm outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--brand)]"
+            className="ui-input w-full"
             placeholder="••••••••"
             disabled={busy || authLoading}
             aria-invalid={!!fieldErrors.password}
@@ -301,7 +301,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
         <button
           type="submit"
           disabled={busy || authLoading}
-          className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--brand)] px-4 py-2.5 text-sm font-semibold text-[var(--brand-contrast)] shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="ui-btn-primary flex w-full gap-2 rounded-full py-2.5"
         >
           {submitting ? (
             <>
@@ -337,7 +337,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
         type="button"
         onClick={handleGoogleLogin}
         disabled={busy || authLoading}
-        className="flex w-full items-center justify-center gap-2 rounded-full border border-[var(--chip-border)] bg-[var(--chip)] px-4 py-2.5 text-sm font-semibold text-[var(--text)] shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        className="ui-btn-ghost flex w-full gap-2 rounded-full border-[var(--chip-border)] bg-[var(--chip)] py-2.5 text-[var(--text)]"
       >
         {googleLoading ? (
           <>

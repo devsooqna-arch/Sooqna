@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { ModernAvatar } from "@/components/ui/ModernAvatar";
 
 export function PublicNavActions() {
   const router = useRouter();
@@ -34,9 +35,18 @@ export function PublicNavActions() {
 
   return (
     <div className="flex items-center gap-2">
+      <div className="hidden sm:block">
+        <ModernAvatar
+          src={currentUser.photoURL}
+          name={currentUser.displayName || currentUser.email?.split("@")[0] || "مستخدم"}
+          size="sm"
+          status="online"
+          verified={Boolean(currentUser.emailVerified)}
+        />
+      </div>
       <Link
         href="/me"
-        className="rounded-full bg-[var(--brand)] px-4 py-2 text-xs font-semibold text-[var(--brand-contrast)] transition hover:opacity-90"
+        className="rounded-full bg-[var(--brand)] px-4 py-2 text-xs font-semibold text-[var(--brand-contrast)] shadow-[var(--shadow-sm)] transition hover:opacity-90"
       >
         حسابي
       </Link>
@@ -47,7 +57,7 @@ export function PublicNavActions() {
             router.replace("/");
           })
         }
-        className="rounded-full border border-[var(--chip-border)] bg-[var(--surface)] px-4 py-2 text-xs font-semibold text-[var(--text-muted)] transition hover:bg-[var(--chip)]"
+        className="rounded-full border border-[var(--chip-border)] bg-[var(--surface)] px-4 py-2 text-xs font-semibold text-[var(--text-muted)] shadow-[var(--shadow-sm)] transition hover:bg-[var(--chip)]"
       >
         تسجيل الخروج
       </button>
