@@ -230,9 +230,6 @@ jobs:
             } > .env
             echo "Backend .env written (NODE_ENV=production, CORS_ORIGIN=${NEXT_PUBLIC_SITE_URL}, FIREBASE_PROJECT_ID set, DATABASE_URL=SET)."
 
-            echo "Running backend DB preflight check..."
-            npm run db:check
-
             echo "Listing prisma directory..."
             ls -lah prisma || true
             echo "Listing prisma migrations directory..."
@@ -256,6 +253,8 @@ jobs:
             fi
 
             echo "Prisma migrate deploy finished successfully."
+            echo "Running backend DB preflight check after migrations..."
+            npm run db:check
 
             echo "Seeding categories from JSON (idempotent upsert — required for deploy parity)..."
             seed_exit=0
