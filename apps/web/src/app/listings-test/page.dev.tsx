@@ -13,9 +13,7 @@ export default function ListingsTestPage() {
       <div className="mx-auto max-w-6xl space-y-8">
         <header>
           <h1 className="text-2xl font-semibold text-slate-900">اختبار الإعلانات للمرحلة الأولى</h1>
-          <p className="mt-1 text-sm text-slate-600">
-            أنشئ إعلانًا تجريبيًا وراجع الإعلانات المنشورة.
-          </p>
+          <p className="mt-1 text-sm text-slate-600">أنشئ إعلانًا تجريبيًا وراجع الإعلانات المنشورة.</p>
         </header>
 
         <CreateListingForm />
@@ -28,4 +26,3 @@ export default function ListingsTestPage() {
     </main>
   );
 }
-

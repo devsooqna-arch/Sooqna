@@ -5,9 +5,11 @@ import helmet from "helmet";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
 import { env } from "./config/env";
+import { openApiSpec } from "./config/swagger";
 import { apiRouter } from "./routes";
 import { errorHandler } from "./middleware/errorHandler";
 import { notFoundHandler } from "./middleware/notFound";
+import swaggerUi from "swagger-ui-express";
 
 export const app = express();
 
@@ -74,6 +76,7 @@ app.use(
 );
 
 app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiSpec));
 app.use("/api", apiRouter);
 app.use(notFoundHandler);
 app.use(errorHandler);

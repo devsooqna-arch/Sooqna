@@ -12,13 +12,19 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  ADMIN
+  BUYER
+  SELLER
+}
+
 model User {
   id              String   @id
   firebaseUid     String   @unique
   email           String
   name            String
   avatarUrl       String?
-  role            String
+  role            Role     @default(BUYER)
   accountStatus   String
   isEmailVerified Boolean
   createdAt       DateTime
@@ -160,4 +166,50 @@ model Upload {
   createdAt DateTime
 
   listing Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+}
+
+model Report {
+  id           String   @id
+  targetType   String
+  targetId     String
+  reasonCode   String
+  details      String
+  reporterId   String
+  status       String
+  moderatorId  String?
+  moderatorNote String?
+  createdAt    DateTime
+  updatedAt    DateTime
+
+  @@index([status, createdAt])
+  @@index([targetType, targetId])
+  @@index([reporterId, createdAt])
+}
+
+model AuditLog {
+  id         String   @id
+  actorId    String?
+  action     String
+  targetType String
+  targetId   String?
+  metadata   Json
+  createdAt  DateTime
+
+  @@index([createdAt])
+  @@index([action, createdAt])
+  @@index([targetType, targetId])
+}
+
+model EngagementEvent {
+  id             String   @id
+  eventType      String
+  listingId      String?
+  conversationId String?
+  actorId        String?
+  metadata       Json
+  createdAt      DateTime
+
+  @@index([createdAt])
+  @@index([eventType, createdAt])
+  @@index([listingId, createdAt])
 }

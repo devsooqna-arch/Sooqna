@@ -64,7 +64,7 @@ export function AccountDashboard() {
               name={displayName}
               size="lg"
               status="online"
-              verified={Boolean(profile?.emailVerified ?? currentUser?.emailVerified)}
+              verified={Boolean(profile?.isEmailVerified ?? currentUser?.emailVerified)}
             />
             <div>
               <p className="text-xs text-[var(--text-muted)]">مرحباً بعودتك</p>

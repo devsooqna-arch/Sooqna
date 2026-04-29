@@ -12,7 +12,7 @@ export const LISTING_CONTACT_PREFERENCES = ["chat", "phone"] as const;
 
 export const MESSAGE_TYPES = ["text", "image", "system"] as const;
 
-export const USER_ROLES = ["user"] as const;
+export const USER_ROLES = ["ADMIN", "BUYER", "SELLER"] as const;
 export const ACCOUNT_STATUSES = ["active"] as const;
 
 export const CATEGORY_IDS = [

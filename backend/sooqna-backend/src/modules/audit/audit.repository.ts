@@ -1,24 +1,54 @@
-import * as path from "node:path";
-import { readJsonArrayFile, writeJsonArrayFile } from "../../utils/fileStore";
+import { Prisma } from "@prisma/client";
+import { prisma } from "../../config/prisma";
 import type { AuditLogEntry } from "./audit.types";
-
-const auditDataPath = path.resolve(process.cwd(), "src/modules/audit/audit.data.json");
 
 export interface AuditRepository {
   append(entry: AuditLogEntry): Promise<void>;
   list(limit: number): Promise<AuditLogEntry[]>;
 }
 
-export class JsonAuditRepository implements AuditRepository {
+export class PrismaAuditRepository implements AuditRepository {
   async append(entry: AuditLogEntry): Promise<void> {
-    const items = readJsonArrayFile<AuditLogEntry>(auditDataPath);
-    items.push(entry);
-    const trimmed = items.slice(-5000);
-    writeJsonArrayFile(auditDataPath, trimmed);
+    await prisma.auditLog.create({
+      data: {
+        id: entry.id,
+        actorId: entry.actorId,
+        action: entry.action,
+        targetType: entry.targetType,
+        targetId: entry.targetId,
+        metadata: entry.metadata as Prisma.InputJsonValue,
+        createdAt: new Date(entry.createdAt),
+      },
+    });
+
+    const total = await prisma.auditLog.count();
+    if (total > 5000) {
+      const toDelete = await prisma.auditLog.findMany({
+        orderBy: { createdAt: "asc" },
+        take: total - 5000,
+        select: { id: true },
+      });
+      if (toDelete.length > 0) {
+        await prisma.auditLog.deleteMany({
+          where: { id: { in: toDelete.map((item) => item.id) } },
+        });
+      }
+    }
   }
 
   async list(limit: number): Promise<AuditLogEntry[]> {
-    const items = readJsonArrayFile<AuditLogEntry>(auditDataPath);
-    return items.slice(-Math.max(1, Math.min(limit, 500))).reverse();
+    const rows = await prisma.auditLog.findMany({
+      orderBy: { createdAt: "desc" },
+      take: Math.max(1, Math.min(limit, 500)),
+    });
+    return rows.map((item) => ({
+      id: item.id,
+      actorId: item.actorId,
+      action: item.action as AuditLogEntry["action"],
+      targetType: item.targetType,
+      targetId: item.targetId,
+      metadata: (item.metadata ?? {}) as Record<string, unknown>,
+      createdAt: item.createdAt.toISOString(),
+    }));
   }
 }

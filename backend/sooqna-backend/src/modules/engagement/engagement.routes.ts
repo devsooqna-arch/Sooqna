@@ -1,26 +1,23 @@
 import { Router } from "express";
 import { verifyFirebaseToken } from "../../middleware/verifyFirebaseToken";
+import { validateRequest } from "../../middleware/validateRequest";
+import { engagementEventBodySchema, engagementRecentQuerySchema } from "../../shared/validation/schemas";
 import { trackEngagementEvent, listRecentEngagementEvents } from "./engagement.service";
 
 export const engagementRouter = Router();
 
-engagementRouter.post("/events", verifyFirebaseToken, async (req, res) => {
-  const eventType = String(req.body?.eventType ?? "");
-  if (!["favorite", "view", "contact_intent"].includes(eventType)) {
-    res.status(400).json({ success: false, code: "VALIDATION_ERROR", message: "Invalid eventType." });
-    return;
-  }
+engagementRouter.post("/events", verifyFirebaseToken, validateRequest({ body: engagementEventBodySchema }), async (req, res) => {
   await trackEngagementEvent({
-    eventType: eventType as "favorite" | "view" | "contact_intent",
-    listingId: typeof req.body?.listingId === "string" ? req.body.listingId : undefined,
-    conversationId: typeof req.body?.conversationId === "string" ? req.body.conversationId : undefined,
+    eventType: req.body.eventType,
+    listingId: req.body.listingId,
+    conversationId: req.body.conversationId,
     actorId: req.authUser?.uid,
-    metadata: req.body?.metadata && typeof req.body.metadata === "object" ? req.body.metadata : undefined,
+    metadata: req.body.metadata,
   });
   res.json({ success: true });
 });
 
-engagementRouter.get("/events/recent", verifyFirebaseToken, (req, res) => {
-  const limit = Math.max(1, Math.min(Number(req.query.limit) || 50, 200));
-  res.json({ success: true, events: listRecentEngagementEvents(limit) });
+engagementRouter.get("/events/recent", verifyFirebaseToken, validateRequest({ query: engagementRecentQuerySchema }), async (req, res) => {
+  const limit = Number(req.query.limit ?? 50);
+  res.json({ success: true, events: await listRecentEngagementEvents(limit) });
 });

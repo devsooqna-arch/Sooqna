@@ -9,6 +9,8 @@ import type { UserProfile } from "../src/modules/users/users.types";
 import type { Listing } from "../src/modules/listings/listings.types";
 import type { FavoriteRecord } from "../src/modules/favorites/favorites.types";
 import type { Conversation, Message } from "../src/modules/messages/messages.types";
+import type { ModerationReport } from "../src/modules/reports/reports.types";
+import type { AuditLogEntry } from "../src/modules/audit/audit.types";
 
 function readJsonFile<T>(relativePath: string): T[] {
   const filePath = path.resolve(process.cwd(), relativePath);
@@ -20,13 +22,14 @@ function readJsonFile<T>(relativePath: string): T[] {
 
 async function migrateUsers(users: UserProfile[]): Promise<void> {
   for (const user of users) {
+    const role = user.role === "ADMIN" || user.role === "BUYER" || user.role === "SELLER" ? user.role : "BUYER";
     await prisma.user.upsert({
       where: { firebaseUid: user.uid },
       update: {
         email: user.email,
         name: user.fullName,
         avatarUrl: user.photoURL,
-        role: user.role,
+        role,
         accountStatus: user.accountStatus,
         isEmailVerified: user.isEmailVerified,
         updatedAt: new Date(user.updatedAt),
@@ -37,11 +40,69 @@ async function migrateUsers(users: UserProfile[]): Promise<void> {
         email: user.email,
         name: user.fullName,
         avatarUrl: user.photoURL,
-        role: user.role,
+        role,
         accountStatus: user.accountStatus,
         isEmailVerified: user.isEmailVerified,
         createdAt: new Date(user.createdAt),
         updatedAt: new Date(user.updatedAt),
+      },
+    });
+  }
+}
+
+async function migrateReports(reports: ModerationReport[]): Promise<void> {
+  for (const report of reports) {
+    await prisma.report.upsert({
+      where: { id: report.id },
+      update: {
+        targetType: report.targetType,
+        targetId: report.targetId,
+        reasonCode: report.reasonCode,
+        details: report.details,
+        reporterId: report.reporterId,
+        status: report.status,
+        moderatorId: report.moderatorId,
+        moderatorNote: report.moderatorNote,
+        createdAt: new Date(report.createdAt),
+        updatedAt: new Date(report.updatedAt),
+      },
+      create: {
+        id: report.id,
+        targetType: report.targetType,
+        targetId: report.targetId,
+        reasonCode: report.reasonCode,
+        details: report.details,
+        reporterId: report.reporterId,
+        status: report.status,
+        moderatorId: report.moderatorId,
+        moderatorNote: report.moderatorNote,
+        createdAt: new Date(report.createdAt),
+        updatedAt: new Date(report.updatedAt),
+      },
+    });
+  }
+}
+
+async function migrateAuditLogs(entries: AuditLogEntry[]): Promise<void> {
+  for (const entry of entries) {
+    await prisma.auditLog.upsert({
+      where: { id: entry.id },
+      update: {
+        actorId: entry.actorId,
+        action: entry.action,
+        targetType: entry.targetType,
+        targetId: entry.targetId,
+        metadata: entry.metadata,
+        createdAt: new Date(entry.createdAt),
+      },
+      create: {
+        id: entry.id,
+        actorId: entry.actorId,
+        action: entry.action,
+        targetType: entry.targetType,
+        targetId: entry.targetId,
+        metadata: entry.metadata,
+        createdAt: new Date(entry.createdAt),
       },
     });
   }
@@ -282,12 +343,16 @@ async function main(): Promise<void> {
     sortOrder: number;
     createdAt: string | null;
   }>("src/modules/categories/repositories/categories.data.json");
+  const reports = readJsonFile<ModerationReport>("src/modules/reports/reports.data.json");
+  const auditLogs = readJsonFile<AuditLogEntry>("src/modules/audit/audit.data.json");
 
   await migrateUsers(users);
   await migrateListings(listings);
   await migrateFavorites(favorites);
   await migrateConversationsAndMessages(conversations, messages);
   await migrateCategories(categories);
+  await migrateReports(reports);
+  await migrateAuditLogs(auditLogs);
 
   console.log("JSON data migrated to PostgreSQL successfully.");
 }

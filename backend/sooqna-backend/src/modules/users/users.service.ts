@@ -18,7 +18,7 @@ export class UsersService {
       fullName: input?.fullName ?? existing?.fullName ?? authUser.name ?? "",
       email: authUser.email ?? existing?.email ?? "",
       photoURL: input?.photoURL ?? existing?.photoURL ?? authUser.picture ?? "",
-      role: existing?.role ?? "user",
+      role: existing?.role ?? "BUYER",
       accountStatus: existing?.accountStatus ?? "active",
       isEmailVerified: authUser.email_verified ?? false,
       createdAt: existing?.createdAt ?? now,

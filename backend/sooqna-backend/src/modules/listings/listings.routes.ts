@@ -7,6 +7,7 @@ import {
   attachListingImageBodySchema,
   createListingBodySchema,
   idParamsSchema,
+  listingsQuerySchema,
   patchListingBodySchema,
   renewListingBodySchema,
 } from "../../shared/validation/schemas";
@@ -26,7 +27,7 @@ import {
 
 export const listingsRouter = Router();
 
-listingsRouter.get("/", listListings);
+listingsRouter.get("/", validateRequest({ query: listingsQuerySchema }), listListings);
 listingsRouter.get("/mine", verifyFirebaseToken, listMyListings);
 listingsRouter.get("/:id", validateRequest({ params: idParamsSchema }), getListingById);
 

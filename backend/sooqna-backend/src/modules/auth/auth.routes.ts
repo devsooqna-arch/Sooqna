@@ -1,9 +1,11 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
 import { verifyFirebaseToken } from "../../middleware/verifyFirebaseToken";
+import { validateRequest } from "../../middleware/validateRequest";
 import { adminAuth } from "../../config/firebaseAdmin";
 import { env } from "../../config/env";
 import { sendError, sendSuccess } from "../../shared/contracts/api";
+import { emptyBodySchema, emptyQuerySchema, recaptchaVerifyBodySchema } from "../../shared/validation/schemas";
 
 export const authRouter = Router();
 
@@ -21,7 +23,7 @@ const recaptchaLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-authRouter.get("/session", verifyFirebaseToken, (req, res) => {
+authRouter.get("/session", verifyFirebaseToken, validateRequest({ query: emptyQuerySchema }), (req, res) => {
   res.json({
     success: true,
     user: {
@@ -32,7 +34,12 @@ authRouter.get("/session", verifyFirebaseToken, (req, res) => {
   });
 });
 
-authRouter.post("/resend-verification", verifyFirebaseToken, resendVerificationLimiter, async (req, res) => {
+authRouter.post(
+  "/resend-verification",
+  verifyFirebaseToken,
+  resendVerificationLimiter,
+  validateRequest({ query: emptyQuerySchema, body: emptyBodySchema }),
+  async (req, res) => {
   try {
     const email = req.authUser?.email;
     if (!email) {
@@ -56,9 +63,14 @@ authRouter.post("/resend-verification", verifyFirebaseToken, resendVerificationL
       error instanceof Error ? error.message : String(error)
     );
   }
-});
+  }
+);
 
-authRouter.post("/recaptcha/verify", recaptchaLimiter, async (req, res) => {
+authRouter.post(
+  "/recaptcha/verify",
+  recaptchaLimiter,
+  validateRequest({ query: emptyQuerySchema, body: recaptchaVerifyBodySchema }),
+  async (req, res) => {
   try {
     if (!env.recaptchaEnabled) {
       sendSuccess(res, { verified: true, bypassed: true });
@@ -110,5 +122,6 @@ authRouter.post("/recaptcha/verify", recaptchaLimiter, async (req, res) => {
       error instanceof Error ? error.message : String(error)
     );
   }
-});
+  }
+);
 

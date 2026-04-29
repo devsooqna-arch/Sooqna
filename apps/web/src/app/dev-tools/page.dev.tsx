@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { DevToolsPanel } from "@/components/dev/DevToolsPanel";
 
@@ -8,10 +7,6 @@ export const metadata: Metadata = {
 };
 
 export default function DevToolsPage() {
-  if (process.env.NODE_ENV === "production") {
-    notFound();
-  }
-
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8">
       <div className="mx-auto max-w-7xl">

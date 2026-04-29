@@ -3,10 +3,12 @@ import { fileURLToPath } from "url";
 import { wpExactRedirects, wpPatternRedirects } from "./wp-redirects.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const isDevelopment = process.env.NODE_ENV === "development";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  pageExtensions: isDevelopment ? ["tsx", "ts", "jsx", "js", "dev.tsx"] : ["tsx", "ts", "jsx", "js"],
   // Disable experimental devtools overlay hooks that were causing
   // Segment Explorer manifest/runtime errors in this environment.
   devIndicators: false,

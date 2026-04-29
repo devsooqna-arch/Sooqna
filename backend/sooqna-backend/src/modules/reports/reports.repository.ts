@@ -1,11 +1,5 @@
-import * as path from "node:path";
-import { readJsonArrayFile, writeJsonArrayFile } from "../../utils/fileStore";
+import { prisma } from "../../config/prisma";
 import type { ModerationReport, ReportStatus } from "./reports.types";
-
-const reportsDataPath = path.resolve(
-  process.cwd(),
-  "src/modules/reports/reports.data.json"
-);
 
 export interface ReportsRepository {
   create(report: ModerationReport): Promise<ModerationReport>;
@@ -14,31 +8,74 @@ export interface ReportsRepository {
   update(report: ModerationReport): Promise<ModerationReport>;
 }
 
-export class JsonReportsRepository implements ReportsRepository {
+export class PrismaReportsRepository implements ReportsRepository {
   async create(report: ModerationReport): Promise<ModerationReport> {
-    const items = readJsonArrayFile<ModerationReport>(reportsDataPath);
-    items.push(report);
-    writeJsonArrayFile(reportsDataPath, items);
+    await prisma.report.create({
+      data: {
+        id: report.id,
+        targetType: report.targetType,
+        targetId: report.targetId,
+        reasonCode: report.reasonCode,
+        details: report.details,
+        reporterId: report.reporterId,
+        status: report.status,
+        moderatorId: report.moderatorId,
+        moderatorNote: report.moderatorNote,
+        createdAt: new Date(report.createdAt),
+        updatedAt: new Date(report.updatedAt),
+      },
+    });
     return report;
   }
 
   async list(filters?: { status?: ReportStatus }): Promise<ModerationReport[]> {
-    const items = readJsonArrayFile<ModerationReport>(reportsDataPath);
-    const filtered = filters?.status ? items.filter((item) => item.status === filters.status) : items;
-    return filtered.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    const reports = await prisma.report.findMany({
+      where: filters?.status ? { status: filters.status } : undefined,
+      orderBy: { createdAt: "desc" },
+    });
+    return reports.map((report) => ({
+      id: report.id,
+      targetType: report.targetType as ModerationReport["targetType"],
+      targetId: report.targetId,
+      reasonCode: report.reasonCode as ModerationReport["reasonCode"],
+      details: report.details,
+      reporterId: report.reporterId,
+      status: report.status as ReportStatus,
+      moderatorId: report.moderatorId,
+      moderatorNote: report.moderatorNote,
+      createdAt: report.createdAt.toISOString(),
+      updatedAt: report.updatedAt.toISOString(),
+    }));
   }
 
   async findById(id: string): Promise<ModerationReport | null> {
-    const items = readJsonArrayFile<ModerationReport>(reportsDataPath);
-    return items.find((item) => item.id === id) ?? null;
+    const report = await prisma.report.findUnique({ where: { id } });
+    if (!report) return null;
+    return {
+      id: report.id,
+      targetType: report.targetType as ModerationReport["targetType"],
+      targetId: report.targetId,
+      reasonCode: report.reasonCode as ModerationReport["reasonCode"],
+      details: report.details,
+      reporterId: report.reporterId,
+      status: report.status as ReportStatus,
+      moderatorId: report.moderatorId,
+      moderatorNote: report.moderatorNote,
+      createdAt: report.createdAt.toISOString(),
+      updatedAt: report.updatedAt.toISOString(),
+    };
   }
 
   async update(report: ModerationReport): Promise<ModerationReport> {
-    const items = readJsonArrayFile<ModerationReport>(reportsDataPath);
-    const idx = items.findIndex((item) => item.id === report.id);
-    if (idx < 0) throw new Error("Report not found");
-    items[idx] = report;
-    writeJsonArrayFile(reportsDataPath, items);
+    await prisma.report.update({
+      where: { id: report.id },
+      data: {
+        status: report.status,
+        moderatorId: report.moderatorId,
+        moderatorNote: report.moderatorNote,
+        updatedAt: new Date(report.updatedAt),
+      },
+    });
     return report;
   }
 }

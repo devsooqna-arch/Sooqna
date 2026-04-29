@@ -110,6 +110,54 @@ export const categoriesQuerySchema = z
   })
   .strict();
 
+export const listingsQuerySchema = z
+  .object({
+    limit: z.coerce.number().int().min(1).max(100).optional(),
+    offset: z.coerce.number().int().min(0).optional(),
+    category: z.string().trim().min(1).max(120).optional(),
+    city: z.string().trim().min(1).max(120).optional(),
+    search: z.string().trim().max(200).optional(),
+    sort: z.enum(["price_asc", "price_desc", "newest"]).optional(),
+  })
+  .strict();
+
+export const moderationQueueQuerySchema = z
+  .object({
+    status: z.enum(["open", "in_review", "resolved", "rejected"]).optional(),
+  })
+  .strict();
+
+export const auditLogsQuerySchema = z
+  .object({
+    limit: z.coerce.number().int().min(1).max(500).optional(),
+  })
+  .strict();
+
+export const engagementEventBodySchema = z
+  .object({
+    eventType: z.enum(["favorite", "view", "contact_intent"]),
+    listingId: z.string().trim().min(1).max(120).optional(),
+    conversationId: z.string().trim().min(1).max(120).optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
+  })
+  .strict();
+
+export const engagementRecentQuerySchema = z
+  .object({
+    limit: z.coerce.number().int().min(1).max(200).optional(),
+  })
+  .strict();
+
+export const recaptchaVerifyBodySchema = z
+  .object({
+    token: z.string().trim().min(1).optional(),
+  })
+  .strict();
+
+export const emptyQuerySchema = z.object({}).strict();
+export const emptyBodySchema = z.object({}).strict();
+export const uploadMultipartFieldsSchema = z.record(z.string(), z.string()).optional().default({});
+
 export const createReportBodySchema = z
   .object({
     targetType: z.enum(["listing", "message", "user"]),

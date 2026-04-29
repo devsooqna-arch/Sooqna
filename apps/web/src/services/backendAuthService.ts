@@ -5,7 +5,7 @@ export type BackendProfile = {
   fullName: string;
   email: string;
   photoURL: string;
-  role: "user";
+  role: "ADMIN" | "BUYER" | "SELLER";
   accountStatus: "active";
   isEmailVerified: boolean;
   createdAt: string;

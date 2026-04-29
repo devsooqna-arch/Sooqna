@@ -71,7 +71,7 @@ export class ListingsService {
       fullName: owner.fullName,
       email: owner.email,
       photoURL: owner.photoURL,
-      role: "user",
+      role: "SELLER",
       accountStatus: "active",
       isEmailVerified: false,
       createdAt: now,

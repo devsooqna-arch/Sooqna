@@ -69,7 +69,6 @@ export const env = {
   recaptchaEnabled: parseBoolean(process.env.RECAPTCHA_ENABLED, isProduction),
   recaptchaSecretKey: process.env.RECAPTCHA_SECRET_KEY ?? "",
   requireEmailVerified: parseBoolean(process.env.REQUIRE_EMAIL_VERIFIED, isProduction),
-  adminUids: parseCsv(process.env.ADMIN_UIDS),
   moderationBlockedKeywords: parseCsv(process.env.MODERATION_BLOCKED_KEYWORDS).map((item) =>
     item.toLowerCase()
   ),

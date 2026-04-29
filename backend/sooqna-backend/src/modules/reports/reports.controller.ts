@@ -1,11 +1,11 @@
 import type { Request, Response } from "express";
 import { AppError } from "../../shared/errors/appError";
 import { logAuditEvent } from "../audit/audit.service";
-import { JsonReportsRepository } from "./reports.repository";
+import { PrismaReportsRepository } from "./reports.repository";
 import { ReportsService } from "./reports.service";
 import type { ReportStatus } from "./reports.types";
 
-const service = new ReportsService(new JsonReportsRepository());
+const service = new ReportsService(new PrismaReportsRepository());
 
 export async function submitReport(req: Request, res: Response): Promise<void> {
   const uid = req.authUser?.uid;

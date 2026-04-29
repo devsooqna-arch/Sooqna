@@ -1,9 +1,9 @@
 import { generateId } from "../../utils/ids";
 import { nowIso } from "../../utils/time";
-import { JsonAuditRepository } from "./audit.repository";
+import { PrismaAuditRepository } from "./audit.repository";
 import type { AuditAction, AuditLogEntry } from "./audit.types";
 
-const repo = new JsonAuditRepository();
+const repo = new PrismaAuditRepository();
 
 export async function logAuditEvent(input: {
   actorId?: string | null;
