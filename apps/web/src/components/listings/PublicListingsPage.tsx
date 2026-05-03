@@ -38,7 +38,7 @@ function buildPageNumbers(currentPage: number, totalPages: number): Array<number
   return pages;
 }
 
-function ListingsSkeleton() {
+export function ListingsPageSkeleton() {
   return (
     <div className="grid gap-5 lg:grid-cols-[270px_1fr]">
       <div className="h-48 animate-pulse rounded-lg bg-[var(--surface)]" />
@@ -168,7 +168,7 @@ function PublicListingsPageInner() {
   }, [currentPage, totalPages, router, buildListingsHref]);
 
   if (showSkeleton) {
-    return <ListingsSkeleton />;
+    return <ListingsPageSkeleton />;
   }
 
   if (error) {
@@ -382,7 +382,7 @@ function PublicListingsPageInner() {
 
 export function PublicListingsPage() {
   return (
-    <Suspense fallback={<ListingsSkeleton />}>
+    <Suspense fallback={<ListingsPageSkeleton />}>
       <PublicListingsPageInner />
     </Suspense>
   );

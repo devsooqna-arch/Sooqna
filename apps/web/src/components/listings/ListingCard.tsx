@@ -1,10 +1,21 @@
+"use client";
+
 import type { Listing } from "@/types/listing";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { formatListedAgo } from "@/lib/formatListedAgo";
+
+const PLACEHOLDER = "/images/placeholder-listing.svg";
 
 export function ListingCard({ listing }: { listing: Listing }) {
   const firstImage = listing.images.find((img) => img.isPrimary) ?? listing.images[0];
+  const preferredSrc = firstImage?.url?.trim() ? firstImage.url : PLACEHOLDER;
+  const [imgSrc, setImgSrc] = useState(preferredSrc);
+
+  useEffect(() => {
+    setImgSrc(preferredSrc);
+  }, [listing.id, preferredSrc]);
   const detailsHref = `/listings/${encodeURIComponent(listing.id)}`;
   const listedAgo = formatListedAgo(listing.publishedAt ?? listing.createdAt);
 
@@ -12,22 +23,15 @@ export function ListingCard({ listing }: { listing: Listing }) {
     <article className="ui-card ui-card-hover group relative overflow-hidden">
       {/* Image */}
       <div className="relative h-44 w-full overflow-hidden bg-[var(--surface-muted)]">
-        {firstImage?.url ? (
-          <Image
-            src={firstImage.url}
-            alt={listing.title}
-            fill
-            className="object-cover transition duration-300 group-hover:scale-105"
-            loading="lazy"
-            unoptimized
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--text-muted)] opacity-40">
-              <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>
-            </svg>
-          </div>
-        )}
+        <Image
+          src={imgSrc}
+          alt={listing.title}
+          fill
+          className="object-cover transition duration-300 group-hover:scale-105"
+          loading="lazy"
+          unoptimized
+          onError={() => setImgSrc(PLACEHOLDER)}
+        />
 
         {/* Featured badge */}
         {listing.isFeatured && (

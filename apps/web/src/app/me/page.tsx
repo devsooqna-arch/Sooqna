@@ -11,7 +11,7 @@ export default function MePage() {
   return (
     <PublicShell
       pageTitle="حسابي"
-      pageDescription="إدارة الإعلانات، المفضلة، والرسائل باستخدام خدمات Milestone 1 الحالية."
+      pageDescription="إدارة إعلاناتك، المفضلة، والرسائل من لوحة واحدة."
     >
       <AccountDashboard />
     </PublicShell>

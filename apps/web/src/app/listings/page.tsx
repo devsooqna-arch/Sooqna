@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { PublicShell } from "@/components/layout/PublicShell";
-import { PublicListingsPage } from "@/components/listings/PublicListingsPage";
+import { PublicListingsPage, ListingsPageSkeleton } from "@/components/listings/PublicListingsPage";
 import { JsonLdScript } from "@/components/seo/JsonLdScript";
 import { buildAbsoluteUrl } from "@/lib/seo";
 
@@ -24,9 +24,7 @@ export default function ListingsPage() {
   return (
     <PublicShell>
       <JsonLdScript data={jsonLd} />
-      <Suspense
-        fallback={<p className="text-sm text-[var(--text-muted)]">جاري تحميل الإعلانات...</p>}
-      >
+      <Suspense fallback={<ListingsPageSkeleton />}>
         <PublicListingsPage />
       </Suspense>
     </PublicShell>

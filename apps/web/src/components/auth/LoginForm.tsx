@@ -12,7 +12,8 @@ function isValidEmail(value: string): boolean {
 
 function readNextPathFromUrl(): string {
   if (typeof window === "undefined") return "/me";
-  const raw = new URLSearchParams(window.location.search).get("next");
+  const params = new URLSearchParams(window.location.search);
+  const raw = params.get("next") ?? params.get("returnTo");
   if (raw && raw.startsWith("/") && !raw.startsWith("//")) return raw;
   return "/me";
 }

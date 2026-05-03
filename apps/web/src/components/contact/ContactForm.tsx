@@ -3,21 +3,61 @@
 import { useState, type FormEvent } from "react";
 
 export function ContactForm() {
-  const [hint, setHint] = useState<string | null>(null);
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  function onSubmit(e: FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    const name = String(fd.get("name") ?? "").trim();
-    const email = String(fd.get("email") ?? "").trim();
-    const subject = String(fd.get("subject") ?? "").trim();
-    const message = String(fd.get("message") ?? "").trim();
-    const body = encodeURIComponent(
-      `الاسم: ${name}\nالبريد: ${email}\n\n${message}`
+    setStatus("sending");
+    setErrorMessage(null);
+    const form = e.currentTarget;
+    const payload = {
+      name: String(new FormData(form).get("name") ?? "").trim(),
+      email: String(new FormData(form).get("email") ?? "").trim(),
+      subject: String(new FormData(form).get("subject") ?? "").trim(),
+      message: String(new FormData(form).get("message") ?? "").trim(),
+    };
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; dev?: boolean };
+      if (!res.ok || !data.ok) {
+        setStatus("error");
+        setErrorMessage(data.error || "تعذّر إرسال الرسالة. حاول مرة أخرى لاحقاً.");
+        return;
+      }
+      setStatus("success");
+      form.reset();
+    } catch {
+      setStatus("error");
+      setErrorMessage("تعذّر الاتصال بالخادم. تحقق من الاتصال بالإنترنت.");
+    }
+  }
+
+  if (status === "success") {
+    return (
+      <div
+        className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-8 text-center text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-100"
+        role="status"
+      >
+        <p className="text-lg font-bold">تم إرسال رسالتك ✓</p>
+        <p className="mt-2 text-sm opacity-90">سنعاود الاتصال بك عبر البريد الإلكتروني قريباً.</p>
+        <button
+          type="button"
+          onClick={() => {
+            setStatus("idle");
+            setErrorMessage(null);
+          }}
+          className="mt-5 text-sm font-semibold text-[var(--brand)] underline hover:opacity-90"
+        >
+          إرسال رسالة أخرى
+        </button>
+      </div>
     );
-    const sub = encodeURIComponent(subject || "تواصل من موقع سوقنا");
-    window.location.href = `mailto:support@sooqna.com?subject=${sub}&body=${body}`;
-    setHint("إذا لم يُفتح تطبيق البريد تلقائياً، يمكنك مراسلتنا يدوياً على support@sooqna.com");
   }
 
   return (
@@ -28,7 +68,8 @@ export function ContactForm() {
           <input
             name="name"
             required
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]"
+            disabled={status === "sending"}
+            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)] disabled:opacity-60"
             placeholder="اسمك الكامل"
           />
         </label>
@@ -38,7 +79,8 @@ export function ContactForm() {
             name="email"
             type="email"
             required
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]"
+            disabled={status === "sending"}
+            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)] disabled:opacity-60"
             placeholder="you@example.com"
           />
         </label>
@@ -47,7 +89,8 @@ export function ContactForm() {
         <span className="text-sm font-medium text-[var(--text)]">الموضوع</span>
         <input
           name="subject"
-          className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]"
+          disabled={status === "sending"}
+          className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)] disabled:opacity-60"
           placeholder="موجز لطلبك"
         />
       </label>
@@ -57,14 +100,19 @@ export function ContactForm() {
           name="message"
           required
           rows={5}
-          className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]"
+          disabled={status === "sending"}
+          className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)] disabled:opacity-60"
           placeholder="اكتب رسالتك هنا..."
         />
       </label>
-      <button type="submit" className="ui-btn-primary w-full rounded-full py-3 text-sm font-semibold sm:w-auto sm:px-10">
-        إرسال عبر البريد
+      <button
+        type="submit"
+        disabled={status === "sending"}
+        className="ui-btn-primary w-full rounded-full py-3 text-sm font-semibold disabled:opacity-60 sm:w-auto sm:px-10"
+      >
+        {status === "sending" ? "جاري الإرسال..." : "إرسال"}
       </button>
-      {hint ? <p className="text-xs text-[var(--text-muted)]">{hint}</p> : null}
+      {errorMessage ? <p className="text-sm text-red-600 dark:text-red-400">{errorMessage}</p> : null}
     </form>
   );
 }

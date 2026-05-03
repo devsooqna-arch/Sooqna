@@ -52,6 +52,14 @@ export function HomeMarketplace() {
 
   const featuredListings = useMemo(() => listings.slice(0, 9), [listings]);
   const topCategories = useMemo(() => categories.slice(0, 10), [categories]);
+  const categoryCounts = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const l of listings) {
+      const id = l.categoryId;
+      map.set(id, (map.get(id) ?? 0) + 1);
+    }
+    return map;
+  }, [listings]);
   const heroSlides = ["/hero/slide-1.png", "/hero/slide-2.png"];
 
   return (
@@ -79,7 +87,7 @@ export function HomeMarketplace() {
               />
             );
           })}
-          <div className="absolute inset-0 bg-black/40" aria-hidden />
+          <div className="absolute inset-0 bg-black/50" aria-hidden />
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center text-white">
             <h2 className="text-xl font-bold sm:text-2xl">اكتشف أفضل الإعلانات بسهولة وأمان</h2>
             <p className="max-w-lg text-sm text-white/90">
@@ -134,9 +142,14 @@ export function HomeMarketplace() {
           </h3>
           <ul className="mt-4 space-y-2 text-sm text-[var(--text-muted)]">
             {topCategories.map((category) => (
-              <li key={category.id} className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full border border-[var(--chip-border)]" />
-                <span>{category.name.ar || category.name.en || category.slug}</span>
+              <li key={category.id} className="flex items-center justify-between gap-2">
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="h-3 w-3 shrink-0 rounded-full border border-[var(--chip-border)]" />
+                  <span className="truncate">{category.name.ar || category.name.en || category.slug}</span>
+                </span>
+                <span className="shrink-0 text-xs text-[var(--text-muted)]">
+                  {categoryCounts.get(category.id) ?? 0} إعلان
+                </span>
               </li>
             ))}
           </ul>

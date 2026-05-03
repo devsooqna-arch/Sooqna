@@ -23,8 +23,14 @@ const DASH_CARDS: DashCard[] = [
   { title: "إعدادات الحساب",    description: "تعديل الاسم والصورة الشخصية",         href: "/me/settings",    icon: "⚙️" },
   { title: "تصفح الإعلانات",    description: "اكتشف كل الإعلانات المنشورة",         href: "/listings",       icon: "🔍" },
   { title: "التصنيفات",          description: "استكشف أقسام المنصة",                href: "/categories",     icon: "🗂️" },
-  { title: "لوحة المطور",        description: "أدوات الاختبار والتطوير",              href: "/dev-tools",      icon: "🛠️" },
 ];
+
+const DEV_ONLY_CARD: DashCard = {
+  title: "لوحة المطور",
+  description: "أدوات الاختبار والتطوير",
+  href: "/dev-tools",
+  icon: "🛠️",
+};
 
 export function AccountDashboard() {
   const { currentUser } = useAuth();
@@ -42,7 +48,7 @@ export function AccountDashboard() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [currentUser?.uid]);
 
   const displayName = useMemo(() => {
     if (profile?.fullName) return profile.fullName;
@@ -51,6 +57,13 @@ export function AccountDashboard() {
   }, [currentUser, profile]);
 
   const photoURL = profile?.photoURL || currentUser?.photoURL || "";
+
+  const dashCards = useMemo(() => {
+    if (profile?.role === "ADMIN") {
+      return [...DASH_CARDS, DEV_ONLY_CARD];
+    }
+    return DASH_CARDS;
+  }, [profile?.role]);
 
   return (
     <RequireAuthGate fallbackMessage="جاري تحميل لوحة الحساب...">
@@ -76,7 +89,7 @@ export function AccountDashboard() {
 
         {/* Dashboard grid */}
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {DASH_CARDS.map((card) => (
+          {dashCards.map((card) => (
             <DashLinkCard key={card.href} {...card} />
           ))}
         </section>
