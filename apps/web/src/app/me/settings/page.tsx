@@ -4,7 +4,7 @@ import { AccountSettingsForm } from "@/components/me/AccountSettingsForm";
 
 export const metadata: Metadata = {
   title: "إعدادات الحساب",
-  description: "تعديل بيانات الحساب الأساسية في سوقنا.",
+  description: "الملف الشخصي، الأمان، والاختصارات في سوقنا.",
   alternates: {
     canonical: "/me/settings",
   },
@@ -14,7 +14,7 @@ export default function AccountSettingsPage() {
   return (
     <PublicShell
       pageTitle="إعدادات الحساب"
-      pageDescription="حدّث الاسم والصورة الشخصية المرتبطة بحسابك."
+      pageDescription="الملف الشخصي، البريد، الأمان، واختصارات الحساب."
     >
       <AccountSettingsForm />
     </PublicShell>
