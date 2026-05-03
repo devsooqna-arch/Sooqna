@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { attachListingImage, createListing } from "@/services/listingService";
+import { attachListingImage, createListing, publishListing } from "@/services/listingService";
 import { getCategories } from "@/services/categoryService";
 import { uploadBackendListingImage } from "@/services/backendUploadService";
 import type { Category } from "@/types/category";
@@ -179,6 +179,11 @@ export function SubmitListingPage() {
       return;
     }
 
+    if (images.length === 0) {
+      setError("أضف صورة واحدة على الأقل — الإعلانات المنشورة تتطلب صورة (وستبقى المسودة في «إعلاناتي» دون صور).");
+      return;
+    }
+
     setBusy(true);
     setOptimisticNote("جارٍ إنشاء الإعلان...");
     try {
@@ -194,10 +199,10 @@ export function SubmitListingPage() {
         },
       });
       setOptimisticNote("تم إنشاء الإعلان. جارٍ رفع الصور...");
-      if (images.length > 0) {
-        await uploadImagesForListing(result.listingId);
-      }
-      setOptimisticNote("تم نشر الإعلان وتجهيز الصور بنجاح.");
+      await uploadImagesForListing(result.listingId);
+      setOptimisticNote("جارٍ نشر الإعلان...");
+      await publishListing(result.listingId);
+      setOptimisticNote("تم نشر الإعلان وهو الآن يظهر في البحث والصفحة الرئيسية.");
       setCreatedListingId(result.listingId);
     } catch (err) {
       setError(err instanceof Error ? err.message : "تعذر إنشاء الإعلان.");

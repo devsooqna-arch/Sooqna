@@ -1,4 +1,4 @@
-const DEFAULT_SITE_URL = "https://dev.flashpointjordan.com";
+const DEFAULT_SITE_URL = "https://un.flashpointjordan.com";
 
 export function getSiteUrl(): string {
   const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();

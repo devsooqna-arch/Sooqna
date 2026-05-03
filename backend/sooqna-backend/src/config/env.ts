@@ -54,14 +54,25 @@ if (!databaseUrl && requireDatabase) {
   );
 }
 
+/**
+ * Public base URL for `/uploads/*` as seen by browsers (HTTPS in production).
+ * Prefer explicit UPLOADS_PUBLIC_BASE_URL; otherwise derive from BACKEND_PUBLIC_ORIGIN (same host as API, without `/api`).
+ */
+function resolveUploadsPublicBaseUrl(): string {
+  const explicit = process.env.UPLOADS_PUBLIC_BASE_URL?.trim();
+  if (explicit) return explicit.replace(/\/$/, "");
+  const origin = process.env.BACKEND_PUBLIC_ORIGIN?.trim();
+  if (origin) return `${origin.replace(/\/$/, "")}/uploads`;
+  return "http://localhost:5000/uploads";
+}
+
 export const env = {
   port: Number(process.env.PORT ?? 5000),
   nodeEnv,
   corsOrigin: process.env.CORS_ORIGIN ?? (isProduction
     ? (() => { throw new Error("CORS_ORIGIN env var is required in production."); })()
     : "http://localhost:3000"),
-  uploadsPublicBaseUrl:
-    process.env.UPLOADS_PUBLIC_BASE_URL ?? "http://localhost:5000/uploads",
+  uploadsPublicBaseUrl: resolveUploadsPublicBaseUrl(),
   firebaseProjectId: requireInProduction(process.env.FIREBASE_PROJECT_ID, "FIREBASE_PROJECT_ID"),
   firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL ?? "",
   firebasePrivateKey: (process.env.FIREBASE_PRIVATE_KEY ?? "").replace(/\\n/g, "\n"),
