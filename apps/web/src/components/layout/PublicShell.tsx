@@ -26,9 +26,9 @@ export function PublicShell({
               <Image
                 src="/branding/logo.png"
                 alt="سوقنا"
-                width={82}
-                height={40}
-                className="h-10 w-auto dark:brightness-0 dark:invert"
+                width={160}
+                height={72}
+                className="h-14 w-auto"
                 priority
               />
             </Link>
