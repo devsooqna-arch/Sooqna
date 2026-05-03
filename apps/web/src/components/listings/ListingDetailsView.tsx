@@ -64,6 +64,15 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
     return () => { mounted = false; };
   }, [currentUser, listingId]);
 
+  const sortedImages = useMemo(() => {
+    if (!listing) return [] as ListingImage[];
+    return [...listing.images].sort((a, b) => {
+      if (a.isPrimary && !b.isPrimary) return -1;
+      if (!a.isPrimary && b.isPrimary) return 1;
+      return a.order - b.order;
+    });
+  }, [listing]);
+
   async function toggleFavorite() {
     if (!listing) return;
     if (!currentUser) {
@@ -169,16 +178,6 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
       </div>
     );
   }
-
-  const sortedImages = useMemo(
-    () =>
-      [...listing.images].sort((a, b) => {
-        if (a.isPrimary && !b.isPrimary) return -1;
-        if (!a.isPrimary && b.isPrimary) return 1;
-        return a.order - b.order;
-      }),
-    [listing.images]
-  );
 
   const categoryName =
     categories.find((c) => c.id === listing.categoryId || c.slug === listing.categoryId)?.name.ar
