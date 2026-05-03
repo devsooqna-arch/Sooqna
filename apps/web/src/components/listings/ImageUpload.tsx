@@ -55,7 +55,7 @@ export function ImageUpload({ listingId, onUploaded }: ImageUploadProps) {
 
       setUploadedUrl(uploaded.url);
       setUploadedPath(uploaded.path);
-      onUploaded?.(uploaded);
+      onUploaded?.({ url: uploaded.url, path: uploaded.path });
       setFile(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "فشل رفع الصورة.");

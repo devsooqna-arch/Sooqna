@@ -163,12 +163,14 @@ export async function attachListingImage(
   listingId: string,
   image: { url: string; path: string }
 ): Promise<Listing> {
+  /** Backend `attachListingImageBodySchema` is `.strict()` — only url + path. */
+  const payload = { url: image.url, path: image.path };
   const response = await apiFetch<{ success: true; listing: Listing }>(
     `/listings/${listingId}/images`,
     {
       method: "POST",
       authenticated: true,
-      body: JSON.stringify(image),
+      body: JSON.stringify(payload),
     }
   );
   return response.listing;

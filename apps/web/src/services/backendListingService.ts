@@ -58,13 +58,14 @@ export async function createBackendListing(input: {
 
 export async function attachBackendListingImage(
   listingId: string,
-  payload: { url: string; path: string; filename?: string }
+  payload: { url: string; path: string }
 ): Promise<BackendListing> {
+  const body = { url: payload.url, path: payload.path };
   const response = await apiFetch<{ success: boolean; listing: BackendListing }>(
     `/listings/${listingId}/images`,
     {
       method: "POST",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(body),
       authenticated: true,
     }
   );
