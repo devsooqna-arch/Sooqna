@@ -3,7 +3,7 @@ import { PublicShell } from "@/components/layout/PublicShell";
 import { AccountDashboard } from "@/components/me/AccountDashboard";
 
 export const metadata: Metadata = {
-  title: "حسابي | سوقنا",
+  title: "حسابي",
   description: "لوحة حساب المستخدم داخل سوقنا.",
 };
 

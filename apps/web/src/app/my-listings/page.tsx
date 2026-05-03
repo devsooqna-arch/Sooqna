@@ -3,7 +3,7 @@ import { PublicShell } from "@/components/layout/PublicShell";
 import { MyListingsPageView } from "@/components/listings/MyListingsPageView";
 
 export const metadata: Metadata = {
-  title: "إعلاناتي | سوقنا",
+  title: "إعلاناتي",
   description: "إدارة الإعلانات التي قمت بنشرها.",
 };
 

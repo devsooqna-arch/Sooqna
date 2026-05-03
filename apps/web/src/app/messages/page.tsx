@@ -3,7 +3,7 @@ import { PublicShell } from "@/components/layout/PublicShell";
 import { MessagesWorkspace } from "@/components/messages/MessagesWorkspace";
 
 export const metadata: Metadata = {
-  title: "الرسائل | سوقنا",
+  title: "الرسائل",
   description: "إدارة محادثاتك ورسائلك داخل سوقنا.",
 };
 
@@ -18,7 +18,7 @@ export default async function MessagesPage({ searchParams }: MessagesPageProps) 
   return (
     <PublicShell
       pageTitle="الرسائل"
-      pageDescription="أنشئ محادثة جديدة أو أدخل معرّف محادثة موجود لمتابعة الرسائل."
+      pageDescription="راسل البائعين وتابع محادثاتك في مكان واحد."
     >
       <MessagesWorkspace initialConversationId={initialConversationId} />
     </PublicShell>

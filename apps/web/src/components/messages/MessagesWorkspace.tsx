@@ -24,6 +24,8 @@ import {
 import type { Conversation, Message } from "@/types/message";
 import { ModernAvatar } from "@/components/ui/ModernAvatar";
 
+const showDevTools = process.env.NODE_ENV !== "production";
+
 export function MessagesWorkspace({ initialConversationId = "" }: { initialConversationId?: string }) {
   const { currentUser } = useAuth();
   const [conversationId, setConversationId] = useState(initialConversationId);
@@ -243,46 +245,51 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
           )}
         </section>
 
-        <section className="grid gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm sm:grid-cols-2 sm:p-6">
-          <label className="space-y-1">
-            <span className="text-sm font-medium">معرّف الإعلان (لإنشاء محادثة)</span>
-            <input
-              value={listingId}
-              onChange={(e) => setListingId(e.target.value)}
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]"
-              placeholder="listing id"
-            />
-          </label>
+        {showDevTools ? (
+          <section className="grid gap-4 rounded-2xl border border-dashed border-amber-400/60 bg-amber-50/40 p-5 shadow-sm dark:bg-amber-950/20 sm:grid-cols-2 sm:p-6">
+            <p className="sm:col-span-2 text-xs font-semibold text-amber-800 dark:text-amber-200">
+              وضع المطوّر فقط — إنشاء محادثة يدوياً
+            </p>
+            <label className="space-y-1">
+              <span className="text-sm font-medium">معرّف الإعلان (لإنشاء محادثة)</span>
+              <input
+                value={listingId}
+                onChange={(e) => setListingId(e.target.value)}
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]"
+                placeholder="listing id"
+              />
+            </label>
 
-          <label className="space-y-1">
-            <span className="text-sm font-medium">معرّف الطرف الآخر (اختياري)</span>
-            <input
-              value={participantId}
-              onChange={(e) => setParticipantId(e.target.value)}
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]"
-              placeholder="uid"
-            />
-          </label>
+            <label className="space-y-1">
+              <span className="text-sm font-medium">معرّف الطرف الآخر (اختياري)</span>
+              <input
+                value={participantId}
+                onChange={(e) => setParticipantId(e.target.value)}
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]"
+                placeholder="uid"
+              />
+            </label>
 
-          <button
-            type="button"
-            onClick={() => void handleCreateConversation()}
-            disabled={loading}
-            className="rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-semibold text-[var(--brand-contrast)] transition hover:opacity-90 disabled:opacity-60"
-          >
-            إنشاء محادثة جديدة
-          </button>
+            <button
+              type="button"
+              onClick={() => void handleCreateConversation()}
+              disabled={loading}
+              className="rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-semibold text-[var(--brand-contrast)] transition hover:opacity-90 disabled:opacity-60"
+            >
+              إنشاء محادثة جديدة
+            </button>
 
-          <label className="space-y-1">
-            <span className="text-sm font-medium">معرّف المحادثة</span>
-            <input
-              value={conversationId}
-              onChange={(e) => setConversationId(e.target.value)}
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]"
-              placeholder="conversation id"
-            />
-          </label>
-        </section>
+            <label className="space-y-1">
+              <span className="text-sm font-medium">معرّف المحادثة</span>
+              <input
+                value={conversationId}
+                onChange={(e) => setConversationId(e.target.value)}
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]"
+                placeholder="conversation id"
+              />
+            </label>
+          </section>
+        ) : null}
 
         <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm sm:p-6">
           {error ? (
@@ -292,14 +299,23 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
           ) : null}
 
           {conversation ? (
-            <div className="mb-4 rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm text-[var(--text-muted)]">
-              <p>المحادثة: {conversation.id}</p>
-              <p>الإعلان: {conversation.listingId}</p>
-              <p>عدد المشاركين: {conversation.participantIds.length}</p>
-            </div>
+            showDevTools ? (
+              <div className="mb-4 rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm text-[var(--text-muted)]">
+                <p>المحادثة: {conversation.id}</p>
+                <p>الإعلان: {conversation.listingId}</p>
+                <p>عدد المشاركين: {conversation.participantIds.length}</p>
+              </div>
+            ) : (
+              <div className="mb-4 rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm">
+                <p className="font-semibold text-[var(--text)]">{conversation.listingSnapshot.title || "محادثة"}</p>
+                <p className="mt-1 text-xs text-[var(--text-muted)]">آخر تحديث: {formatDate(conversation.updatedAt)}</p>
+              </div>
+            )
           ) : (
             <p className="mb-3 text-sm text-[var(--text-muted)]">
-              أدخل معرّف محادثة أو أنشئ محادثة جديدة للبدء.
+              {showDevTools
+                ? "أدخل معرّف محادثة أو أنشئ محادثة جديدة للبدء."
+                : "اختر محادثة من الصندوق أعلاه، أو افتح محادثة من صفحة إعلان عبر «راسل البائع»."}
             </p>
           )}
 
@@ -344,7 +360,7 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
                     />
                     <div className="min-w-0 flex-1">
                       <p className="text-xs text-[var(--text-muted)]">
-                        {conversation?.participants[message.senderId]?.fullName || message.senderId} • {formatDate(message.createdAt)}
+                        {conversation?.participants[message.senderId]?.fullName?.trim() || "مستخدم"} • {formatDate(message.createdAt)}
                       </p>
                       <p className="mt-1">{message.text || "(بدون نص)"}</p>
                     </div>

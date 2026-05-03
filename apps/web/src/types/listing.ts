@@ -43,6 +43,8 @@ export interface Listing {
   status: ListingStatus;
   condition: ListingCondition;
   contactPreference: ListingContactPreference;
+  /** E.164 or local digits — when set, UI may offer WhatsApp deep link */
+  contactPhone?: string;
   viewsCount: number;
   favoritesCount: number;
   messagesCount: number;

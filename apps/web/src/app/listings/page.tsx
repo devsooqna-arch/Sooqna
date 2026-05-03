@@ -6,7 +6,7 @@ import { JsonLdScript } from "@/components/seo/JsonLdScript";
 import { buildAbsoluteUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "الإعلانات | سوقنا",
+  title: "الإعلانات",
   description: "تصفح جميع الإعلانات مع الفلترة حسب التصنيف.",
   alternates: {
     canonical: "/listings",

@@ -176,13 +176,14 @@ function SearchBarInner() {
 
     if (trimmedSearch) {
       nextParams.set("search", trimmedSearch);
+      nextParams.delete("category");
     } else {
       nextParams.delete("search");
-    }
-    if (trimmedCategory) {
-      nextParams.set("category", trimmedCategory);
-    } else {
-      nextParams.delete("category");
+      if (trimmedCategory) {
+        nextParams.set("category", trimmedCategory);
+      } else {
+        nextParams.delete("category");
+      }
     }
     if (trimmedCity) {
       nextParams.set("city", trimmedCity);

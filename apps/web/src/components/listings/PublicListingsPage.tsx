@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { ListingCard } from "@/components/listings/ListingCard";
 import { getListingsFiltered } from "@/services/listingService";
 import { getCategories } from "@/services/categoryService";
@@ -103,6 +104,8 @@ function PublicListingsPageInner() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const showSkeleton = useDelayedLoading(loading);
+
   useEffect(() => {
     let mounted = true;
     setLoading(true);
@@ -164,7 +167,7 @@ function PublicListingsPageInner() {
     }
   }, [currentPage, totalPages, router, buildListingsHref]);
 
-  if (loading) {
+  if (showSkeleton) {
     return <ListingsSkeleton />;
   }
 
@@ -227,7 +230,11 @@ function PublicListingsPageInner() {
                 href={buildListingsHref({ category: null, page: 1 })}
                 className="translate-y-0 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800 opacity-100 transition-all duration-300 ease-out hover:bg-emerald-100"
               >
-                🏷️ التصنيف: {categoryFilter} ×
+                🏷️ التصنيف:{" "}
+                {categories.find((c) => (c.slug || c.id).toLowerCase() === categoryFilter)?.name.ar ||
+                  categories.find((c) => (c.slug || c.id).toLowerCase() === categoryFilter)?.name.en ||
+                  categoryFilter}{" "}
+                ×
               </Link>
             ) : null}
             {cityFilterRaw ? (
@@ -267,7 +274,14 @@ function PublicListingsPageInner() {
             {(categoryFilter || cityFilter || searchFilter) ? (
               <p className="text-sm text-[var(--text-muted)]">
                 {categoryFilter && (
-                  <>فلتر التصنيف: <span className="font-semibold text-[var(--text)]">{categoryFilter}</span></>
+                  <>
+                    فلتر التصنيف:{" "}
+                    <span className="font-semibold text-[var(--text)]">
+                      {categories.find((c) => (c.slug || c.id).toLowerCase() === categoryFilter)?.name.ar ||
+                        categories.find((c) => (c.slug || c.id).toLowerCase() === categoryFilter)?.name.en ||
+                        categoryFilter}
+                    </span>
+                  </>
                 )}
                 {categoryFilter && (cityFilter || searchFilter) && " • "}
                 {cityFilter && (

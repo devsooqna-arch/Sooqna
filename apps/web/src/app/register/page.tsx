@@ -3,7 +3,7 @@ import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { LoginForm } from "@/components/auth/LoginForm";
 
 export const metadata: Metadata = {
-  title: "إنشاء حساب | سوقنا",
+  title: "إنشاء حساب",
   description: "إنشاء حساب جديد في سوقنا",
 };
 

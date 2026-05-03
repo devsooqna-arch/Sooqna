@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { ListingDetailsView } from "@/components/listings/ListingDetailsView";
 import { PublicShell } from "@/components/layout/PublicShell";
 import { JsonLdScript } from "@/components/seo/JsonLdScript";
+import { listingTitleForPageMetadata } from "@/lib/listingMetadata";
 import { buildAbsoluteUrl } from "@/lib/seo";
 import { fetchPublicListingById } from "@/lib/server-listings";
 
@@ -14,10 +16,26 @@ export async function generateMetadata({
 }: ListingDetailsPageProps): Promise<Metadata> {
   const { listingId } = await params;
   const listing = await fetchPublicListingById(listingId);
-  const title = listing?.title ? `${listing.title} | سوقنا` : `تفاصيل الإعلان | ${listingId}`;
   const description =
     listing?.description?.trim() ||
     "تفاصيل الإعلان داخل سوقنا، مع بيانات البائع وطرق التواصل المباشر.";
+
+  if (!listing) {
+    const title = "إعلان غير موجود";
+    return {
+      title,
+      description: "لم يُعثر على هذا الإعلان في سوقنا.",
+      alternates: { canonical: `/listings/${listingId}` },
+      openGraph: {
+        title,
+        description: "لم يُعثر على هذا الإعلان في سوقنا.",
+        url: `/listings/${listingId}`,
+        type: "website",
+      },
+    };
+  }
+
+  const title = listingTitleForPageMetadata(listing.title);
 
   return {
     title,
@@ -29,7 +47,7 @@ export async function generateMetadata({
       title,
       description,
       url: `/listings/${listingId}`,
-      images: listing?.images?.[0]?.url ? [listing.images[0].url] : undefined,
+      images: listing.images?.[0]?.url ? [listing.images[0].url] : undefined,
       type: "website",
     },
   };
@@ -38,6 +56,8 @@ export async function generateMetadata({
 export default async function ListingDetailsPage({ params }: ListingDetailsPageProps) {
   const { listingId } = await params;
   const listing = await fetchPublicListingById(listingId);
+  if (!listing) notFound();
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",

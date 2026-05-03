@@ -1,10 +1,12 @@
 import type { Listing } from "@/types/listing";
 import Image from "next/image";
 import Link from "next/link";
+import { formatListedAgo } from "@/lib/formatListedAgo";
 
 export function ListingCard({ listing }: { listing: Listing }) {
   const firstImage = listing.images.find((img) => img.isPrimary) ?? listing.images[0];
   const detailsHref = `/listings/${encodeURIComponent(listing.id)}`;
+  const listedAgo = formatListedAgo(listing.publishedAt ?? listing.createdAt);
 
   return (
     <article className="ui-card ui-card-hover group relative overflow-hidden">
@@ -51,11 +53,19 @@ export function ListingCard({ listing }: { listing: Listing }) {
         <h3 className="line-clamp-2 text-sm font-bold leading-snug text-[var(--text)]">
           {listing.title}
         </h3>
-        <p className="mt-1.5 flex items-center gap-1 text-xs text-[var(--text-muted)]">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" className="shrink-0 text-[var(--brand)]">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-          </svg>
-          {listing.location.city || "الأردن"}
+        <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-[var(--text-muted)]">
+          <span className="inline-flex items-center gap-1">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" className="shrink-0 text-[var(--brand)]">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
+            {listing.location.city || "الأردن"}
+          </span>
+          {listedAgo ? (
+            <>
+              <span className="text-[var(--border)]">•</span>
+              <span>{listedAgo}</span>
+            </>
+          ) : null}
         </p>
       </div>
 

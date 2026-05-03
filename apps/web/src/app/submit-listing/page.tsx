@@ -3,7 +3,7 @@ import { PublicShell } from "@/components/layout/PublicShell";
 import { SubmitListingPage } from "@/components/listings/SubmitListingPage";
 
 export const metadata: Metadata = {
-  title: "إضافة إعلان | سوقنا",
+  title: "إضافة إعلان",
   description: "أضف إعلانًا جديدًا في سوقنا باستخدام واجهة React.",
 };
 

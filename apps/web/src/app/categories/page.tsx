@@ -3,7 +3,7 @@ import { CategoriesDirectory } from "@/components/categories/CategoriesDirectory
 import { PublicShell } from "@/components/layout/PublicShell";
 
 export const metadata: Metadata = {
-  title: "التصنيفات | سوقنا",
+  title: "التصنيفات",
   description: "تصفح التصنيفات المتاحة للوصول إلى الإعلانات المناسبة.",
 };
 

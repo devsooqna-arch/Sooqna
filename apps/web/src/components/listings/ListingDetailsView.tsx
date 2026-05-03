@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { addToFavorites, removeFromFavorites, isFavorite } from "@/services/favoriteService";
 import { createConversation } from "@/services/messageService";
 import { trackEngagementEvent } from "@/services/engagementService";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
@@ -31,6 +32,7 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
   const [reviewMsg, setReviewMsg] = useState<string | null>(null);
   const [reportMsg, setReportMsg] = useState<string | null>(null);
   const [activeImg, setActiveImg] = useState(0);
+  const showLoadingUi = useDelayedLoading(loading);
 
   useEffect(() => {
     let mounted = true;
@@ -122,7 +124,7 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
   }
 
   /* ── Loading ── */
-  if (loading) {
+  if (showLoadingUi) {
     return (
       <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
         <div className="space-y-4">
@@ -140,11 +142,28 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
 
   if (!listing) {
     return (
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-6 py-10 text-center">
-        <p className="text-sm text-[var(--text-muted)]">الإعلان غير موجود أو غير متاح.</p>
-        <Link href="/listings" className="mt-3 inline-block rounded-full bg-[var(--brand)] px-5 py-2 text-xs font-semibold text-[var(--brand-contrast)]">
-          العودة إلى الإعلانات
-        </Link>
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-6 py-20 text-center shadow-[var(--shadow-sm)]">
+        <p className="mb-4 text-6xl leading-none" aria-hidden>
+          🔍
+        </p>
+        <h2 className="text-xl font-extrabold text-[var(--text)] sm:text-2xl">الإعلان غير موجود أو تم حذفه</h2>
+        <p className="mx-auto mt-3 max-w-md text-sm text-[var(--text-muted)]">
+          تعذّر تحميل هذا الإعلان. قد يكون الرابط غير صحيح أو الإعلان لم يعد متاحاً.
+        </p>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/listings"
+            className="inline-flex rounded-full bg-[var(--brand)] px-6 py-2.5 text-sm font-semibold text-[var(--brand-contrast)] shadow transition hover:opacity-90"
+          >
+            تصفّح إعلانات مشابهة
+          </Link>
+          <Link
+            href="/"
+            className="inline-flex rounded-full border border-[var(--border)] bg-[var(--chip)] px-6 py-2.5 text-sm font-semibold text-[var(--text)] transition hover:border-[var(--brand)]"
+          >
+            الصفحة الرئيسية
+          </Link>
+        </div>
       </div>
     );
   }
@@ -337,6 +356,22 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
               </svg>
               راسل البائع
             </button>
+
+            {listing.contactPhone?.trim() ? (
+              <a
+                href={`https://wa.me/${listing.contactPhone.replace(/\D/g, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-full border border-emerald-600/40 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-100 dark:hover:bg-emerald-900/50"
+              >
+                <span aria-hidden>💬</span>
+                تواصل عبر واتساب
+              </a>
+            ) : listing.contactPreference === "phone" ? (
+              <p className="mt-2 text-center text-xs text-[var(--text-muted)]">
+                يفضّل البائع التواصل الصوتي — ابدأ بمحادثة داخل المنصة ثم نسّق الطريقة المناسبة.
+              </p>
+            ) : null}
 
             <button
               type="button"

@@ -28,6 +28,7 @@ export type BackendListing = {
   status: "draft" | "pending" | "published" | "rejected" | "sold" | "archived";
   condition: "new" | "used";
   contactPreference: "chat" | "phone";
+  contactPhone?: string;
   viewsCount: number;
   favoritesCount: number;
   messagesCount: number;

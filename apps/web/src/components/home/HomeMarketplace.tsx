@@ -3,24 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-
-const CATEGORY_ICONS: Record<string, string> = {
-  cars: "🚗",
-  "real-estate": "🏠",
-  electronics: "📱",
-  furniture: "🛋️",
-  jobs: "💼",
-  fashion: "👗",
-  kids: "🧸",
-  sports: "⚽",
-  services: "🔧",
-  other: "📦",
-};
 import { getCategories } from "@/services/categoryService";
 import { getListings } from "@/services/listingService";
 import type { Category } from "@/types/category";
 import type { Listing } from "@/types/listing";
 import { ListingCard } from "@/components/listings/ListingCard";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 
 export function HomeMarketplace() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -28,6 +16,7 @@ export function HomeMarketplace() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeHeroIndex, setActiveHeroIndex] = useState(0);
+  const showMarketplaceLoading = useDelayedLoading(loading);
 
   useEffect(() => {
     let mounted = true;
@@ -90,7 +79,7 @@ export function HomeMarketplace() {
               />
             );
           })}
-          <div className="absolute inset-0 bg-black/45" />
+          <div className="absolute inset-0 bg-black/40" aria-hidden />
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center text-white">
             <h2 className="text-xl font-bold sm:text-2xl">اكتشف أفضل الإعلانات بسهولة وأمان</h2>
             <p className="max-w-lg text-sm text-white/90">
@@ -138,42 +127,6 @@ export function HomeMarketplace() {
         </div>
       </section>
 
-      <section className="ui-card p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-bold">التصنيفات</h3>
-          <Link href="/categories" className="text-xs font-semibold text-[var(--brand)]">
-            عرض الكل
-          </Link>
-        </div>
-
-        {loading ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-20 animate-pulse rounded-md bg-[var(--surface-muted)]" />
-            ))}
-          </div>
-        ) : error ? (
-          <p className="text-sm text-[var(--danger)]">{error}</p>
-        ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
-            {topCategories.map((category) => (
-              <Link
-                key={category.id}
-                href={`/listings?category=${encodeURIComponent(category.slug || category.id)}`}
-                className="flex flex-col items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-3 text-center shadow-[var(--shadow-sm)] transition hover:border-[var(--brand)] hover:bg-[var(--accent-soft)] hover:shadow-[var(--shadow-md)]"
-              >
-                <span className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-[var(--accent-soft)] text-xl">
-                  {CATEGORY_ICONS[category.slug] ?? CATEGORY_ICONS[category.id] ?? "📦"}
-                </span>
-                <span className="text-xs font-medium text-[var(--text-muted)]">
-                  {category.name.ar || category.name.en || category.slug}
-                </span>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
-
       <section className="grid gap-4 lg:grid-cols-[270px_1fr]">
         <aside className="ui-card p-4">
           <h3 className="rounded-full bg-[var(--brand)] px-4 py-2 text-sm font-bold text-[var(--brand-contrast)]">
@@ -197,7 +150,7 @@ export function HomeMarketplace() {
             </Link>
           </div>
 
-          {loading ? (
+          {showMarketplaceLoading ? (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="h-52 animate-pulse rounded-lg bg-[var(--surface)]" />

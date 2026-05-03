@@ -18,7 +18,7 @@ export function PublicShell({
   pageDescription?: string;
 }) {
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
+    <div className="flex min-h-screen flex-col bg-[var(--bg)] text-[var(--text)]">
       <header className="sticky top-0 z-30">
         <div className="border-b border-[var(--border)] bg-[var(--surface)]">
           <div className="mx-auto flex max-w-[1110px] items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
@@ -28,7 +28,7 @@ export function PublicShell({
                 alt="سوقنا"
                 width={82}
                 height={40}
-                className="h-10 w-auto"
+                className="h-10 w-auto dark:brightness-0 dark:invert"
                 style={{ width: "auto", height: "auto" }}
                 priority
               />
@@ -64,7 +64,7 @@ export function PublicShell({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-[1110px] px-4 py-7 pb-24 sm:px-6 md:pb-7">
+      <main className="mx-auto flex w-full max-w-[1110px] flex-1 px-4 py-7 pb-20 sm:px-6 md:pb-6">
         {pageTitle ? (
           <section className="mb-6">
               <h1 className="text-4xl font-extrabold tracking-tight text-[var(--text)] sm:text-5xl" style={{ lineHeight: 1.25 }}>
@@ -87,8 +87,8 @@ export function PublicShell({
               title="عن سوقنا"
               items={[
                 { label: "من نحن", href: "/about" },
-                { label: "الوظائف", href: "#" },
-                { label: "المركز الإعلامي", href: "#" },
+                { label: "الوظائف", href: "/careers" },
+                { label: "المركز الإعلامي", href: "/press" },
                 { label: "التطبيقات", href: "#" },
                 { label: "اتصل بنا", href: "/contact" },
               ]}
@@ -96,18 +96,18 @@ export function PublicShell({
             <FooterColumn
               title="معلومات"
               items={[
-                { label: "المساعدة", href: "#" },
-                { label: "نصائح الأمان", href: "#" },
-                { label: "سياسة الخصوصية", href: "#" },
+                { label: "المساعدة", href: "/help" },
+                { label: "نصائح الأمان", href: "/safety" },
+                { label: "سياسة الخصوصية", href: "/privacy" },
                 { label: "شروط الاستخدام", href: "/terms" },
               ]}
             />
             <FooterColumn
               title="للشركات"
               items={[
-                { label: "الإعلان معنا", href: "#" },
-                { label: "الباقات الإعلانية", href: "#" },
-                { label: "حلول الشركات", href: "#" },
+                { label: "الإعلان معنا", href: "/contact" },
+                { label: "الباقات الإعلانية", href: "/packages" },
+                { label: "حلول الشركات", href: "/contact" },
               ]}
             />
             <FooterColumn

@@ -3,7 +3,7 @@ import { PublicShell } from "@/components/layout/PublicShell";
 import { FavoritesPageView } from "@/components/favorites/FavoritesPageView";
 
 export const metadata: Metadata = {
-  title: "المفضلة | سوقنا",
+  title: "المفضلة",
   description: "إدارة الإعلانات المحفوظة في المفضلة.",
 };
 
