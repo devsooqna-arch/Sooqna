@@ -75,6 +75,17 @@ app.use(
   })
 );
 
+app.use(
+  "/api/contact",
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 15,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, error: "Too many contact requests." },
+  })
+);
+
 app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiSpec));
 app.use("/api", apiRouter);

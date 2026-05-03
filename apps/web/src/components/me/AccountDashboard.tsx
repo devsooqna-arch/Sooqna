@@ -58,12 +58,15 @@ export function AccountDashboard() {
 
   const photoURL = profile?.photoURL || currentUser?.photoURL || "";
 
+  /** لا تُظهر لوحة المطور إلا بعد تأكيد دور ADMIN من الـ backend */
+  const showDeveloperTile = profile?.role === "ADMIN";
+
   const dashCards = useMemo(() => {
-    if (profile?.role === "ADMIN") {
+    if (showDeveloperTile) {
       return [...DASH_CARDS, DEV_ONLY_CARD];
     }
     return DASH_CARDS;
-  }, [profile?.role]);
+  }, [showDeveloperTile]);
 
   return (
     <RequireAuthGate fallbackMessage="جاري تحميل لوحة الحساب...">

@@ -1,88 +1,45 @@
 import { NextResponse } from "next/server";
 
-type ContactPayload = {
-  name?: string;
-  email?: string;
-  subject?: string;
-  message?: string;
-};
+const DEFAULT_API = "http://localhost:5000/api";
 
-function isNonEmpty(s: unknown): s is string {
-  return typeof s === "string" && s.trim().length > 0;
+function apiBase(): string {
+  const raw = process.env.NEXT_PUBLIC_BACKEND_API_BASE_URL ?? DEFAULT_API;
+  return raw.endsWith("/") ? raw.slice(0, -1) : raw;
 }
 
 /**
- * POST /api/contact — forwards to Resend when RESEND_API_KEY is set.
- * Env: RESEND_API_KEY, CONTACT_TO_EMAIL (default info@sooqna.com), CONTACT_FROM_EMAIL (verified sender in Resend).
+ * يمرّر الطلب إلى الـ backend (POST /api/contact) حيث يُرسَل البريد عبر Resend.
  */
 export async function POST(request: Request) {
-  let body: ContactPayload;
+  let body: unknown;
   try {
-    body = (await request.json()) as ContactPayload;
+    body = await request.json();
   } catch {
     return NextResponse.json({ ok: false, error: "طلب غير صالح." }, { status: 400 });
   }
 
-  const name = body.name?.trim();
-  const email = body.email?.trim().toLowerCase();
-  const subject = body.subject?.trim() || "رسالة من نموذج اتصل بنا — سوقنا";
-  const message = body.message?.trim();
+  try {
+    const res = await fetch(`${apiBase()}/contact`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
 
-  if (!isNonEmpty(name) || !isNonEmpty(email) || !isNonEmpty(message)) {
-    return NextResponse.json({ ok: false, error: "الاسم والبريد والرسالة مطلوبة." }, { status: 400 });
-  }
+    const json = (await res.json().catch(() => ({}))) as {
+      success?: boolean;
+      dev?: boolean;
+      error?: string;
+    };
 
-  const to = process.env.CONTACT_TO_EMAIL || "info@sooqna.com";
-  const from = process.env.CONTACT_FROM_EMAIL || "onboarding@resend.dev";
-  const key = process.env.RESEND_API_KEY;
-
-  const html = `
-    <p><strong>الاسم:</strong> ${escapeHtml(name)}</p>
-    <p><strong>البريد:</strong> ${escapeHtml(email)}</p>
-    <p><strong>الموضوع:</strong> ${escapeHtml(subject)}</p>
-    <hr />
-    <pre style="white-space:pre-wrap;font-family:inherit">${escapeHtml(message)}</pre>
-  `;
-
-  if (!key) {
-    if (process.env.NODE_ENV === "development") {
-      console.info("[contact] (dev, no RESEND_API_KEY)", { name, email, subject, message });
-      return NextResponse.json({ ok: true, dev: true });
-    }
+    const ok = Boolean(res.ok && json.success === true);
     return NextResponse.json(
-      { ok: false, error: "خدمة البريد غير مهيأة حالياً." },
-      { status: 503 }
+      { ok, dev: json.dev, error: json.error },
+      { status: res.ok ? 200 : res.status }
+    );
+  } catch {
+    return NextResponse.json(
+      { ok: false, error: "تعذّر الاتصال بالخادم." },
+      { status: 502 }
     );
   }
-
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from,
-      to: [to],
-      reply_to: email,
-      subject: `[سوقنا] ${subject}`,
-      html,
-    }),
-  });
-
-  if (!res.ok) {
-    const errText = await res.text().catch(() => "");
-    console.error("[contact] Resend error", res.status, errText);
-    return NextResponse.json({ ok: false, error: "تعذّر إرسال الرسالة." }, { status: 502 });
-  }
-
-  return NextResponse.json({ ok: true });
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }

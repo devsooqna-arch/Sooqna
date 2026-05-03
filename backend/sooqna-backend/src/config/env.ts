@@ -76,5 +76,9 @@ export const env = {
   listingRenewDays: parsePositiveInt(process.env.LISTING_RENEW_DAYS, 30, 1, 365),
   databaseUrl,
   enableCategoriesJsonFallback,
+  /** نموذج اتصل بنا — إرسال عبر Resend */
+  resendApiKey: process.env.RESEND_API_KEY ?? "",
+  contactToEmail: process.env.CONTACT_TO_EMAIL ?? "info@sooqna.com",
+  contactFromEmail: process.env.CONTACT_FROM_EMAIL ?? "onboarding@resend.dev",
 };
 

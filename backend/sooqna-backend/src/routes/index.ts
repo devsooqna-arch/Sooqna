@@ -10,6 +10,7 @@ import { categoriesRouter } from "../modules/categories/categories.routes";
 import { engagementRouter } from "../modules/engagement/engagement.routes";
 import { reportsRouter } from "../modules/reports/reports.routes";
 import { auditRouter } from "../modules/audit/audit.routes";
+import { contactRouter } from "../modules/contact/contact.routes";
 import { prisma } from "../config/prisma";
 import { env } from "../config/env";
 import { readJsonArrayFile } from "../utils/fileStore";
@@ -88,4 +89,5 @@ apiRouter.use("/categories", categoriesRouter);
 apiRouter.use("/engagement", engagementRouter);
 apiRouter.use("/reports", reportsRouter);
 apiRouter.use("/audit", auditRouter);
+apiRouter.use("/contact", contactRouter);
 

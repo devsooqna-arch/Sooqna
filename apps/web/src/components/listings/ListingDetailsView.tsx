@@ -2,17 +2,19 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getListingById } from "@/services/listingService";
 import { getCategories } from "@/services/categoryService";
-import type { Listing } from "@/types/listing";
+import type { Listing, ListingImage } from "@/types/listing";
 import type { Category } from "@/types/category";
 import { useAuth } from "@/hooks/useAuth";
 import { addToFavorites, removeFromFavorites, isFavorite } from "@/services/favoriteService";
 import { createConversation } from "@/services/messageService";
 import { trackEngagementEvent } from "@/services/engagementService";
 import { useDelayedLoading } from "@/hooks/useDelayedLoading";
+
+const LISTING_IMG_PLACEHOLDER = "/images/placeholder-listing.png";
 
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
@@ -168,12 +170,15 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
     );
   }
 
-  const sortedImages = [...listing.images].sort((a, b) => {
-    if (a.isPrimary && !b.isPrimary) return -1;
-    if (!a.isPrimary && b.isPrimary) return 1;
-    return a.order - b.order;
-  });
-  const currentImage = sortedImages[activeImg];
+  const sortedImages = useMemo(
+    () =>
+      [...listing.images].sort((a, b) => {
+        if (a.isPrimary && !b.isPrimary) return -1;
+        if (!a.isPrimary && b.isPrimary) return 1;
+        return a.order - b.order;
+      }),
+    [listing.images]
+  );
 
   const categoryName =
     categories.find((c) => c.id === listing.categoryId || c.slug === listing.categoryId)?.name.ar
@@ -204,22 +209,7 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
           {/* Image Gallery */}
           <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow)]">
             <div className="relative h-[360px] w-full sm:h-[460px]">
-              {currentImage?.url ? (
-                <Image
-                  src={currentImage.url}
-                  alt={listing.title}
-                  fill
-                  className="object-cover"
-                  unoptimized
-                  priority
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center bg-[var(--surface-muted)]">
-                  <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--text-muted)] opacity-30">
-                    <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>
-                  </svg>
-                </div>
-              )}
+              <ListingHeroImage sortedImages={sortedImages} activeImg={activeImg} alt={listing.title} />
               {listing.isFeatured && (
                 <span className="absolute right-3 top-3 rounded-full bg-[var(--featured)] px-3 py-1 text-xs font-bold text-[var(--featured-text)] shadow">
                   مميز ★
@@ -431,6 +421,37 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
         </aside>
       </article>
     </div>
+  );
+}
+
+function ListingHeroImage({
+  sortedImages,
+  activeImg,
+  alt,
+}: {
+  sortedImages: ListingImage[];
+  activeImg: number;
+  alt: string;
+}) {
+  const currentImage = sortedImages[activeImg];
+  const preferred =
+    currentImage?.url?.trim() ? currentImage.url : LISTING_IMG_PLACEHOLDER;
+  const [src, setSrc] = useState(preferred);
+
+  useEffect(() => {
+    setSrc(preferred);
+  }, [preferred]);
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      className="object-cover"
+      unoptimized
+      priority
+      onError={() => setSrc(LISTING_IMG_PLACEHOLDER)}
+    />
   );
 }
 
