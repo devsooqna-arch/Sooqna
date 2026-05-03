@@ -87,7 +87,7 @@ export function HomeMarketplace() {
               />
             );
           })}
-          <div className="absolute inset-0 bg-black/50" aria-hidden />
+          <div className="absolute inset-0 bg-black/40" aria-hidden />
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center text-white">
             <h2 className="text-xl font-bold sm:text-2xl">اكتشف أفضل الإعلانات بسهولة وأمان</h2>
             <p className="max-w-lg text-sm text-white/90">

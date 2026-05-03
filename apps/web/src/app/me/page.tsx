@@ -13,6 +13,7 @@ export default function MePage() {
       pageTitle="حسابي"
       pageDescription="إدارة إعلاناتك، المفضلة، والرسائل من لوحة واحدة."
     >
+      {/* لوحة المطور (/dev-tools): تُعرَض فقط عندما يكون دور المستخدم ADMIN — انظر AccountDashboard */}
       <AccountDashboard />
     </PublicShell>
   );

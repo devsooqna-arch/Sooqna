@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { formatListedAgo } from "@/lib/formatListedAgo";
 
-const PLACEHOLDER = "/images/placeholder-listing.svg";
+const PLACEHOLDER = "/images/placeholder-listing.png";
 
 export function ListingCard({ listing }: { listing: Listing }) {
   const firstImage = listing.images.find((img) => img.isPrimary) ?? listing.images[0];

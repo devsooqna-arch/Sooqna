@@ -29,7 +29,6 @@ export function PublicShell({
                 width={82}
                 height={40}
                 className="h-10 w-auto dark:brightness-0 dark:invert"
-                style={{ width: "auto", height: "auto" }}
                 priority
               />
             </Link>
