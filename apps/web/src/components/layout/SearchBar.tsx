@@ -6,14 +6,14 @@ import { getCategories } from "@/services/categoryService";
 import type { Category } from "@/types/category";
 
 const CITY_OPTIONS = [
-  { value: "amman", label: "عمّان" },
-  { value: "zarqa", label: "الزرقاء" },
-  { value: "irbid", label: "إربد" },
-  { value: "aqaba", label: "العقبة" },
-  { value: "salt", label: "السلط" },
-  { value: "madaba", label: "مادبا" },
-  { value: "karak", label: "الكرك" },
-  { value: "jerash", label: "جرش" },
+  { value: "aleppo", label: "حلب" },
+  { value: "damascus", label: "دمشق" },
+  { value: "homs", label: "حمص" },
+  { value: "latakia", label: "اللاذقية" },
+  { value: "tartus", label: "طرطوس" },
+  { value: "idlib", label: "إدلب" },
+  { value: "alhasakah", label: "الحسكة" },
+  { value: "deirezzor", label: "دير الزور" },
 ];
 
 function SearchBarFallback() {

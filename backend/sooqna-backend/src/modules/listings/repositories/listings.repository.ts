@@ -46,7 +46,7 @@ function mapListing(record: ListingWithImages): Listing {
     titleLower: listing.titleLower,
     description: listing.description,
     price: listing.price,
-    currency: listing.currency as "JOD",
+    currency: listing.currency as "SYP" | "JOD",
     priceType: listing.priceType as Listing["priceType"],
     categoryId: listing.categoryId,
     ownerId: listing.ownerId ?? "",

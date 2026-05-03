@@ -33,8 +33,8 @@ export function SubmitListingPage() {
   const [price, setPrice] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [description, setDescription] = useState("");
-  const [country, setCountry] = useState("Jordan");
-  const [city, setCity] = useState("Amman");
+  const [country, setCountry] = useState("Syria");
+  const [city, setCity] = useState("Aleppo");
   const [area, setArea] = useState("");
   const [images, setImages] = useState<DraftImage[]>([]);
 

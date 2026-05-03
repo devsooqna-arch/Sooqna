@@ -8,11 +8,11 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <PublicShell pageTitle="من نحن" pageDescription="سوقك الإلكتروني في الأردن">
+    <PublicShell pageTitle="من نحن" pageDescription="سوقك الإلكتروني في سوريا">
       <div className="prose prose-lg max-w-3xl mx-auto text-[var(--text)] leading-relaxed space-y-6">
         <p className="text-[var(--text-muted)]">
-          <strong className="text-[var(--text)]">سوقنا</strong> هو المنصة الرائدة للإعلانات المبوبة في الأردن، أُسست عام 2026 بهدف
-          توفير بيئة بيع وشراء آمنة وسهلة لكل الأردنيين.
+          <strong className="text-[var(--text)]">سوقنا</strong> هو المنصة الرائدة للإعلانات المبوبة في سوريا، أُسست عام 2026 بهدف
+          توفير بيئة بيع وشراء آمنة وسهلة للجميع، مع تركيز على مدينة حلب.
         </p>
         <p className="text-[var(--text-muted)]">
           نؤمن بأن كل شخص يستحق أن يجد ما يبحث عنه بسرعة وأمان — سواء كنت تبيع
@@ -28,7 +28,7 @@ export default function AboutPage() {
           </ul>
         </div>
         <p className="text-[var(--text-muted)]">
-          <strong className="text-[var(--text)]">رؤيتنا:</strong> أن نكون الوجهة الأولى للبيع والشراء في الأردن والمنطقة.
+          <strong className="text-[var(--text)]">رؤيتنا:</strong> أن نكون الوجهة الأولى للبيع والشراء في سوريا والمنطقة.
         </p>
         <p className="text-[var(--text-muted)]">
           <strong className="text-[var(--text)]">مهمتنا:</strong> ربط البائعين بالمشترين بطريقة آمنة وشفافة وسهلة الاستخدام.

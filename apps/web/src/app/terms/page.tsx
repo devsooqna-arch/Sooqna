@@ -18,7 +18,7 @@ export default function TermsPage() {
         <ul className="list-disc space-y-2 pe-6 text-[var(--text-muted)]">
           <li>يُسمح للمستخدمين بنشر إعلانات البيع والشراء المشروعة فقط</li>
           <li>يُحظر نشر محتوى مضلل أو مزيف أو ينتهك حقوق الآخرين</li>
-          <li>يُحظر نشر منتجات مخالفة للقانون الأردني</li>
+          <li>يُحظر نشر منتجات مخالفة للقانون السوري المعمول به</li>
         </ul>
         <h2 className="text-xl font-bold">3. المسؤولية</h2>
         <p className="text-[var(--text-muted)]">

@@ -29,12 +29,12 @@ export const CATEGORY_IDS = [
 ] as const;
 
 export const CITY_IDS = [
-  "amman",
-  "zarqa",
-  "irbid",
-  "aqaba",
-  "salt",
-  "madaba",
-  "karak",
-  "jerash",
+  "aleppo",
+  "damascus",
+  "homs",
+  "latakia",
+  "tartus",
+  "idlib",
+  "alhasakah",
+  "deirezzor",
 ] as const;

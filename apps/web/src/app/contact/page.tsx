@@ -34,7 +34,7 @@ export default function ContactPage() {
             </a>
           </p>
           <p className="mt-4 text-[var(--text)]">🕐 أوقات العمل: الأحد – الخميس، 9 صباحاً – 5 مساءً</p>
-          <p className="mt-2">العنوان: عمّان، الأردن</p>
+          <p className="mt-2">العنوان: حلب، سوريا</p>
         </section>
 
         <section>

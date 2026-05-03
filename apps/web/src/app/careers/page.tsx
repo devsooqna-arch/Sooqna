@@ -11,29 +11,29 @@ export default function CareersPage() {
     <PublicShell pageTitle="الوظائف" pageDescription="انضم إلى فريق سوقنا 🚀">
       <article className="prose prose-lg max-w-3xl mx-auto text-[var(--text)] leading-relaxed space-y-6">
         <p className="text-[var(--text-muted)]">
-          نحن نبني مستقبل التجارة الإلكترونية في الأردن ونبحث عن موهوبين شغوفين.
+          نحن نبني مستقبل التجارة الإلكترونية في سوريا ونبحث عن موهوبين شغوفين — مقرنا الرئيسي في حلب.
         </p>
         <h2 className="text-xl font-bold">وظائف متاحة حالياً</h2>
         <ul className="space-y-4 text-[var(--text-muted)]">
           <li>
             <strong className="text-[var(--text)]">مطوّر Full Stack (React / Node.js)</strong>
             <br />
-            عمّان | دوام كامل
+            حلب | دوام كامل
           </li>
           <li>
             <strong className="text-[var(--text)]">مصمم UI/UX</strong>
             <br />
-            عمّان | دوام كامل أو جزئي
+            حلب | دوام كامل أو جزئي
           </li>
           <li>
             <strong className="text-[var(--text)]">مسؤول دعم العملاء (عربي/إنجليزي)</strong>
             <br />
-            عمّان | دوام كامل
+            حلب | دوام كامل
           </li>
           <li>
             <strong className="text-[var(--text)]">مسؤول تسويق رقمي</strong>
             <br />
-            عمّان | دوام كامل
+            حلب | دوام كامل
           </li>
         </ul>
         <p className="text-[var(--text-muted)]">

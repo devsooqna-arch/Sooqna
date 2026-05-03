@@ -1,11 +1,11 @@
 [
   {
     "id": "listing-demo-001",
-    "title": "Toyota Corolla 2018",
-    "titleLower": "toyota corolla 2018",
-    "description": "سيارة نظيفة جدًا، فحص كامل، استعمال شخصي.",
-    "price": 11800,
-    "currency": "JOD",
+    "title": "تويوتا كورولا 2018 — حلب (الشهباء)",
+    "titleLower": "تويوتا كورولا 2018 — حلب (الشهباء)",
+    "description": "سيارة نظيفة جدًا، فحص كامل، استعمال شخصي، المعاينة في حي الشهباء.",
+    "price": 88000000,
+    "currency": "SYP",
     "priceType": "negotiable",
     "categoryId": "cars",
     "ownerId": "user-demo-001",
@@ -14,9 +14,9 @@
       "photoURL": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80"
     },
     "location": {
-      "country": "Jordan",
-      "city": "Amman",
-      "area": "Khalda"
+      "country": "Syria",
+      "city": "Aleppo",
+      "area": "الشهباء"
     },
     "images": [
       {
@@ -42,11 +42,11 @@
   },
   {
     "id": "listing-demo-002",
-    "title": "شقة للإيجار في ضاحية الرشيد",
-    "titleLower": "شقة للإيجار في ضاحية الرشيد",
-    "description": "شقة 3 غرف، تشطيب ممتاز، قريبة من الخدمات.",
-    "price": 450,
-    "currency": "JOD",
+    "title": "شقة للإيجار في حلب — حي السكري",
+    "titleLower": "شقة للإيجار في حلب — حي السكري",
+    "description": "شقة 3 غرف، تشطيب ممتاز، قريبة من الخدمات والمواصلات في السكري.",
+    "price": 720000,
+    "currency": "SYP",
     "priceType": "fixed",
     "categoryId": "real-estate",
     "ownerId": "user-demo-002",
@@ -55,9 +55,9 @@
       "photoURL": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80"
     },
     "location": {
-      "country": "Jordan",
-      "city": "Amman",
-      "area": "Dabouq"
+      "country": "Syria",
+      "city": "Aleppo",
+      "area": "السكري"
     },
     "images": [
       {
@@ -83,11 +83,11 @@
   },
   {
     "id": "listing-demo-003",
-    "title": "iPhone 14 Pro 256GB",
-    "titleLower": "iphone 14 pro 256gb",
-    "description": "نظيف جدًا مع الكرتونة الأصلية، بدون صيانة.",
-    "price": 620,
-    "currency": "JOD",
+    "title": "آيفون 14 برو 256 جيجا — حلب الجميلية",
+    "titleLower": "آيفون 14 برو 256 جيجا — حلب الجميلية",
+    "description": "نظيف جدًا مع الكرتونة الأصلية، بدون صيانة، التسليم في الجميلية.",
+    "price": 5200000,
+    "currency": "SYP",
     "priceType": "negotiable",
     "categoryId": "electronics",
     "ownerId": "user-demo-003",
@@ -96,9 +96,9 @@
       "photoURL": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80"
     },
     "location": {
-      "country": "Jordan",
-      "city": "Irbid",
-      "area": "University Street"
+      "country": "Syria",
+      "city": "Aleppo",
+      "area": "الجميلية"
     },
     "images": [
       {
@@ -124,11 +124,11 @@
   },
   {
     "id": "listing-demo-004",
-    "title": "طاولة طعام خشب 6 كراسي",
-    "titleLower": "طاولة طعام خشب 6 كراسي",
-    "description": "طاولة ممتازة بحالة جيدة جدًا، استعمال بسيط.",
-    "price": 230,
-    "currency": "JOD",
+    "title": "طاولة طعام خشب 6 كراسي — حلب الأذنية",
+    "titleLower": "طاولة طعام خشب 6 كراسي — حلب الأذنية",
+    "description": "طاولة ممتازة بحالة جيدة جدًا، استعمال بسيط، التوصيل ضمن حلب.",
+    "price": 1900000,
+    "currency": "SYP",
     "priceType": "fixed",
     "categoryId": "furniture",
     "ownerId": "user-demo-004",
@@ -137,9 +137,9 @@
       "photoURL": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80"
     },
     "location": {
-      "country": "Jordan",
-      "city": "Zarqa",
-      "area": "New Zarqa"
+      "country": "Syria",
+      "city": "Aleppo",
+      "area": "الأذنية"
     },
     "images": [
       {
@@ -165,11 +165,11 @@
   },
   {
     "id": "listing-demo-005",
-    "title": "مطلوب مندوب مبيعات",
-    "titleLower": "مطلوب مندوب مبيعات",
-    "description": "شركة تجارية تبحث عن مندوب مبيعات بخبرة سنة على الأقل.",
-    "price": 550,
-    "currency": "JOD",
+    "title": "مطلوب مندوب مبيعات — حلب",
+    "titleLower": "مطلوب مندوب مبيعات — حلب",
+    "description": "شركة تجارية في حلب تبحث عن مندوب مبيعات بخبرة سنة على الأقل.",
+    "price": 2800000,
+    "currency": "SYP",
     "priceType": "contact",
     "categoryId": "jobs",
     "ownerId": "q5x3acmBlBh12fXM3TQn9boHEVv1",
@@ -178,9 +178,9 @@
       "photoURL": "https://lh3.googleusercontent.com/a/ACg8ocKyJn7VJvayJWfjFmM9VV4kMFs34Iw0vyKf_8wu9bRj7tpqrkQXr=s96-c"
     },
     "location": {
-      "country": "Jordan",
-      "city": "Amman",
-      "area": "Mecca St"
+      "country": "Syria",
+      "city": "Aleppo",
+      "area": "مركز المدينة"
     },
     "images": [
       {
@@ -206,11 +206,11 @@
   },
   {
     "id": "lst_1777281992086_f090ee91c55b",
-    "title": "اختبار سيارة",
-    "titleLower": "اختبار سيارة",
-    "description": "هذا وصف اختباري للإعلان",
-    "price": 5000,
-    "currency": "JOD",
+    "title": "اختبار سيارة — حلب",
+    "titleLower": "اختبار سيارة — حلب",
+    "description": "هذا وصف اختباري للإعلان في حلب.",
+    "price": 5000000,
+    "currency": "SYP",
     "priceType": "fixed",
     "categoryId": "cars",
     "ownerId": "q5x3acmBlBh12fXM3TQn9boHEVv1",
@@ -219,9 +219,9 @@
       "photoURL": "https://lh3.googleusercontent.com/a/ACg8ocKyJn7VJayJWfjFmM9VV4kMFs34lw0vyKf_8wu9bRj7tpqRkQXk=s96-c"
     },
     "location": {
-      "country": "Jordan",
-      "city": "Amman",
-      "area": "Amman"
+      "country": "Syria",
+      "city": "Aleppo",
+      "area": "النيرب"
     },
     "images": [],
     "status": "draft",
@@ -240,11 +240,11 @@
   },
   {
     "id": "lst_1777369864231_f0e7069c252a",
-    "title": "test",
-    "titleLower": "test",
+    "title": "test — حلب",
+    "titleLower": "test — حلب",
     "description": "testtest",
-    "price": 100,
-    "currency": "JOD",
+    "price": 150000,
+    "currency": "SYP",
     "priceType": "fixed",
     "categoryId": "cars",
     "ownerId": "q5x3acmBlBh12fXM3TQn9boHEVv1",
@@ -253,9 +253,9 @@
       "photoURL": "https://lh3.googleusercontent.com/a/ACg8ocKyJn7VJayJWfjFmM9VV4kMFs34lw0vyKf_8wu9bRj7tpqRkQXk=s96-c"
     },
     "location": {
-      "country": "Jordan",
-      "city": "Amman",
-      "area": "Amman"
+      "country": "Syria",
+      "city": "Aleppo",
+      "area": "الحمدانية"
     },
     "images": [],
     "status": "draft",

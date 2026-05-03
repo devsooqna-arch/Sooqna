@@ -23,7 +23,7 @@ export interface Listing {
   titleLower: string;
   description: string;
   price: number;
-  currency: "JOD";
+  currency: "SYP" | "JOD";
   priceType: ListingPriceType;
   categoryId: string;
   ownerId: string;

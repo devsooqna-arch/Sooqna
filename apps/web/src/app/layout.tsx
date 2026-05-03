@@ -7,25 +7,25 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: {
-    default: "سوقنا — أكبر سوق إلكتروني في الأردن",
+    default: "سوقنا — سوقك في سوريا (حلب وغيرها)",
     template: "%s | سوقنا",
   },
-  description: "منصة إعلانات مبوبة للبيع والشراء في الأردن",
+  description: "منصة إعلانات مبوبة للبيع والشراء في سوريا — تركيز على حلب",
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
-    locale: "ar_JO",
+    locale: "ar_SY",
     siteName: "سوقنا",
     title: "سوقنا",
-    description: "منصة إعلانات مبوبة للبيع والشراء في الأردن",
+    description: "منصة إعلانات مبوبة للبيع والشراء في سوريا — تركيز على حلب",
     url: "/",
   },
   twitter: {
     card: "summary_large_image",
     title: "سوقنا",
-    description: "منصة إعلانات مبوبة للبيع والشراء في الأردن",
+    description: "منصة إعلانات مبوبة للبيع والشراء في سوريا — تركيز على حلب",
   },
   icons: {
     icon: "/branding/favicon.png",

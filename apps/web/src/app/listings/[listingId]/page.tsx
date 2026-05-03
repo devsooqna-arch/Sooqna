@@ -68,7 +68,7 @@ export default async function ListingDetailsPage({ params }: ListingDetailsPageP
     description: listing?.description || undefined,
     offers: {
       "@type": "Offer",
-      priceCurrency: listing?.currency || "JOD",
+      priceCurrency: listing?.currency || "SYP",
       price: listing?.price ?? undefined,
       availability: "https://schema.org/InStock",
       url: buildAbsoluteUrl(`/listings/${listingId}`),

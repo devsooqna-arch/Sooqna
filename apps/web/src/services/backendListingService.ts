@@ -6,7 +6,7 @@ export type BackendListing = {
   titleLower: string;
   description: string;
   price: number;
-  currency: "JOD";
+  currency: string;
   priceType: "fixed" | "negotiable" | "contact";
   categoryId: string;
   ownerId: string;
