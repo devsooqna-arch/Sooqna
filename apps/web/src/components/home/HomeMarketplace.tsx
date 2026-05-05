@@ -142,14 +142,19 @@ export function HomeMarketplace() {
           </h3>
           <ul className="mt-4 space-y-2 text-sm text-[var(--text-muted)]">
             {topCategories.map((category) => (
-              <li key={category.id} className="flex items-center justify-between gap-2">
-                <span className="flex min-w-0 items-center gap-2">
-                  <span className="h-3 w-3 shrink-0 rounded-full border border-[var(--chip-border)]" />
-                  <span className="truncate">{category.name.ar || category.name.en || category.slug}</span>
-                </span>
-                <span className="shrink-0 text-xs text-[var(--text-muted)]">
-                  {categoryCounts.get(category.id) ?? 0} إعلان
-                </span>
+              <li key={category.id}>
+                <Link
+                  href={`/listings?category=${encodeURIComponent(category.slug || category.id)}`}
+                  className="flex items-center justify-between gap-2 rounded-md px-1 py-1.5 transition hover:bg-[var(--chip)] hover:text-[var(--text)]"
+                >
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span className="h-3 w-3 shrink-0 rounded-full border border-[var(--chip-border)]" />
+                    <span className="truncate">{category.name.ar || category.name.en || category.slug}</span>
+                  </span>
+                  <span className="shrink-0 text-xs text-[var(--text-muted)]">
+                    {categoryCounts.get(category.id) ?? 0} إعلان
+                  </span>
+                </Link>
               </li>
             ))}
           </ul>
