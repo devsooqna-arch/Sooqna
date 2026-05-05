@@ -88,7 +88,7 @@ export function PublicShell({
                 { label: "من نحن", href: "/about" },
                 { label: "الوظائف", href: "/careers" },
                 { label: "المركز الإعلامي", href: "/press" },
-                { label: "التطبيقات", href: "#" },
+                { label: "التطبيقات", href: "/packages" },
                 { label: "اتصل بنا", href: "/contact" },
               ]}
             />

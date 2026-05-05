@@ -7,25 +7,25 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: {
-    default: "سوقنا — سوقك في الأردن",
+    default: "سوقنا — سوقك في سوريا",
     template: "%s | سوقنا",
   },
-  description: "منصة إعلانات مبوبة للبيع والشراء في الأردن — عمّان وجميع المحافظات",
+  description: "سوقنا — منصة إعلانات مبوبة مجانية في سوريا. بيع واشترِ سيارات، عقارات، إلكترونيات وأكثر في حلب وجميع المحافظات.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
-    locale: "ar_JO",
+    locale: "ar_SY",
     siteName: "سوقنا",
-    title: "سوقنا",
-    description: "منصة إعلانات مبوبة للبيع والشراء في الأردن — عمّان وجميع المحافظات",
+    title: "سوقنا — سوقك في سوريا",
+    description: "سوقنا — منصة إعلانات مبوبة مجانية في سوريا. بيع واشترِ سيارات، عقارات، إلكترونيات وأكثر في حلب وجميع المحافظات.",
     url: "/",
   },
   twitter: {
     card: "summary_large_image",
-    title: "سوقنا",
-    description: "منصة إعلانات مبوبة للبيع والشراء في الأردن — عمّان وجميع المحافظات",
+    title: "سوقنا — سوقك في سوريا",
+    description: "سوقنا — منصة إعلانات مبوبة مجانية في سوريا. بيع واشترِ سيارات، عقارات، إلكترونيات وأكثر في حلب وجميع المحافظات.",
   },
   icons: {
     icon: "/branding/favicon.png",

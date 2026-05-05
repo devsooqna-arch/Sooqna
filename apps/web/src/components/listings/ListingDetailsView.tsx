@@ -27,7 +27,7 @@ function formatDate(iso: string | null): string {
   const year = d.getUTCFullYear();
   // Build a local-noon date to avoid DST/timezone edge cases
   const safeDate = new Date(year, month, day, 12, 0, 0);
-  return safeDate.toLocaleDateString("ar-JO", { year: "numeric", month: "long", day: "numeric" });
+  return safeDate.toLocaleDateString("ar-SY", { year: "numeric", month: "long", day: "numeric" });
 }
 
 export function ListingDetailsView({ listingId }: { listingId: string }) {

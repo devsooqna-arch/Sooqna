@@ -11,7 +11,7 @@ export default function SubmitListingRoutePage() {
   return (
     <PublicShell
       pageTitle="أضف إعلانك"
-      pageDescription="أنشئ إعلان جديد وارفع الصور باستخدام الباكند الحالي من Milestone 1."
+      pageDescription="انشر إعلانك مجاناً في ثوانٍ وابدأ البيع الآن."
     >
       <SubmitListingPage />
     </PublicShell>

@@ -8,6 +8,13 @@ const isDevelopment = process.env.NODE_ENV === "development";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "un.flashpointjordan.com" },
+    ],
+  },
   pageExtensions: isDevelopment ? ["tsx", "ts", "jsx", "js", "dev.tsx"] : ["tsx", "ts", "jsx", "js"],
   // Disable experimental devtools overlay hooks that were causing
   // Segment Explorer manifest/runtime errors in this environment.
@@ -45,6 +52,14 @@ const nextConfig = {
       ...wpExactRedirects,
       ...wpPatternRedirects,
       // Non-WP compatibility redirects can be added below.
+    ];
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/uploads/:path*",
+        destination: "http://localhost:5000/uploads/:path*",
+      },
     ];
   },
 };
