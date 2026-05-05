@@ -4,6 +4,7 @@ import { ListingDetailsView } from "@/components/listings/ListingDetailsView";
 import { PublicShell } from "@/components/layout/PublicShell";
 import { JsonLdScript } from "@/components/seo/JsonLdScript";
 import { listingTitleForPageMetadata } from "@/lib/listingMetadata";
+import { resolvePublicMediaUrl } from "@/lib/mediaUrl";
 import { buildAbsoluteUrl } from "@/lib/seo";
 import { fetchPublicListingById } from "@/lib/server-listings";
 
@@ -47,7 +48,9 @@ export async function generateMetadata({
       title,
       description,
       url: `/listings/${listingId}`,
-      images: listing.images?.[0]?.url ? [listing.images[0].url] : undefined,
+      images: listing.images?.[0]?.url
+        ? [(resolvePublicMediaUrl(listing.images[0].url) ?? listing.images[0].url)]
+        : undefined,
       type: "website",
     },
   };
@@ -58,18 +61,22 @@ export default async function ListingDetailsPage({ params }: ListingDetailsPageP
   const listing = await fetchPublicListingById(listingId);
   if (!listing) notFound();
 
+  const firstListingImage = listing.images?.[0]?.url?.trim()
+    ? (resolvePublicMediaUrl(listing.images[0].url) ?? listing.images[0].url)
+    : undefined;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: listing?.title || `إعلان رقم ${listingId}`,
+    name: listing.title || `إعلان رقم ${listingId}`,
     sku: listingId,
     url: buildAbsoluteUrl(`/listings/${listingId}`),
-    image: listing?.images?.[0]?.url || undefined,
-    description: listing?.description || undefined,
+    image: firstListingImage,
+    description: listing.description || undefined,
     offers: {
       "@type": "Offer",
-      priceCurrency: listing?.currency || "SYP",
-      price: listing?.price ?? undefined,
+      priceCurrency: listing.currency || "SYP",
+      price: listing.price ?? undefined,
       availability: "https://schema.org/InStock",
       url: buildAbsoluteUrl(`/listings/${listingId}`),
     },

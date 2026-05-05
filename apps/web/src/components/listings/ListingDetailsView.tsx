@@ -13,12 +13,21 @@ import { addToFavorites, removeFromFavorites, isFavorite } from "@/services/favo
 import { createConversation } from "@/services/messageService";
 import { trackEngagementEvent } from "@/services/engagementService";
 import { useDelayedLoading } from "@/hooks/useDelayedLoading";
+import { resolvePublicMediaUrl } from "@/lib/mediaUrl";
 
 const LISTING_IMG_PLACEHOLDER = "/images/placeholder-listing.png";
 
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("ar-JO", { year: "numeric", month: "long", day: "numeric" });
+  // Parse as UTC then format in Jordan timezone to avoid day-0 off-by-one
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  const day = d.getUTCDate();
+  const month = d.getUTCMonth();
+  const year = d.getUTCFullYear();
+  // Build a local-noon date to avoid DST/timezone edge cases
+  const safeDate = new Date(year, month, day, 12, 0, 0);
+  return safeDate.toLocaleDateString("ar-JO", { year: "numeric", month: "long", day: "numeric" });
 }
 
 export function ListingDetailsView({ listingId }: { listingId: string }) {
@@ -104,6 +113,7 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
     }
     setActionError(null);
     const primaryImg = listing.images.find((img) => img.isPrimary) ?? listing.images[0];
+    const snapshotImage = resolvePublicMediaUrl(primaryImg?.url) ?? primaryImg?.url ?? "";
     try {
       const result = await createConversation({
         participantIds: [currentUser.uid, listing.ownerId],
@@ -120,7 +130,7 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
         listingId: listing.id,
         listingSnapshot: {
           title: listing.title,
-          primaryImageURL: primaryImg?.url ?? "",
+          primaryImageURL: snapshotImage,
         },
         createdBy: currentUser.uid,
       });
@@ -240,7 +250,13 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
                       idx === activeImg ? "border-[var(--brand)]" : "border-transparent opacity-60 hover:opacity-100"
                     }`}
                   >
-                    <Image src={img.url} alt="" fill className="object-cover" unoptimized />
+                    <Image
+                      src={resolvePublicMediaUrl(img.url) ?? img.url}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
                   </button>
                 ))}
               </div>
@@ -434,7 +450,9 @@ function ListingHeroImage({
 }) {
   const currentImage = sortedImages[activeImg];
   const preferred =
-    currentImage?.url?.trim() ? currentImage.url : LISTING_IMG_PLACEHOLDER;
+    currentImage?.url?.trim()
+      ? (resolvePublicMediaUrl(currentImage.url) ?? currentImage.url)
+      : LISTING_IMG_PLACEHOLDER;
   const [src, setSrc] = useState(preferred);
 
   useEffect(() => {

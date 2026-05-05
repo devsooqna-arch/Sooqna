@@ -33,8 +33,8 @@ export function SubmitListingPage() {
   const [price, setPrice] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [description, setDescription] = useState("");
-  const [country, setCountry] = useState("Syria");
-  const [city, setCity] = useState("Aleppo");
+  const [country, setCountry] = useState("Jordan");
+  const [city, setCity] = useState("Amman");
   const [area, setArea] = useState("");
   const [images, setImages] = useState<DraftImage[]>([]);
 
@@ -284,7 +284,7 @@ export function SubmitListingPage() {
           {activeStep === 2 ? (
             <div className="space-y-2 rounded-lg border border-[var(--border)] bg-[var(--chip)] p-3 text-sm">
               <p><strong>العنوان:</strong> {title || "-"}</p>
-              <p><strong>السعر:</strong> {price || "0"} دينار</p>
+              <p><strong>السعر:</strong> {price || "0"} د.أ (JOD)</p>
               <p><strong>التصنيف:</strong> {categoryOptions.find((c) => c.id === categoryId)?.label || "-"}</p>
               <p><strong>الموقع:</strong> {country} / {city} / {area || city}</p>
               <p><strong>عدد الصور:</strong> {images.length}</p>

@@ -8,9 +8,9 @@ export async function createListing(
   input: CreateListingInput
 ): Promise<CreateListingResult> {
   const location = {
-    country: input.location?.country?.trim() || "Syria",
-    city: input.location?.city?.trim() || "Aleppo",
-    area: input.location?.area?.trim() || "Unknown",
+    country: input.location?.country?.trim() || "Jordan",
+    city: input.location?.city?.trim() || "Amman",
+    area: input.location?.area?.trim() || "Amman",
   };
   const response = await apiFetch<{ success: true; listing: Listing }>("/listings", {
     method: "POST",

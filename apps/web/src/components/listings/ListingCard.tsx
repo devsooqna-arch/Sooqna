@@ -5,12 +5,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { formatListedAgo } from "@/lib/formatListedAgo";
+import { resolvePublicMediaUrl } from "@/lib/mediaUrl";
 
 const PLACEHOLDER = "/images/placeholder-listing.png";
 
 export function ListingCard({ listing }: { listing: Listing }) {
   const firstImage = listing.images.find((img) => img.isPrimary) ?? listing.images[0];
-  const preferredSrc = firstImage?.url?.trim() ? firstImage.url : PLACEHOLDER;
+  const preferredSrc = firstImage?.url?.trim()
+    ? (resolvePublicMediaUrl(firstImage.url) ?? firstImage.url)
+    : PLACEHOLDER;
   const [imgSrc, setImgSrc] = useState(preferredSrc);
 
   useEffect(() => {
