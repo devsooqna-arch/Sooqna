@@ -43,6 +43,7 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
   const [actionError, setActionError] = useState<string | null>(null);
   const [reviewMsg, setReviewMsg] = useState<string | null>(null);
   const [reportMsg, setReportMsg] = useState<string | null>(null);
+  const [shareCopied, setShareCopied] = useState(false);
   const [activeImg, setActiveImg] = useState(0);
   const showLoadingUi = useDelayedLoading(loading);
 
@@ -142,6 +143,29 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
       router.push(`/messages?conversation=${encodeURIComponent(result.conversationId)}`);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Failed to create conversation.");
+    }
+  }
+
+  async function handleShare() {
+    if (!listing) return;
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    const title = listing.title;
+    const text = `${title} — ${listing.price} ${listing.currency}`;
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({ title, text, url });
+        return;
+      } catch {
+        // User cancelled or browser blocked — fall through to clipboard
+      }
+    }
+    // Clipboard fallback
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2500);
+    } catch {
+      /* ignore clipboard errors */
     }
   }
 
@@ -274,9 +298,28 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
                 {listing.condition === "new" ? "جديد" : "مستعمل"}
               </span>
             </div>
-            <h1 className="text-2xl font-extrabold leading-snug text-[var(--text)] sm:text-3xl">
-              {listing.title}
-            </h1>
+            <div className="flex items-start justify-between gap-3">
+              <h1 className="text-2xl font-extrabold leading-snug text-[var(--text)] sm:text-3xl">
+                {listing.title}
+              </h1>
+              <button
+                type="button"
+                onClick={() => void handleShare()}
+                title="مشاركة الإعلان"
+                className="mt-1 shrink-0 rounded-full border border-[var(--chip-border)] bg-[var(--chip)] p-2 text-[var(--text-muted)] transition hover:text-[var(--text)]"
+              >
+                {shareCopied ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                  </svg>
+                )}
+              </button>
+            </div>
             <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--text-muted)]">
               <span className="flex items-center gap-1">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="text-[var(--brand)]">
@@ -394,6 +437,54 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
               </svg>
               {favoriteLoading ? "..." : favorite ? "إزالة من المفضلة" : "أضف للمفضلة"}
             </button>
+
+            {/* Share */}
+            <div className="mt-3 space-y-2 border-t border-[var(--border)] pt-3">
+              <button
+                type="button"
+                onClick={() => void handleShare()}
+                className="flex w-full items-center justify-center gap-2 rounded-full border border-[var(--chip-border)] bg-[var(--chip)] px-4 py-2.5 text-sm font-semibold text-[var(--text-muted)] transition hover:text-[var(--text)]"
+              >
+                {shareCopied ? (
+                  <>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span className="text-green-600">تم نسخ الرابط!</span>
+                  </>
+                ) : (
+                  <>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                    </svg>
+                    مشاركة الإعلان
+                  </>
+                )}
+              </button>
+
+              {/* Quick share: Telegram & WhatsApp */}
+              {listing && (
+                <div className="grid grid-cols-2 gap-2">
+                  <a
+                    href={`https://t.me/share/url?url=${encodeURIComponent(typeof window !== "undefined" ? window.location.href : "")}&text=${encodeURIComponent(listing.title)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-1.5 rounded-full border border-sky-300 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-800 transition hover:bg-sky-100"
+                  >
+                    <span aria-hidden>✈️</span> تيليغرام
+                  </a>
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(`${listing.title} — ${typeof window !== "undefined" ? window.location.href : ""}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-1.5 rounded-full border border-green-300 bg-green-50 px-3 py-2 text-xs font-semibold text-green-800 transition hover:bg-green-100"
+                  >
+                    <span aria-hidden>💬</span> واتساب
+                  </a>
+                </div>
+              )}
+            </div>
 
             <div className="mt-3 space-y-1 border-t border-[var(--border)] pt-3">
               {reviewMsg ? (
