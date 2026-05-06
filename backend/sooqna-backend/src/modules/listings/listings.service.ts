@@ -308,6 +308,21 @@ export class ListingsService {
     return this.repo.update(listing.id, next);
   }
 
+  async feature(listingId: string, ownerId: string): Promise<Listing> {
+    const listing = await this.getOwnerListingOrThrow(listingId, ownerId);
+    if (listing.status !== "published") {
+      throw new AppError(400, "Only published listings can be featured.", "LISTING_STATE_INVALID");
+    }
+    const next: Listing = { ...listing, isFeatured: true, updatedAt: nowIso() };
+    return this.repo.update(listing.id, next);
+  }
+
+  async unfeature(listingId: string, ownerId: string): Promise<Listing> {
+    const listing = await this.getOwnerListingOrThrow(listingId, ownerId);
+    const next: Listing = { ...listing, isFeatured: false, updatedAt: nowIso() };
+    return this.repo.update(listing.id, next);
+  }
+
   async expire(listingId: string, ownerId: string): Promise<Listing> {
     const listing = await this.getOwnerListingOrThrow(listingId, ownerId);
     this.applyAutoExpiration(listing);

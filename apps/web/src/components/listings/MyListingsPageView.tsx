@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { RequireAuthGate } from "@/components/auth/RequireAuthGate";
-import { getMyListings } from "@/services/listingService";
+import { getMyListings, featureListing, unfeatureListing } from "@/services/listingService";
 import type { Listing, ListingStatus } from "@/types/listing";
+import { arabicCity } from "@/lib/locationNames";
 
 const STATUS_LABELS: Record<ListingStatus, string> = {
   draft:     "مسودة",
@@ -47,6 +48,7 @@ export function MyListingsPageView() {
   const [error, setError] = useState<string | null>(null);
   const [myListings, setMyListings] = useState<Listing[]>([]);
   const [tab, setTab] = useState<MyTab>("all");
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const filteredListings = useMemo(
     () => myListings.filter((l) => matchesMyTab(l, tab)),
@@ -64,6 +66,23 @@ export function MyListingsPageView() {
       .finally(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
   }, [currentUser]);
+
+  async function handleFeatureToggle(listing: Listing) {
+    if (togglingId) return;
+    setTogglingId(listing.id);
+    try {
+      const updated = listing.isFeatured
+        ? await unfeatureListing(listing.id)
+        : await featureListing(listing.id);
+      setMyListings((prev) =>
+        prev.map((l) => (l.id === updated.id ? updated : l))
+      );
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "حدث خطأ، حاول مجدداً");
+    } finally {
+      setTogglingId(null);
+    }
+  }
 
   return (
     <RequireAuthGate fallbackMessage="يتم التحقق من الجلسة قبل تحميل إعلاناتك...">
@@ -120,12 +139,30 @@ export function MyListingsPageView() {
                 </div>
                 <p className="mt-1 text-xs text-[var(--text-muted)]">
                   {listing.price} {listing.currency}
-                  {listing.location.city ? ` • ${listing.location.city}` : ""}
+                  {listing.location.city ? ` • ${arabicCity(listing.location.city)}` : ""}
                   <span className="mx-1">•</span>
                   {listing.viewsCount} مشاهدة
                 </p>
               </div>
-              <div className="flex shrink-0 items-center gap-2">
+              <div className="flex shrink-0 flex-wrap items-center gap-2">
+                {listing.status === "published" && (
+                  <button
+                    type="button"
+                    onClick={() => void handleFeatureToggle(listing)}
+                    disabled={togglingId === listing.id}
+                    className={`rounded-full px-4 py-1.5 text-xs font-semibold transition disabled:opacity-50 ${
+                      listing.isFeatured
+                        ? "border border-[var(--featured)] bg-[var(--featured)]/10 text-[var(--featured)] hover:bg-[var(--featured)]/20"
+                        : "border border-[var(--border)] bg-[var(--chip)] text-[var(--text-muted)] hover:text-[var(--text)]"
+                    }`}
+                  >
+                    {togglingId === listing.id
+                      ? "..."
+                      : listing.isFeatured
+                      ? "إلغاء التمييز"
+                      : "تمييز ★"}
+                  </button>
+                )}
                 <Link
                   href={`/listings/${listing.id}`}
                   className="rounded-full border border-[var(--chip-border)] bg-[var(--chip)] px-4 py-1.5 text-xs font-semibold text-[var(--text-muted)] transition hover:text-[var(--text)]"

@@ -165,12 +165,12 @@ export class PrismaListingsRepository implements ListingsRepository {
           : []),
       ],
     };
-    const orderBy: Array<{ price?: "asc" | "desc"; createdAt?: "asc" | "desc"; id?: "asc" | "desc" }> =
+    const orderBy: Array<{ isFeatured?: "asc" | "desc"; price?: "asc" | "desc"; createdAt?: "asc" | "desc"; id?: "asc" | "desc" }> =
       sort === "price_asc"
-        ? [{ price: "asc" }, { createdAt: "desc" }, { id: "desc" }]
+        ? [{ isFeatured: "desc" }, { price: "asc" }, { createdAt: "desc" }, { id: "desc" }]
         : sort === "price_desc"
-          ? [{ price: "desc" }, { createdAt: "desc" }, { id: "desc" }]
-          : [{ createdAt: "desc" }, { id: "desc" }];
+          ? [{ isFeatured: "desc" }, { price: "desc" }, { createdAt: "desc" }, { id: "desc" }]
+          : [{ isFeatured: "desc" }, { createdAt: "desc" }, { id: "desc" }];
 
     try {
       const [listings, total] = await prisma.$transaction([
@@ -208,11 +208,11 @@ export class PrismaListingsRepository implements ListingsRepository {
           );
         }
         if (sort === "price_asc") {
-          filtered = [...filtered].sort((a, b) => a.price - b.price);
+          filtered = [...filtered].sort((a, b) => Number(b.isFeatured) - Number(a.isFeatured) || a.price - b.price);
         } else if (sort === "price_desc") {
-          filtered = [...filtered].sort((a, b) => b.price - a.price);
+          filtered = [...filtered].sort((a, b) => Number(b.isFeatured) - Number(a.isFeatured) || b.price - a.price);
         } else {
-          filtered = [...filtered].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+          filtered = [...filtered].sort((a, b) => Number(b.isFeatured) - Number(a.isFeatured) || b.createdAt.localeCompare(a.createdAt));
         }
         return { items: filtered.slice(offset, offset + limit), total: filtered.length };
       }

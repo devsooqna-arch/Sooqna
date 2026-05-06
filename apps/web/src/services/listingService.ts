@@ -159,6 +159,22 @@ export async function expireListing(listingId: string): Promise<Listing> {
   return response.listing;
 }
 
+export async function featureListing(listingId: string): Promise<Listing> {
+  const response = await apiFetch<{ success: true; listing: Listing }>(`/listings/${listingId}/feature`, {
+    method: "POST",
+    authenticated: true,
+  });
+  return response.listing;
+}
+
+export async function unfeatureListing(listingId: string): Promise<Listing> {
+  const response = await apiFetch<{ success: true; listing: Listing }>(`/listings/${listingId}/unfeature`, {
+    method: "POST",
+    authenticated: true,
+  });
+  return response.listing;
+}
+
 export async function attachListingImage(
   listingId: string,
   image: { url: string; path: string }

@@ -180,6 +180,30 @@ export async function deleteListing(req: Request, res: Response): Promise<void> 
   res.json({ success: true, listing });
 }
 
+export async function featureListing(req: Request, res: Response): Promise<void> {
+  if (!req.authUser) throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
+  const listing = await service.feature(req.params.id, req.authUser.uid);
+  await logAuditEvent({
+    actorId: req.authUser.uid,
+    action: "listing.feature",
+    targetType: "listing",
+    targetId: listing.id,
+  });
+  res.json({ success: true, listing });
+}
+
+export async function unfeatureListing(req: Request, res: Response): Promise<void> {
+  if (!req.authUser) throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
+  const listing = await service.unfeature(req.params.id, req.authUser.uid);
+  await logAuditEvent({
+    actorId: req.authUser.uid,
+    action: "listing.unfeature",
+    targetType: "listing",
+    targetId: listing.id,
+  });
+  res.json({ success: true, listing });
+}
+
 export async function attachListingImage(req: Request, res: Response): Promise<void> {
   if (!req.authUser) {
     throw new AppError(401, "Unauthorized", "UNAUTHORIZED");

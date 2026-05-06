@@ -16,12 +16,14 @@ import {
   createListing,
   deleteListing,
   expireListing,
+  featureListing,
   getListingById,
   listListings,
   listMyListings,
   patchListing,
   publishListing,
   renewListing,
+  unfeatureListing,
   unpublishListing,
 } from "./listings.controller";
 
@@ -81,6 +83,20 @@ listingsRouter.delete(
   requireVerifiedEmail,
   validateRequest({ params: idParamsSchema }),
   deleteListing
+);
+listingsRouter.post(
+  "/:id/feature",
+  verifyFirebaseToken,
+  requireVerifiedEmail,
+  validateRequest({ params: idParamsSchema }),
+  featureListing
+);
+listingsRouter.post(
+  "/:id/unfeature",
+  verifyFirebaseToken,
+  requireVerifiedEmail,
+  validateRequest({ params: idParamsSchema }),
+  unfeatureListing
 );
 listingsRouter.post(
   "/:id/images",

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { attachListingImage, createListing, publishListing } from "@/services/listingService";
+import { attachListingImage, createListing, featureListing, publishListing } from "@/services/listingService";
 import { getCategories } from "@/services/categoryService";
 import { uploadBackendListingImage } from "@/services/backendUploadService";
 import type { Category } from "@/types/category";
@@ -12,7 +12,7 @@ import { RequireAuthGate } from "@/components/auth/RequireAuthGate";
 const MAX_IMAGES = 10;
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp"]);
-const STEPS = ["تفاصيل الإعلان", "الصور", "المراجعة والنشر"] as const;
+const STEPS = ["تفاصيل الإعلان", "الصور", "تمييز الإعلان", "المراجعة والنشر"] as const;
 
 type UploadStage = "queued" | "uploading" | "uploaded" | "failed";
 type DraftImage = {
@@ -37,6 +37,8 @@ export function SubmitListingPage() {
   const [city, setCity] = useState("Aleppo");
   const [area, setArea] = useState("");
   const [images, setImages] = useState<DraftImage[]>([]);
+
+  const [wantFeatured, setWantFeatured] = useState(false);
 
   const [activeStep, setActiveStep] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -202,7 +204,15 @@ export function SubmitListingPage() {
       await uploadImagesForListing(result.listingId);
       setOptimisticNote("جارٍ نشر الإعلان...");
       await publishListing(result.listingId);
-      setOptimisticNote("تم نشر الإعلان وهو الآن يظهر في البحث والصفحة الرئيسية.");
+      if (wantFeatured) {
+        setOptimisticNote("جارٍ تفعيل التمييز...");
+        await featureListing(result.listingId);
+      }
+      setOptimisticNote(
+        wantFeatured
+          ? "✅ تم نشر إعلانك المميز وسيظهر في أول الصفحة الرئيسية!"
+          : "تم نشر الإعلان وهو الآن يظهر في البحث والصفحة الرئيسية."
+      );
       setCreatedListingId(result.listingId);
     } catch (err) {
       setError(err instanceof Error ? err.message : "تعذر إنشاء الإعلان.");
@@ -216,9 +226,9 @@ export function SubmitListingPage() {
     <RequireAuthGate fallbackMessage="يتم التحقق من تسجيل الدخول قبل إنشاء الإعلان...">
       <div className="space-y-5">
         <form onSubmit={onSubmit} className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm sm:p-6">
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             {STEPS.map((step, idx) => (
-              <div key={step} className={`rounded-lg px-2 py-2 text-center text-xs font-semibold ${idx === activeStep ? "bg-[var(--brand)] text-[var(--brand-contrast)]" : "bg-[var(--chip)] text-[var(--text-muted)]"}`}>
+              <div key={step} className={`rounded-lg px-2 py-2 text-center text-xs font-semibold ${idx === activeStep ? "bg-[var(--brand)] text-[var(--brand-contrast)]" : idx < activeStep ? "bg-[var(--brand)]/20 text-[var(--brand)]" : "bg-[var(--chip)] text-[var(--text-muted)]"}`}>
                 {idx + 1}. {step}
               </div>
             ))}
@@ -282,12 +292,70 @@ export function SubmitListingPage() {
           ) : null}
 
           {activeStep === 2 ? (
+            <div className="space-y-4">
+              <p className="text-sm text-[var(--text-muted)]">
+                الإعلانات المميزة تظهر في قسم خاص في أعلى الصفحة الرئيسية وتحصل على مشاهدات أكثر.
+              </p>
+
+              <button
+                type="button"
+                onClick={() => setWantFeatured((prev) => !prev)}
+                disabled={busy}
+                className={`w-full rounded-2xl border-2 p-5 text-right transition-all ${
+                  wantFeatured
+                    ? "border-[var(--featured)] bg-[var(--featured)]/10"
+                    : "border-[var(--border)] bg-[var(--surface)] hover:border-[var(--featured)]/50"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <p className="flex items-center gap-2 text-sm font-bold text-[var(--text)]">
+                      <span className="text-lg">⭐</span>
+                      إعلان مميز
+                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">مجاناً خلال الإطلاق</span>
+                    </p>
+                    <ul className="space-y-0.5 text-xs text-[var(--text-muted)]">
+                      <li>✓ يظهر في قسم "الإعلانات المميزة" أعلى الصفحة الرئيسية</li>
+                      <li>✓ بادج "مميز ★" بارز على الإعلان</li>
+                      <li>✓ مشاهدات أكثر وتواصل أسرع</li>
+                    </ul>
+                  </div>
+                  <div className={`h-6 w-6 shrink-0 rounded-full border-2 transition-all ${
+                    wantFeatured
+                      ? "border-[var(--featured)] bg-[var(--featured)]"
+                      : "border-[var(--border)] bg-[var(--surface)]"
+                  }`}>
+                    {wantFeatured && (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="h-full w-full p-1">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+              </button>
+
+              <div
+                className={`rounded-xl border p-3 text-xs transition-all ${
+                  wantFeatured
+                    ? "border-[var(--featured)]/40 bg-[var(--featured)]/5 text-[var(--text)]"
+                    : "border-[var(--border)] bg-[var(--chip)] text-[var(--text-muted)]"
+                }`}
+              >
+                {wantFeatured
+                  ? "✅ رائع! إعلانك سيظهر مميزاً في الصفحة الرئيسية فور النشر."
+                  : "سيُنشر إعلانك في قسم «آخر الإعلانات». يمكنك تمييزه لاحقاً من صفحة إعلاناتي."}
+              </div>
+            </div>
+          ) : null}
+
+          {activeStep === 3 ? (
             <div className="space-y-2 rounded-lg border border-[var(--border)] bg-[var(--chip)] p-3 text-sm">
               <p><strong>العنوان:</strong> {title || "-"}</p>
-              <p><strong>السعر:</strong> {price || "0"} د.أ (JOD)</p>
+              <p><strong>السعر:</strong> {price || "0"} ل.س (SYP)</p>
               <p><strong>التصنيف:</strong> {categoryOptions.find((c) => c.id === categoryId)?.label || "-"}</p>
               <p><strong>الموقع:</strong> {country} / {city} / {area || city}</p>
               <p><strong>عدد الصور:</strong> {images.length}</p>
+              <p><strong>مميز:</strong> {wantFeatured ? "✅ نعم" : "لا"}</p>
             </div>
           ) : null}
 
@@ -296,7 +364,9 @@ export function SubmitListingPage() {
             {activeStep < STEPS.length - 1 ? (
               <button type="button" onClick={nextStep} disabled={busy} className="rounded-full bg-[var(--brand)] px-4 py-2 text-xs font-semibold text-[var(--brand-contrast)]">التالي</button>
             ) : (
-              <button type="submit" disabled={busy || categoryLoading} className="rounded-full bg-[var(--brand)] px-4 py-2 text-xs font-bold text-[var(--brand-contrast)] disabled:opacity-60">{busy ? "جارٍ النشر..." : "نشر الإعلان"}</button>
+              <button type="submit" disabled={busy || categoryLoading} className="rounded-full bg-[var(--brand)] px-4 py-2 text-xs font-bold text-[var(--brand-contrast)] disabled:opacity-60">
+                {busy ? "جارٍ النشر..." : wantFeatured ? "نشر الإعلان المميز ⭐" : "نشر الإعلان"}
+              </button>
             )}
           </div>
         </form>

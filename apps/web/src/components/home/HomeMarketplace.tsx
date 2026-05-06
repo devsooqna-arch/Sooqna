@@ -50,7 +50,8 @@ export function HomeMarketplace() {
     };
   }, []);
 
-  const featuredListings = useMemo(() => listings.slice(0, 9), [listings]);
+  const featuredListings = useMemo(() => listings.filter((l) => l.isFeatured), [listings]);
+  const regularListings = useMemo(() => listings.filter((l) => !l.isFeatured), [listings]);
   const topCategories = useMemo(() => categories.slice(0, 10), [categories]);
   const categoryCounts = useMemo(() => {
     const map = new Map<string, number>();
@@ -160,28 +161,59 @@ export function HomeMarketplace() {
           </ul>
         </aside>
 
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-2xl font-bold text-[var(--text)]">الإعلانات</h3>
-            <Link href="/listings" className="ui-btn-primary rounded-full px-4 py-1.5 text-xs">
-              عرض الكل
-            </Link>
-          </div>
-
+        <div className="space-y-5">
           {showMarketplaceLoading ? (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-52 animate-pulse rounded-lg bg-[var(--surface)]" />
-              ))}
+            <div className="space-y-3">
+              <div className="h-6 w-40 animate-pulse rounded-md bg-[var(--surface)]" />
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="h-52 animate-pulse rounded-lg bg-[var(--surface)]" />
+                ))}
+              </div>
             </div>
           ) : error ? (
             <p className="text-sm text-[var(--danger)]">{error}</p>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {featuredListings.map((listing) => (
-                <ListingCard key={listing.id} listing={listing} />
-              ))}
-            </div>
+            <>
+              {featuredListings.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="flex items-center gap-2 text-xl font-bold text-[var(--text)]">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--featured)] text-sm text-[var(--featured-text)]">★</span>
+                      الإعلانات المميزة
+                    </h3>
+                    <Link href="/listings?featured=true" className="text-xs text-[var(--brand)] hover:underline">
+                      عرض الكل
+                    </Link>
+                  </div>
+                  <div className="rounded-2xl border border-[var(--featured)]/30 bg-[var(--featured)]/5 p-3">
+                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                      {featuredListings.map((listing) => (
+                        <ListingCard key={listing.id} listing={listing} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold text-[var(--text)]">آخر الإعلانات</h3>
+                  <Link href="/listings" className="ui-btn-primary rounded-full px-4 py-1.5 text-xs">
+                    عرض الكل
+                  </Link>
+                </div>
+                {regularListings.length === 0 ? (
+                  <p className="text-sm text-[var(--text-muted)]">لا توجد إعلانات حالياً.</p>
+                ) : (
+                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    {regularListings.map((listing) => (
+                      <ListingCard key={listing.id} listing={listing} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </div>
       </section>

@@ -14,6 +14,7 @@ import { createConversation } from "@/services/messageService";
 import { trackEngagementEvent } from "@/services/engagementService";
 import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { resolvePublicMediaUrl } from "@/lib/mediaUrl";
+import { arabicCity, arabicArea } from "@/lib/locationNames";
 
 const LISTING_IMG_PLACEHOLDER = "/images/placeholder-listing.png";
 
@@ -281,8 +282,8 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="text-[var(--brand)]">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                 </svg>
-                {listing.location.city || "حلب"}
-                {listing.location.area ? ` - ${listing.location.area}` : ""}
+                {arabicCity(listing.location.city) || "حلب"}
+                {listing.location.area ? ` - ${arabicArea(listing.location.area)}` : ""}
               </span>
               <span>نشر في {formatDate(listing.publishedAt ?? listing.createdAt)}</span>
               <span>{listing.viewsCount} مشاهدة</span>
@@ -428,7 +429,7 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
             <dl className="space-y-2 text-xs">
               <MetaRow label="التصنيف" value={categoryName} />
               <MetaRow label="الحالة" value={listing.condition === "new" ? "جديد" : "مستعمل"} />
-              <MetaRow label="المدينة" value={listing.location.city || "—"} />
+              <MetaRow label="المدينة" value={arabicCity(listing.location.city) || "—"} />
               <MetaRow label="المشاهدات" value={String(listing.viewsCount)} />
               <MetaRow label="تاريخ النشر" value={formatDate(listing.publishedAt ?? listing.createdAt)} />
             </dl>
