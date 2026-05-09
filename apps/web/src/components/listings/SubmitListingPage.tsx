@@ -315,8 +315,8 @@ export function SubmitListingPage() {
                       <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">مجاناً خلال الإطلاق</span>
                     </p>
                     <ul className="space-y-0.5 text-xs text-[var(--text-muted)]">
-                      <li>✓ يظهر في قسم "الإعلانات المميزة" أعلى الصفحة الرئيسية</li>
-                      <li>✓ بادج "مميز ★" بارز على الإعلان</li>
+                      <li>✓ يظهر في قسم &quot;الإعلانات المميزة&quot; أعلى الصفحة الرئيسية</li>
+                      <li>✓ بادج &quot;مميز ★&quot; بارز على الإعلان</li>
                       <li>✓ مشاهدات أكثر وتواصل أسرع</li>
                     </ul>
                   </div>
