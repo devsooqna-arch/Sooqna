@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { attachListingImage, createListing, featureListing, publishListing } from "@/services/listingService";
@@ -46,26 +46,25 @@ export function SubmitListingPage() {
   const [createdListingId, setCreatedListingId] = useState<string | null>(null);
   const [optimisticNote, setOptimisticNote] = useState<string | null>(null);
 
-  useEffect(() => {
-    let mounted = true;
+  const loadCategories = useCallback(() => {
+    setCategoryLoading(true);
+    setCategoryError(null);
     void getCategories()
       .then((items) => {
-        if (!mounted) return;
         setCategories(items);
         if (items.length) setCategoryId(items[0].id);
       })
       .catch((err) => {
-        if (!mounted) return;
-        setCategoryError(err instanceof Error ? err.message : "Failed to load categories.");
+        setCategoryError(err instanceof Error ? err.message : "فشل تحميل التصنيفات.");
       })
       .finally(() => {
-        if (!mounted) return;
         setCategoryLoading(false);
       });
-    return () => {
-      mounted = false;
-    };
   }, []);
+
+  useEffect(() => {
+    loadCategories();
+  }, [loadCategories]);
 
   useEffect(() => {
     return () => {
@@ -264,7 +263,12 @@ export function SubmitListingPage() {
                   {categoryOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
                 </select>
                 {categoryLoading ? <p className="text-xs text-[var(--text-muted)]">جاري تحميل التصنيفات...</p> : null}
-                {categoryError ? <p className="text-xs text-[var(--danger)]">{categoryError}</p> : null}
+                {categoryError ? (
+                  <div className="flex items-center gap-2 text-xs text-[var(--danger)]">
+                    <span>{categoryError}</span>
+                    <button type="button" onClick={loadCategories} className="underline hover:opacity-80">إعادة المحاولة</button>
+                  </div>
+                ) : null}
               </label>
             </>
           ) : null}

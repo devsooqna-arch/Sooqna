@@ -52,6 +52,8 @@ const nextConfig = {
       ...wpExactRedirects,
       ...wpPatternRedirects,
       // Non-WP compatibility redirects can be added below.
+      { source: "/profile", destination: "/me", permanent: true },
+      { source: "/profile/:path*", destination: "/me", permanent: true },
     ];
   },
   async rewrites() {

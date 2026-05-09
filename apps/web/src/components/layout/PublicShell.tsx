@@ -56,9 +56,8 @@ export function PublicShell({
         </div>
 
         <div className="border-b border-[var(--border)] bg-[var(--surface)] md:hidden">
-          <div className="mx-auto flex max-w-[1110px] items-center justify-between gap-2 px-4 py-2 text-xs sm:px-6">
+          <div className="mx-auto flex max-w-[1110px] items-center px-4 py-2 text-xs sm:px-6">
             <ThemeSwitcher />
-            <PublicNavActions />
           </div>
         </div>
       </header>

@@ -178,7 +178,7 @@ function PublicListingsPageInner() {
   return (
     <div className="grid gap-5 lg:grid-cols-[270px_1fr]">
       {/* Sidebar */}
-      <aside className="h-fit rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow)]">
+      <aside className="order-2 lg:order-1 h-fit rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow)]">
         <h3 className="rounded-full bg-[var(--brand)] px-4 py-2 text-sm font-bold text-[var(--brand-contrast)]">
           التصنيف
         </h3>
@@ -222,7 +222,7 @@ function PublicListingsPageInner() {
       </aside>
 
       {/* Listings area */}
-      <div className="space-y-4">
+      <div className="order-1 lg:order-2 space-y-4">
         {(categoryFilter || cityFilterRaw || searchFilterRaw) ? (
           <div className="flex flex-wrap items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-2 transition-all duration-300 ease-out">
             {categoryFilter ? (
