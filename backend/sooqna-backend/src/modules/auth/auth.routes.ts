@@ -78,7 +78,8 @@ authRouter.post(
     }
 
     if (!env.recaptchaSecretKey) {
-      sendError(res, 500, "RECAPTCHA_NOT_CONFIGURED", "reCAPTCHA secret is not configured.");
+      console.warn("[reCAPTCHA] RECAPTCHA_ENABLED is true but RECAPTCHA_SECRET_KEY is not set — bypassing verification.");
+      sendSuccess(res, { verified: true, bypassed: true });
       return;
     }
 
