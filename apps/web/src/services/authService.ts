@@ -214,6 +214,6 @@ export function getAuthErrorMessage(error: unknown): string {
       if (code) {
         return `حدث خطأ (${code}). تحقق من إعدادات Firebase أو حاول مرة أخرى.`;
       }
-      return "حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.";
+      return "حدث خطأ غير متوقع. حاول مرة أخرى.";
   }
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import type { ReactNode } from "react";
 import { AppProviders } from "./providers";
 import { getSiteUrl } from "@/lib/seo";
@@ -32,10 +33,27 @@ export const metadata: Metadata = {
   },
 };
 
+const THEME_INIT_SCRIPT = `
+(function () {
+  try {
+    var k = "sooqna-theme";
+    var t = localStorage.getItem(k);
+    if (t === "classic" || t === "light" || t === "dark") {
+      document.documentElement.dataset.theme = t;
+    } else {
+      document.documentElement.dataset.theme = "classic";
+    }
+  } catch (e) {}
+})();
+`;
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="ar" dir="rtl">
+    <html lang="ar" dir="rtl" data-theme="classic" suppressHydrationWarning>
       <body suppressHydrationWarning>
+        <Script id="sooqna-theme-init" strategy="beforeInteractive">
+          {THEME_INIT_SCRIPT}
+        </Script>
         <AppProviders>{children}</AppProviders>
       </body>
     </html>
