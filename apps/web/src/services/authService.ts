@@ -163,7 +163,7 @@ export async function verifyRecaptchaIfEnabled(action: "signup" | "login"): Prom
 
   await apiFetch<{ success: true; data: { verified: boolean } }>("/auth/recaptcha/verify", {
     method: "POST",
-    body: JSON.stringify({ token, action }),
+    body: JSON.stringify(token ? { token } : {}),
   });
 }
 
