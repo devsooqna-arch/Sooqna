@@ -9,6 +9,8 @@ import type { Category } from "@/types/category";
 import type { Listing } from "@/types/listing";
 import { ListingCard } from "@/components/listings/ListingCard";
 import { useDelayedLoading } from "@/hooks/useDelayedLoading";
+import { CategoryIcon } from "@/lib/categoryIcons";
+import { SUBCATEGORIES } from "@/lib/categorySubcategories";
 
 export function HomeMarketplace() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -16,6 +18,7 @@ export function HomeMarketplace() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeHeroIndex, setActiveHeroIndex] = useState(0);
+  const [expandedSlug, setExpandedSlug] = useState<string | null>(null);
   const showMarketplaceLoading = useDelayedLoading(loading);
 
   useEffect(() => {
@@ -137,21 +140,54 @@ export function HomeMarketplace() {
       </section>
 
       <section className="grid gap-4 lg:grid-cols-[270px_1fr]">
-        <aside className="ui-card p-3">
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            <span className="rounded-full bg-[var(--brand)] px-4 py-1.5 text-xs font-bold text-[var(--brand-contrast)]">
-              التصنيفات
-            </span>
-            {topCategories.map((category) => (
-              <Link
-                key={category.id}
-                href={`/listings?category=${encodeURIComponent(category.slug || category.id)}`}
-                className="rounded-full border border-[var(--chip-border)] bg-[var(--chip)] px-3 py-1.5 text-xs text-[var(--text)] transition hover:bg-[var(--brand)] hover:text-[var(--brand-contrast)]"
-              >
-                {category.name.ar || category.name.en || category.slug}
-                <span className="ms-1 text-[var(--text-muted)]">({categoryCounts.get(category.id) ?? 0})</span>
-              </Link>
-            ))}
+        <aside className="ui-card overflow-hidden">
+          <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
+            <Link href="/listings" className="text-xs text-[var(--brand)] hover:underline">عرض الكل</Link>
+            <h3 className="text-sm font-bold text-[var(--text)]">التصنيفات</h3>
+          </div>
+          <div className="divide-y divide-[var(--border)]">
+            {topCategories.map((category) => {
+              const slug = category.slug || category.id;
+              const count = categoryCounts.get(category.id) ?? 0;
+              const isExpanded = expandedSlug === slug;
+              const subs = SUBCATEGORIES[slug] ?? [];
+              return (
+                <div key={category.id} className="divide-y divide-[var(--border)]">
+                  <div className={`flex items-center justify-between px-4 py-3 transition ${isExpanded ? "bg-[var(--accent-soft)]" : "hover:bg-[var(--accent-soft)]"}`}>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setExpandedSlug(isExpanded ? null : slug)}
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--brand)] text-lg font-bold leading-none text-[var(--brand-contrast)] transition hover:opacity-80"
+                      >
+                        {isExpanded ? "×" : "+"}
+                      </button>
+                      {count > 0 && <span className="text-xs text-[var(--text-muted)]">{count}</span>}
+                    </div>
+                    <Link
+                      href={`/listings?category=${encodeURIComponent(slug)}`}
+                      className="flex items-center gap-2"
+                    >
+                      <span className="text-sm font-semibold text-[var(--text)]">{category.name.ar || category.name.en}</span>
+                      <CategoryIcon slug={slug} className="text-[var(--brand)]" />
+                    </Link>
+                  </div>
+                  {isExpanded && subs.length > 0 && (
+                    <div className="bg-[var(--surface-muted,var(--surface))]">
+                      {subs.map((sub) => (
+                        <Link
+                          key={sub}
+                          href={`/listings?category=${encodeURIComponent(slug)}`}
+                          className="block py-2.5 pr-8 pl-4 text-right text-sm text-[var(--text-muted)] transition hover:text-[var(--text)]"
+                        >
+                          {sub}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </aside>
 

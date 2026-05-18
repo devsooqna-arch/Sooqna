@@ -365,3 +365,64 @@
  GET /listings?sort=newest&page=1 200 in 505ms
  GET /listings?city=aleppo&page=1&sort=newest 200 in 661ms
  GET /listings?city=quneitra&page=1&sort=newest 200 in 90ms
+ GET /me 200 in 126ms
+ ✓ Compiled in 1995ms (793 modules)
+ GET /favorites 200 in 584ms
+ GET /me 200 in 580ms
+ GET /listings?sort=newest&page=1 200 in 592ms
+ ✓ Compiled in 1073ms (795 modules)
+ GET /me 200 in 671ms
+ GET /favorites 200 in 689ms
+ GET /listings?sort=newest&page=1 200 in 703ms
+ ✓ Compiled in 822ms (795 modules)
+ GET /me 200 in 584ms
+ GET /favorites 200 in 589ms
+ GET /listings?sort=newest&page=1 200 in 585ms
+ ✓ Compiled in 629ms (795 modules)
+ GET /favorites 200 in 554ms
+ GET /listings?sort=newest&page=1 200 in 552ms
+ GET /me 200 in 360ms
+ GET / 200 in 160ms
+ GET /listings?category=cars 200 in 113ms
+ GET /listings?category=cars&sort=newest&page=1 200 in 93ms
+ ✓ Compiled in 1415ms (795 modules)
+ GET /me 200 in 542ms
+ GET /listings?sort=newest&page=1 200 in 547ms
+ GET /listings?category=cars&sort=newest&page=1 200 in 553ms
+ ✓ Compiled in 626ms (795 modules)
+ GET /me 200 in 561ms
+ GET /listings?sort=newest&page=1 200 in 569ms
+ GET /listings?category=cars&sort=newest&page=1 200 in 558ms
+ ✓ Compiled in 711ms (797 modules)
+ GET /me 200 in 472ms
+ GET /listings?sort=newest&page=1 200 in 470ms
+ GET /listings?category=cars&sort=newest&page=1 200 in 476ms
+ ✓ Compiled in 1465ms (797 modules)
+ GET /me 200 in 572ms
+ GET /listings?sort=newest&page=1 200 in 583ms
+ GET /listings?category=cars&sort=newest&page=1 200 in 586ms
+ ✓ Compiled in 953ms (797 modules)
+ GET /me 200 in 729ms
+ GET /listings?sort=newest&page=1 200 in 726ms
+ GET /listings?category=cars&sort=newest&page=1 200 in 728ms
+ ✓ Compiled in 669ms (797 modules)
+ GET /me 200 in 1052ms
+ GET /listings?category=cars&sort=newest&page=1 200 in 1067ms
+ GET /listings?sort=newest&page=1 200 in 1051ms
+ GET / 200 in 146ms
+ GET / 200 in 888ms
+ GET /listings?category=cars 200 in 108ms
+ GET /listings?category=cars&sort=newest&page=1 200 in 90ms
+ ✓ Compiled in 2.1s (797 modules)
+ ✓ Compiled in 872ms (316 modules)
+ GET / 200 in 891ms
+ GET /listings?category=cars&sort=newest&page=1 200 in 911ms
+ GET /listings?sort=newest&page=1 200 in 900ms
+ ✓ Compiled in 885ms (797 modules)
+ GET /listings?sort=newest&page=1 200 in 1207ms
+ GET / 200 in 1077ms
+ GET /listings?category=cars&sort=newest&page=1 200 in 1079ms
+ GET /listings?sort=newest&page=1 200 in 440ms
+ GET / 200 in 246ms
+ GET /listings?category=cars&sort=newest&page=1 200 in 156ms
+ GET / 200 in 1526ms

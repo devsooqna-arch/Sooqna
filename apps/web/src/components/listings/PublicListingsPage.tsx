@@ -9,6 +9,8 @@ import { getListingsFiltered } from "@/services/listingService";
 import { getCategories } from "@/services/categoryService";
 import type { Listing } from "@/types/listing";
 import type { Category } from "@/types/category";
+import { CategoryIcon } from "@/lib/categoryIcons";
+import { SUBCATEGORIES } from "@/lib/categorySubcategories";
 
 type SortKey = "newest" | "price_asc" | "price_desc";
 const PAGE_SIZE = 12;
@@ -104,6 +106,7 @@ function PublicListingsPageInner() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [expandedSlug, setExpandedSlug] = useState<string | null>(null);
   const showSkeleton = useDelayedLoading(loading);
 
   useEffect(() => {
@@ -178,44 +181,59 @@ function PublicListingsPageInner() {
   return (
     <div className="grid gap-5 lg:grid-cols-[270px_1fr]">
       {/* Sidebar */}
-      <aside className="order-2 lg:order-1 h-fit rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow)]">
-        <h3 className="rounded-full bg-[var(--brand)] px-4 py-2 text-sm font-bold text-[var(--brand-contrast)]">
-          التصنيف
-        </h3>
-        <div className="mt-3 space-y-1 text-sm">
+      <aside className="order-2 lg:order-1 h-fit ui-card overflow-hidden">
+        <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
+          <span />
+          <h3 className="text-sm font-bold text-[var(--text)]">التصنيفات</h3>
+        </div>
+        <div className="divide-y divide-[var(--border)]">
+          {/* All categories row */}
           <Link
-            href={buildListingsHref({
-              category: null,
-              city: null,
-              search: null,
-              sort: null,
-              page: null,
-            })}
-            className={`flex items-center gap-2 rounded-md px-2 py-1.5 transition ${
-              !categoryFilter
-                ? "bg-[var(--accent-soft)] font-semibold text-[var(--brand)]"
-                : "text-[var(--text-muted)] hover:text-[var(--text)]"
-            }`}
+            href={buildListingsHref({ category: null, city: null, search: null, sort: null, page: null })}
+            className={`flex items-center justify-between px-4 py-3 transition ${!categoryFilter ? "bg-[var(--accent-soft)]" : "hover:bg-[var(--accent-soft)]"}`}
           >
-            <span className={`h-2.5 w-2.5 rounded-full ${!categoryFilter ? "bg-[var(--brand)]" : "border border-[var(--chip-border)]"}`} />
-            كل التصنيفات
+            <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-base font-bold leading-none text-[var(--brand-contrast)] ${!categoryFilter ? "bg-red-500" : "bg-[var(--brand)]"}`}>
+              {!categoryFilter ? "×" : "+"}
+            </span>
+            <span className={`text-sm ${!categoryFilter ? "font-bold text-[var(--brand)]" : "font-semibold text-[var(--text)]"}`}>كل التصنيفات</span>
           </Link>
           {categories.map((cat) => {
             const slug = cat.slug || cat.id;
             const isActive = categoryFilter === slug;
+            const isExpanded = expandedSlug === slug;
+            const subs = SUBCATEGORIES[slug] ?? [];
             return (
-              <Link
-                key={cat.id}
-                href={buildListingsHref({ category: slug, page: 1 })}
-                className={`flex items-center gap-2 rounded-md px-2 py-1.5 transition ${
-                  isActive
-                    ? "bg-[var(--accent-soft)] font-semibold text-[var(--brand)]"
-                    : "text-[var(--text-muted)] hover:text-[var(--text)]"
-                }`}
-              >
-                <span className={`h-2.5 w-2.5 rounded-full ${isActive ? "bg-[var(--brand)]" : "border border-[var(--chip-border)]"}`} />
-                {cat.name.ar || cat.name.en || cat.slug}
-              </Link>
+              <div key={cat.id} className="divide-y divide-[var(--border)]">
+                <div className={`flex items-center justify-between px-4 py-3 transition ${isActive || isExpanded ? "bg-[var(--accent-soft)]" : "hover:bg-[var(--accent-soft)]"}`}>
+                  <button
+                    type="button"
+                    onClick={() => setExpandedSlug(isExpanded ? null : slug)}
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-base font-bold leading-none text-[var(--brand-contrast)] transition hover:opacity-80 ${isActive ? "bg-red-500" : "bg-[var(--brand)]"}`}
+                  >
+                    {isExpanded ? "×" : "+"}
+                  </button>
+                  <Link
+                    href={buildListingsHref({ category: slug, page: 1 })}
+                    className="flex items-center gap-2"
+                  >
+                    <span className={`text-sm ${isActive ? "font-bold text-[var(--brand)]" : "font-semibold text-[var(--text)]"}`}>{cat.name.ar || cat.name.en}</span>
+                    <CategoryIcon slug={slug} className={isActive ? "text-[var(--brand)]" : "text-[var(--text-muted)]"} />
+                  </Link>
+                </div>
+                {isExpanded && subs.length > 0 && (
+                  <div className="bg-[var(--surface-muted,var(--surface))]">
+                    {subs.map((sub) => (
+                      <Link
+                        key={sub}
+                        href={buildListingsHref({ category: slug, page: 1 })}
+                        className="block py-2.5 pr-8 pl-4 text-right text-sm text-[var(--text-muted)] transition hover:text-[var(--text)]"
+                      >
+                        {sub}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
