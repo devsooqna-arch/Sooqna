@@ -5,16 +5,9 @@ import { useEffect, useState, Suspense, useCallback, useRef } from "react";
 import { getCategories } from "@/services/categoryService";
 import type { Category } from "@/types/category";
 
-const CITY_OPTIONS = [
-  { value: "aleppo", label: "حلب" },
-  { value: "damascus", label: "دمشق" },
-  { value: "homs", label: "حمص" },
-  { value: "latakia", label: "اللاذقية" },
-  { value: "tartus", label: "طرطوس" },
-  { value: "idlib", label: "إدلب" },
-  { value: "alhasakah", label: "الحسكة" },
-  { value: "deirezzor", label: "دير الزور" },
-];
+import { SYRIAN_GOVERNORATES } from "@/lib/locations";
+
+const CITY_OPTIONS = SYRIAN_GOVERNORATES.map((g) => ({ value: g.value, label: g.labelAr }));
 
 function SearchBarFallback() {
   return (

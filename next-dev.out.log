@@ -340,3 +340,28 @@
  GET / 200 in 516ms
  GET /listings?sort=newest&page=1 200 in 516ms
  GET /favorites 200 in 312ms
+ GET /listings?city=aleppo&page=1 200 in 126ms
+ GET /listings?city=aleppo&page=1&sort=newest 200 in 89ms
+ ✓ Compiled in 1494ms (777 modules)
+ ✓ Compiled in 4s (779 modules)
+ GET /listings?sort=newest&page=1 200 in 655ms
+ GET /favorites 200 in 357ms
+ GET /listings?city=aleppo&page=1&sort=newest 200 in 361ms
+ ✓ Compiled in 1695ms (793 modules)
+ GET /favorites 200 in 550ms
+ GET /listings?sort=newest&page=1 200 in 542ms
+ GET /listings?city=aleppo&page=1&sort=newest 200 in 550ms
+ ✓ Compiled in 1933ms (793 modules)
+ GET /listings?city=aleppo&page=1&sort=newest 200 in 506ms
+ GET /favorites 200 in 495ms
+ GET /listings?sort=newest&page=1 200 in 499ms
+ ✓ Compiled in 679ms (793 modules)
+ GET /favorites 200 in 503ms
+ GET /listings?sort=newest&page=1 200 in 512ms
+ GET /listings?city=aleppo&page=1&sort=newest 200 in 515ms
+ ✓ Compiled in 847ms (793 modules)
+ GET /favorites 200 in 508ms
+ GET /listings?city=aleppo&page=1&sort=newest 200 in 512ms
+ GET /listings?sort=newest&page=1 200 in 505ms
+ GET /listings?city=aleppo&page=1&sort=newest 200 in 661ms
+ GET /listings?city=quneitra&page=1&sort=newest 200 in 90ms

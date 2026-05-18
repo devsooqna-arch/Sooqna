@@ -66,7 +66,7 @@ export function ListingCard({ listing, featured = false }: { listing: Listing; f
             <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" className="shrink-0 text-[var(--brand)]">
               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
             </svg>
-            {arabicCity(listing.location.city) || "حلب"}
+            {arabicCity(listing.location.city)}
           </span>
           {listedAgo ? (
             <>

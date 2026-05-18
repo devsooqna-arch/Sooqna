@@ -31,10 +31,16 @@ export const CATEGORY_IDS = [
 export const CITY_IDS = [
   "aleppo",
   "damascus",
+  "rifdimashq",
   "homs",
+  "hama",
   "latakia",
   "tartus",
   "idlib",
-  "alhasakah",
+  "daraa",
+  "sweida",
+  "quneitra",
   "deirezzor",
+  "raqqa",
+  "alhasakah",
 ] as const;

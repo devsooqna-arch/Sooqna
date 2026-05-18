@@ -9,6 +9,7 @@ import { uploadBackendListingImage } from "@/services/backendUploadService";
 import type { Category } from "@/types/category";
 import { RequireAuthGate } from "@/components/auth/RequireAuthGate";
 import { RequireVerifiedEmailGate } from "@/components/auth/RequireVerifiedEmailGate";
+import { SYRIAN_GOVERNORATES } from "@/lib/locations";
 
 const MAX_IMAGES = 10;
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
@@ -36,7 +37,7 @@ export function SubmitListingPage() {
   const [categoryId, setCategoryId] = useState("");
   const [description, setDescription] = useState("");
   const [country, setCountry] = useState("Syria");
-  const [city, setCity] = useState("Aleppo");
+  const [city, setCity] = useState("");
   const [area, setArea] = useState("");
   const [images, setImages] = useState<DraftImage[]>([]);
 
@@ -292,7 +293,7 @@ export function SubmitListingPage() {
               <label className="space-y-1"><span className="text-sm font-medium">وصف الإعلان</span><textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]" placeholder="اكتب وصفًا واضحًا..." disabled={busy} /></label>
               <div className="grid gap-4 sm:grid-cols-3">
                 <label className="space-y-1"><span className="text-sm font-medium">الدولة</span><input type="text" value={country} onChange={(e) => setCountry(e.target.value)} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]" disabled={busy} /></label>
-                <label className="space-y-1"><span className="text-sm font-medium">المدينة</span><input type="text" value={city} onChange={(e) => setCity(e.target.value)} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]" disabled={busy} /></label>
+                <label className="space-y-1"><span className="text-sm font-medium">المدينة</span><select value={city} onChange={(e) => setCity(e.target.value)} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]" disabled={busy}><option value="">اختر المدينة</option>{SYRIAN_GOVERNORATES.map((g) => (<option key={g.value} value={g.value}>{g.labelAr}</option>))}</select></label>
                 <label className="space-y-1"><span className="text-sm font-medium">المنطقة</span><input type="text" value={area} onChange={(e) => setArea(e.target.value)} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]" placeholder="اختياري" disabled={busy} /></label>
               </div>
               <label className="space-y-1">

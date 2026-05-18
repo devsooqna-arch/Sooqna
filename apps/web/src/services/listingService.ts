@@ -9,7 +9,7 @@ export async function createListing(
 ): Promise<CreateListingResult> {
   const location = {
     country: input.location?.country?.trim() || "Syria",
-    city: input.location?.city?.trim() || "Aleppo",
+    city: input.location?.city?.trim() || "",
     area: input.location?.area?.trim() || "Aleppo",
   };
   const response = await apiFetch<{ success: true; listing: Listing }>("/listings", {

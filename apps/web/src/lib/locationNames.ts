@@ -4,25 +4,30 @@
  */
 
 const CITY_AR: Record<string, string> = {
-  // Major Syrian cities
+  // Major Syrian governorates (canonical values from locations.ts)
   aleppo: "حلب",
   damascus: "دمشق",
+  rifdimashq: "ريف دمشق",
+  "rif dimashq": "ريف دمشق",
+  "rif-dimashq": "ريف دمشق",
   homs: "حمص",
   hama: "حماة",
   latakia: "اللاذقية",
   tartus: "طرطوس",
   idlib: "إدلب",
-  deir_ez_zor: "دير الزور",
-  "deir ez-zor": "دير الزور",
-  "deir ez zor": "دير الزور",
-  raqqa: "الرقة",
-  hasaka: "الحسكة",
-  hasakah: "الحسكة",
-  qamishli: "القامشلي",
   daraa: "درعا",
   sweida: "السويداء",
   "as-suwayda": "السويداء",
   quneitra: "القنيطرة",
+  deirezzor: "دير الزور",
+  deir_ez_zor: "دير الزور",
+  "deir ez-zor": "دير الزور",
+  "deir ez zor": "دير الزور",
+  raqqa: "الرقة",
+  alhasakah: "الحسكة",
+  hasaka: "الحسكة",
+  hasakah: "الحسكة",
+  qamishli: "القامشلي",
   syria: "سوريا",
 };
 
