@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { RequireAuthGate } from "@/components/auth/RequireAuthGate";
@@ -10,7 +11,8 @@ import { getAuthErrorMessage, sendPasswordResetLink } from "@/services/authServi
 import { ModernAvatar } from "@/components/ui/ModernAvatar";
 
 export function AccountSettingsForm() {
-  const { currentUser } = useAuth();
+  const router = useRouter();
+  const { currentUser, resendEmailVerification, logout } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +23,7 @@ export function AccountSettingsForm() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [resetSending, setResetSending] = useState(false);
+  const [verificationSending, setVerificationSending] = useState(false);
 
   const previewUrl = useMemo(() => {
     if (!avatarFile) return null;
@@ -83,6 +86,31 @@ export function AccountSettingsForm() {
       setError(getAuthErrorMessage(err));
     } finally {
       setResetSending(false);
+    }
+  }
+
+  async function handleResendVerification() {
+    if (!currentUser?.email || emailVerified) return;
+    setVerificationSending(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      await resendEmailVerification();
+      setSuccess("تم إرسال رابط تأكيد البريد. افحص البريد الوارد أو البريد غير الهام.");
+    } catch (err) {
+      setError(getAuthErrorMessage(err));
+    } finally {
+      setVerificationSending(false);
+    }
+  }
+
+  async function handleLogoutForSwitchAccount() {
+    setError(null);
+    try {
+      await logout();
+      router.replace("/login");
+    } catch (err) {
+      setError(getAuthErrorMessage(err));
     }
   }
 
@@ -230,6 +258,37 @@ export function AccountSettingsForm() {
                 {emailVerified ? "بريد مؤكد" : "بريد غير مؤكد"}
               </span>
             </div>
+            {!emailVerified ? (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+                <p className="font-semibold">يلزم تأكيد البريد قبل استخدام كل مزايا الحساب.</p>
+                <p className="mt-1 text-xs leading-6">
+                  إذا لم يصلك الرابط، أعد الإرسال أو سجل الخروج لاستخدام بريد آخر.
+                </p>
+                <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={() => void handleResendVerification()}
+                    disabled={verificationSending}
+                    className="rounded-full bg-amber-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-amber-800 disabled:opacity-50"
+                  >
+                    {verificationSending ? "جاري الإرسال..." : "إعادة إرسال رابط التحقق"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void handleLogoutForSwitchAccount()}
+                    className="rounded-full border border-amber-300 bg-white px-4 py-2 text-xs font-semibold text-amber-950 transition hover:bg-amber-100"
+                  >
+                    تسجيل الخروج واستخدام حساب آخر
+                  </button>
+                  <Link
+                    href="/reset-password"
+                    className="rounded-full border border-amber-300 bg-white px-4 py-2 text-center text-xs font-semibold text-amber-950 transition hover:bg-amber-100"
+                  >
+                    استعادة كلمة المرور
+                  </Link>
+                </div>
+              </div>
+            ) : null}
           </section>
 
           {/* الأمان */}

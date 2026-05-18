@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { getAuthErrorMessage, verifyRecaptchaIfEnabled } from "@/services/authService";
+import { shouldDisableAuthControls, shouldRedirectSignedInFromAuthPage } from "./authRecovery";
 
 function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
@@ -46,15 +47,32 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [verificationRequired, setVerificationRequired] = useState(false);
-  const [resendingVerification, setResendingVerification] = useState(false);
+  const [authInitTimedOut, setAuthInitTimedOut] = useState(false);
 
-  // Already signed in → /me (or ?next=…)
   useEffect(() => {
-    if (!authLoading && currentUser) {
+    if (!authLoading) {
+      setAuthInitTimedOut(false);
+      return undefined;
+    }
+    const timeout = window.setTimeout(() => {
+      setAuthInitTimedOut(true);
+    }, 8500);
+    return () => window.clearTimeout(timeout);
+  }, [authLoading]);
+
+  const shouldRedirectSignedIn = shouldRedirectSignedInFromAuthPage({
+    hasUser: Boolean(currentUser),
+    emailVerified: Boolean(currentUser?.emailVerified),
+    authLoading,
+    authPageMode: mode,
+  });
+
+  // Already signed in → /me (or ?next=…). Email verification gates only sensitive actions.
+  useEffect(() => {
+    if (shouldRedirectSignedIn) {
       router.replace(nextPath);
     }
-  }, [authLoading, currentUser, router, nextPath]);
+  }, [shouldRedirectSignedIn, router, nextPath]);
 
   function validateForm(): boolean {
     const next: { fullName?: string; email?: string; password?: string } = {};
@@ -86,15 +104,10 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
       if (isSignup) {
         const result = await register(email, password, fullName);
         if (!result.emailVerified) {
-          setVerificationRequired(true);
-          return;
+          void resendEmailVerification().catch(() => undefined);
         }
       } else {
-        const result = await login(email, password);
-        if (!result.emailVerified) {
-          setVerificationRequired(true);
-          return;
-        }
+        await login(email, password);
       }
       setSuccess(true);
       router.replace(nextPath);
@@ -118,19 +131,12 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
     }
   }
 
-  async function handleResendVerification() {
-    setSubmitError(null);
-    setResendingVerification(true);
-    try {
-      await resendEmailVerification();
-    } catch (err) {
-      setSubmitError(getAuthErrorMessage(err));
-    } finally {
-      setResendingVerification(false);
-    }
-  }
-
   const busy = submitting || googleLoading;
+  const controlsDisabled = shouldDisableAuthControls({
+    busy,
+    authLoading,
+    authInitTimedOut,
+  });
   /** Do not block the whole UI on auth init — avoids infinite "جاري التحميل" if Auth stalls. */
   const showForm = !currentUser;
 
@@ -153,8 +159,13 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
             ? "ابدأ حسابك خلال دقيقة، أو استخدم جوجل للمتابعة بسرعة."
             : "أدخل بياناتك للوصول إلى حسابك، أو تابع مباشرة عبر جوجل."}
         </p>
-        {authLoading && (
+        {authLoading && !authInitTimedOut && (
           <p className="mt-2 text-xs text-slate-400">جاري التحقق من الجلسة…</p>
+        )}
+        {authLoading && authInitTimedOut && (
+          <p className="mt-2 text-xs text-amber-700">
+            تأخر التحقق من الجلسة، يمكنك المتابعة الآن.
+          </p>
         )}
       </div>
 
@@ -176,23 +187,6 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
         </div>
       )}
 
-      {verificationRequired && (
-        <div
-          className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-center text-sm text-amber-900"
-          role="status"
-        >
-          <p>يرجى التحقق من بريدك الإلكتروني قبل متابعة الدخول.</p>
-          <button
-            type="button"
-            onClick={handleResendVerification}
-            disabled={resendingVerification}
-            className="mt-2 rounded-full border border-amber-300 px-3 py-1 text-xs font-semibold transition hover:bg-amber-100 disabled:opacity-60"
-          >
-            {resendingVerification ? "جاري إعادة الإرسال..." : "إعادة إرسال رابط التحقق"}
-          </button>
-        </div>
-      )}
-
       <form onSubmit={handleEmailLogin} className="space-y-4" noValidate>
         {isSignup && (
           <div>
@@ -211,7 +205,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
               onChange={(e) => setFullName(e.target.value)}
               className="ui-input w-full"
               placeholder="الاسم الكامل"
-              disabled={busy || authLoading}
+              disabled={controlsDisabled}
               aria-invalid={!!fieldErrors.fullName}
               aria-describedby={fieldErrors.fullName ? "fullName-error" : undefined}
             />
@@ -244,7 +238,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
             }}
             className="ui-input w-full"
             placeholder="you@example.com"
-            disabled={busy || authLoading}
+            disabled={controlsDisabled}
             aria-invalid={!!fieldErrors.email}
             aria-describedby={fieldErrors.email ? "email-error" : undefined}
           />
@@ -276,7 +270,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
             }}
             className="ui-input w-full"
             placeholder="••••••••"
-            disabled={busy || authLoading}
+            disabled={controlsDisabled}
             aria-invalid={!!fieldErrors.password}
             aria-describedby={
               fieldErrors.password ? "password-error" : undefined
@@ -301,7 +295,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
 
         <button
           type="submit"
-          disabled={busy || authLoading}
+          disabled={controlsDisabled}
           className="ui-btn-primary flex w-full gap-2 rounded-full py-2.5"
         >
           {submitting ? (
@@ -337,7 +331,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
       <button
         type="button"
         onClick={handleGoogleLogin}
-        disabled={busy || authLoading}
+        disabled={controlsDisabled}
         className="ui-btn-ghost flex w-full gap-2 rounded-full border-[var(--chip-border)] bg-[var(--chip)] py-2.5 text-[var(--text)]"
       >
         {googleLoading ? (

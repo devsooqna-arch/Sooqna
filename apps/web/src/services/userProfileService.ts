@@ -1,5 +1,6 @@
 import { type User } from "firebase/auth";
 import { apiFetch } from "@/services/apiClient";
+import { buildUserProfilePayload } from "@/services/userProfilePayload";
 
 /**
  * Creates or merges backend profile from Firebase-authenticated user context.
@@ -18,10 +19,10 @@ export async function ensureUserProfile(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
+      body: JSON.stringify(buildUserProfilePayload({
         fullName,
         photoURL: user.photoURL ?? "",
-      }),
+      })),
     }
   );
   return { created: Boolean(response.data.profile.uid) };

@@ -1,0 +1,31 @@
+
+> dev
+> next dev
+
+   ▲ Next.js 15.5.15
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.56.1:3000
+   - Environments: .env.local
+   - Experiments (use with caution):
+     ⨯ devtoolSegmentExplorer
+
+ ✓ Starting...
+ ✓ Ready in 2s
+ ○ Compiling /submit-listing ...
+ ✓ Compiled /submit-listing in 3.7s (733 modules)
+ GET /submit-listing?final_activation_flow=1779081522633 200 in 4277ms
+ GET /submit-listing?final_activation_flow=1779081522633 500 in 370ms
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 2.8s (1071 modules)
+ GET /submit-listing?final_activation_flow=1779081522633 200 in 144ms
+ GET /submit-listing?final_activation_flow=1779081522633 200 in 758ms
+ ○ Compiling /login ...
+ ✓ Compiled /login in 809ms (1082 modules)
+ GET /login?next=%2Fsubmit-listing%3Ffinal_activation_flow%3D1779081522633 200 in 911ms
+ ✓ Compiled /register in 280ms (1084 modules)
+ GET /register?clean_flow=1779081592365 200 in 544ms
+ ○ Compiling /me ...
+ ✓ Compiled /me in 939ms (1094 modules)
+ GET /me 200 in 1088ms
+ GET /me 200 in 43ms
+ GET /submit-listing?clean_flow=1779081612682 200 in 235ms

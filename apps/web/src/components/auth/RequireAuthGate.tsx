@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type ReactNode, Suspense } from "react";
+import { useEffect, useState, type ReactNode, Suspense } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -15,15 +15,28 @@ function RequireAuthGateInner({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { currentUser, loading } = useAuth();
+  const [authInitTimedOut, setAuthInitTimedOut] = useState(false);
+  const effectiveLoading = loading && !authInitTimedOut;
 
   useEffect(() => {
-    if (loading) return;
+    if (!loading) {
+      setAuthInitTimedOut(false);
+      return undefined;
+    }
+    const timeout = window.setTimeout(() => {
+      setAuthInitTimedOut(true);
+    }, 8500);
+    return () => window.clearTimeout(timeout);
+  }, [loading]);
+
+  useEffect(() => {
+    if (effectiveLoading) return;
     if (currentUser) return;
     const nextPath = `${pathname || "/"}${searchParams?.toString() ? `?${searchParams.toString()}` : ""}`;
     router.replace(`/login?next=${encodeURIComponent(nextPath)}`);
-  }, [loading, currentUser, pathname, searchParams, router]);
+  }, [effectiveLoading, currentUser, pathname, searchParams, router]);
 
-  if (loading) {
+  if (effectiveLoading) {
     return <p className="text-sm text-[var(--text-muted)]">{fallbackMessage}</p>;
   }
 

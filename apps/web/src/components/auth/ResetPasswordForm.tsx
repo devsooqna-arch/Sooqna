@@ -31,7 +31,7 @@ export function ResetPasswordForm() {
     setSubmitting(true);
     try {
       await sendPasswordResetLink(email);
-      setSuccess("تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني.");
+      setSuccess("إذا كان البريد مسجلاً لدينا فسيصلك رابط استعادة كلمة المرور. افحص البريد الوارد والبريد غير الهام.");
     } catch (err) {
       setError(getAuthErrorMessage(err));
     } finally {

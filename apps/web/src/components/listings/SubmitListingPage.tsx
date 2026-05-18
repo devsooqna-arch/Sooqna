@@ -8,6 +8,7 @@ import { getCategories } from "@/services/categoryService";
 import { uploadBackendListingImage } from "@/services/backendUploadService";
 import type { Category } from "@/types/category";
 import { RequireAuthGate } from "@/components/auth/RequireAuthGate";
+import { RequireVerifiedEmailGate } from "@/components/auth/RequireVerifiedEmailGate";
 
 const MAX_IMAGES = 10;
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
@@ -223,7 +224,8 @@ export function SubmitListingPage() {
 
   return (
     <RequireAuthGate fallbackMessage="يتم التحقق من تسجيل الدخول قبل إنشاء الإعلان...">
-      <div className="space-y-5">
+      <RequireVerifiedEmailGate>
+        <div className="space-y-5">
         <form onSubmit={onSubmit} className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm sm:p-6">
           <div className="grid grid-cols-4 gap-2">
             {STEPS.map((step, idx) => (
@@ -374,7 +376,8 @@ export function SubmitListingPage() {
             )}
           </div>
         </form>
-      </div>
+        </div>
+      </RequireVerifiedEmailGate>
     </RequireAuthGate>
   );
 }
