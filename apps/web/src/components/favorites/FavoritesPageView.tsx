@@ -8,6 +8,8 @@ import { getUserFavoriteListingIds } from "@/services/favoriteService";
 import { getListingById } from "@/services/listingService";
 import type { Listing } from "@/types/listing";
 import { ListingCard } from "@/components/listings/ListingCard";
+import { isEmailNotVerified } from "@/lib/apiError";
+import { EmailVerificationBanner } from "@/components/ui/EmailVerificationBanner";
 
 type SortKey = "newest" | "price_asc" | "price_desc";
 
@@ -37,6 +39,7 @@ export function FavoritesPageView() {
   const { currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [emailUnverified, setEmailUnverified] = useState(false);
   const [items, setItems] = useState<Listing[]>([]);
   const [sort, setSort] = useState<SortKey>("newest");
 
@@ -59,7 +62,8 @@ export function FavoritesPageView() {
       })
       .catch((err) => {
         if (!mounted) return;
-        setError(err instanceof Error ? err.message : "Failed to fetch favorites.");
+        if (isEmailNotVerified(err)) { setEmailUnverified(true); }
+        else { setError(err instanceof Error ? err.message : "حدث خطأ أثناء تحميل المفضلة."); }
       })
       .finally(() => {
         if (!mounted) return;
@@ -73,6 +77,7 @@ export function FavoritesPageView() {
 
   return (
     <RequireAuthGate fallbackMessage="يتم التحقق من الجلسة قبل تحميل المفضلة...">
+      {emailUnverified && <EmailVerificationBanner />}
       {loading ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (

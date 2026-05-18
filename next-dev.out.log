@@ -222,3 +222,100 @@
  GET / 200 in 575ms
  GET /listings?sort=newest&page=1 200 in 581ms
  GET /submit-listing 200 in 233ms
+ GET /favorites 200 in 156ms
+ ✓ Compiled in 458ms (311 modules)
+ GET /favorites 200 in 435ms
+ GET /listings?sort=newest&page=1 200 in 441ms
+ GET / 200 in 438ms
+ ✓ Compiled in 907ms (787 modules)
+ GET /favorites 200 in 625ms
+ GET / 200 in 629ms
+ GET /listings?sort=newest&page=1 200 in 631ms
+ ✓ Compiled in 666ms (787 modules)
+ GET / 200 in 525ms
+ GET /listings?sort=newest&page=1 200 in 533ms
+ GET /favorites 200 in 508ms
+ ✓ Compiled in 654ms (789 modules)
+ GET / 200 in 508ms
+ GET /favorites 200 in 505ms
+ GET /listings?sort=newest&page=1 200 in 513ms
+ ✓ Compiled in 1817ms (791 modules)
+ GET /favorites 200 in 595ms
+ GET / 200 in 602ms
+ GET /listings?sort=newest&page=1 200 in 604ms
+ ✓ Compiled in 751ms (313 modules)
+ GET / 200 in 390ms
+ GET /favorites 200 in 390ms
+ GET /listings?sort=newest&page=1 200 in 393ms
+ ✓ Compiled in 436ms (313 modules)
+ GET /favorites 200 in 441ms
+ GET / 200 in 441ms
+ GET /listings?sort=newest&page=1 200 in 447ms
+ ✓ Compiled in 334ms (313 modules)
+ ✓ Compiled in 669ms (313 modules)
+ GET /favorites 200 in 719ms
+ GET / 200 in 724ms
+ GET /listings?sort=newest&page=1 200 in 725ms
+ GET / 200 in 370ms
+ GET /favorites 200 in 360ms
+ GET /listings?sort=newest&page=1 200 in 371ms
+ ✓ Compiled in 262ms (313 modules)
+ GET /favorites 200 in 689ms
+ GET / 200 in 696ms
+ GET /listings?sort=newest&page=1 200 in 700ms
+ ✓ Compiled in 276ms (313 modules)
+ GET /favorites 200 in 371ms
+ GET / 200 in 380ms
+ GET /listings?sort=newest&page=1 200 in 378ms
+ ✓ Compiled in 327ms (313 modules)
+ GET /favorites 200 in 380ms
+ GET / 200 in 383ms
+ GET /listings?sort=newest&page=1 200 in 386ms
+ ✓ Compiled in 309ms (313 modules)
+ GET /favorites 200 in 388ms
+ GET / 200 in 396ms
+ GET /listings?sort=newest&page=1 200 in 394ms
+ ✓ Compiled in 242ms (313 modules)
+ GET /favorites 200 in 405ms
+ GET / 200 in 410ms
+ GET /listings?sort=newest&page=1 200 in 409ms
+ ✓ Compiled in 242ms (313 modules)
+ GET /favorites 200 in 429ms
+ GET / 200 in 433ms
+ GET /listings?sort=newest&page=1 200 in 438ms
+ ✓ Compiled in 223ms (313 modules)
+ GET /favorites 200 in 446ms
+ GET / 200 in 452ms
+ GET /listings?sort=newest&page=1 200 in 452ms
+ ✓ Compiled in 847ms (313 modules)
+ GET /favorites 200 in 391ms
+ GET /listings?sort=newest&page=1 200 in 396ms
+ GET / 200 in 387ms
+ ✓ Compiled in 252ms (313 modules)
+ GET /favorites 200 in 381ms
+ GET / 200 in 391ms
+ GET /listings?sort=newest&page=1 200 in 389ms
+ ✓ Compiled in 250ms (313 modules)
+ ✓ Compiled in 633ms (313 modules)
+ GET /favorites 200 in 708ms
+ GET / 200 in 711ms
+ GET /listings?sort=newest&page=1 200 in 711ms
+ GET / 200 in 405ms
+ GET /listings?sort=newest&page=1 200 in 407ms
+ GET /favorites 200 in 395ms
+ ✓ Compiled in 238ms (313 modules)
+ GET /favorites 200 in 425ms
+ GET / 200 in 426ms
+ GET /listings?sort=newest&page=1 200 in 429ms
+ ✓ Compiled in 302ms (313 modules)
+ GET /favorites 200 in 448ms
+ GET / 200 in 456ms
+ GET /listings?sort=newest&page=1 200 in 457ms
+ ✓ Compiled in 281ms (313 modules)
+ GET /favorites 200 in 537ms
+ GET / 200 in 540ms
+ GET /listings?sort=newest&page=1 200 in 542ms
+ ✓ Compiled in 247ms (313 modules)
+ GET /favorites 200 in 362ms
+ GET /listings?sort=newest&page=1 200 in 366ms
+ GET / 200 in 268ms

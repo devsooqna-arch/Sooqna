@@ -10,6 +10,8 @@ function formatDate(iso: string | null | undefined): string {
 }
 import { useAuth } from "@/hooks/useAuth";
 import { RequireAuthGate } from "@/components/auth/RequireAuthGate";
+import { isEmailNotVerified } from "@/lib/apiError";
+import { EmailVerificationBanner } from "@/components/ui/EmailVerificationBanner";
 import {
   createConversation,
   createMessage,
@@ -39,6 +41,7 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
   const [unreadTotal, setUnreadTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailUnverified, setEmailUnverified] = useState(false);
 
   const refreshInbox = useCallback(async () => {
     if (!currentUser) return;
@@ -50,6 +53,8 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
       ]);
       setInbox(conversations);
       setUnreadTotal(unreadSummary.totalUnread);
+    } catch (err) {
+      if (isEmailNotVerified(err)) setEmailUnverified(true);
     } finally {
       setInboxLoading(false);
     }
@@ -183,6 +188,7 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
   return (
     <RequireAuthGate fallbackMessage="يتم التحقق من الجلسة قبل فتح الرسائل...">
       <div className="space-y-5">
+        {emailUnverified && <EmailVerificationBanner />}
         <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm sm:p-6">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-base font-semibold">صندوق المحادثات</h2>

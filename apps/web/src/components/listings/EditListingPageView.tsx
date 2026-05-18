@@ -15,6 +15,8 @@ import {
 } from "@/services/listingService";
 import { ImageUpload } from "@/components/listings/ImageUpload";
 import type { Listing } from "@/types/listing";
+import { isEmailNotVerified } from "@/lib/apiError";
+import { EmailVerificationBanner } from "@/components/ui/EmailVerificationBanner";
 
 export function EditListingPageView({ listingId }: { listingId: string }) {
   const router = useRouter();
@@ -23,6 +25,7 @@ export function EditListingPageView({ listingId }: { listingId: string }) {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailUnverified, setEmailUnverified] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [listing, setListing] = useState<Listing | null>(null);
   const [title, setTitle] = useState("");
@@ -52,7 +55,7 @@ export function EditListingPageView({ listingId }: { listingId: string }) {
       })
       .catch((err) => {
         if (!mounted) return;
-        setError(err instanceof Error ? err.message : "Failed to load listing.");
+        isEmailNotVerified(err) ? setEmailUnverified(true) : setError(err instanceof Error ? err.message : "حدث خطأ أثناء تحميل الإعلان.");
       })
       .finally(() => {
         if (!mounted) return;
@@ -86,7 +89,7 @@ export function EditListingPageView({ listingId }: { listingId: string }) {
       setListing(updated);
       setSuccess("تم حفظ التعديلات بنجاح.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save listing.");
+      isEmailNotVerified(err) ? setEmailUnverified(true) : setError(err instanceof Error ? err.message : "حدث خطأ أثناء حفظ التعديلات.");
     } finally {
       setSaving(false);
     }
@@ -100,7 +103,7 @@ export function EditListingPageView({ listingId }: { listingId: string }) {
       await deleteListing(listingId);
       router.push("/my-listings");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete listing.");
+      isEmailNotVerified(err) ? setEmailUnverified(true) : setError(err instanceof Error ? err.message : "حدث خطأ أثناء حذف الإعلان.");
     } finally {
       setDeleting(false);
     }
@@ -132,6 +135,7 @@ export function EditListingPageView({ listingId }: { listingId: string }) {
 
   return (
     <RequireAuthGate fallbackMessage="يتم التحقق من الجلسة قبل تعديل الإعلان...">
+      {emailUnverified && <EmailVerificationBanner />}
       {loading ? (
         <p className="text-sm text-[var(--text-muted)]">جاري تحميل بيانات الإعلان...</p>
       ) : (

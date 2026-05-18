@@ -7,6 +7,8 @@ import { RequireAuthGate } from "@/components/auth/RequireAuthGate";
 import { getMyListings, featureListing, unfeatureListing } from "@/services/listingService";
 import type { Listing, ListingStatus } from "@/types/listing";
 import { arabicCity } from "@/lib/locationNames";
+import { isEmailNotVerified } from "@/lib/apiError";
+import { EmailVerificationBanner } from "@/components/ui/EmailVerificationBanner";
 
 const STATUS_LABELS: Record<ListingStatus, string> = {
   draft:     "مسودة",
@@ -46,6 +48,7 @@ export function MyListingsPageView() {
   const { currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [emailUnverified, setEmailUnverified] = useState(false);
   const [myListings, setMyListings] = useState<Listing[]>([]);
   const [tab, setTab] = useState<MyTab>("all");
   const [togglingId, setTogglingId] = useState<string | null>(null);
@@ -62,7 +65,7 @@ export function MyListingsPageView() {
     setError(null);
     void getMyListings()
       .then((items) => { if (mounted) setMyListings(items); })
-      .catch((err) => { if (mounted) setError(err instanceof Error ? err.message : "Failed to load listings."); })
+      .catch((err) => { if (!mounted) return; if (isEmailNotVerified(err)) setEmailUnverified(true); else setError(err instanceof Error ? err.message : "حدث خطأ أثناء تحميل إعلاناتك."); })
       .finally(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
   }, [currentUser]);
@@ -86,6 +89,7 @@ export function MyListingsPageView() {
 
   return (
     <RequireAuthGate fallbackMessage="يتم التحقق من الجلسة قبل تحميل إعلاناتك...">
+      {emailUnverified && <EmailVerificationBanner />}
       {loading ? (
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (

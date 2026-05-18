@@ -9,6 +9,8 @@ import type {
 import { createListing } from "@/services/listingService";
 import { useAuth } from "@/hooks/useAuth";
 import { ImageUpload } from "./ImageUpload";
+import { isEmailNotVerified } from "@/lib/apiError";
+import { EmailVerificationBanner } from "@/components/ui/EmailVerificationBanner";
 
 type ListingFormState = {
   title: string;
@@ -39,6 +41,7 @@ export function CreateListingForm() {
   const [form, setForm] = useState<ListingFormState>(initialState);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailUnverified, setEmailUnverified] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [createdListingId, setCreatedListingId] = useState<string | null>(null);
 
@@ -84,7 +87,8 @@ export function CreateListingForm() {
       setSuccess(`Listing created successfully (ID: ${result.listingId}).`);
       setForm(initialState);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create listing.");
+      if (isEmailNotVerified(err)) setEmailUnverified(true);
+      else setError(err instanceof Error ? err.message : "حدث خطأ أثناء نشر الإعلان.");
     } finally {
       setSubmitting(false);
     }
@@ -97,6 +101,7 @@ export function CreateListingForm() {
     >
       <h2 className="text-lg font-semibold text-slate-900">Create Listing (Test)</h2>
 
+      {emailUnverified && <EmailVerificationBanner />}
       {error && (
         <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
