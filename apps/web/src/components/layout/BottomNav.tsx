@@ -3,28 +3,34 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { isBottomNavActive } from "@/components/layout/bottomNavState";
 
 export function BottomNav() {
   const pathname = usePathname();
   const { currentUser } = useAuth();
 
   const active = (href: string) =>
-    pathname === href || pathname.startsWith(href + "/")
+    isBottomNavActive(pathname, href)
       ? "text-[var(--brand)]"
       : "text-[var(--text-muted)]";
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-40 flex items-center justify-around border-t border-[var(--nav-bottom-border)] bg-[var(--nav-bottom)] pb-[env(safe-area-inset-bottom)] md:hidden">
-      {/* بحث */}
-      <Link href="/listings" className={`flex flex-col items-center gap-0.5 px-3 py-2 text-[10px] font-medium ${active("/listings")}`}>
+    <nav
+      dir="ltr"
+      className="fixed bottom-0 inset-x-0 z-40 flex items-center justify-around border-t border-[var(--nav-bottom-border)] bg-[var(--nav-bottom)] pb-[env(safe-area-inset-bottom)] md:hidden"
+    >
+      {/* الرئيسية */}
+      <Link href="/" dir="rtl" className={`flex flex-col items-center gap-0.5 px-3 py-2 text-[10px] font-medium ${active("/")}`}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          <path d="m3 10.5 9-7 9 7"/>
+          <path d="M5 10v10h14V10"/>
+          <path d="M9 20v-6h6v6"/>
         </svg>
-        بحث
+        الرئيسية
       </Link>
 
       {/* المفضلة */}
-      <Link href="/favorites" className={`flex flex-col items-center gap-0.5 px-3 py-2 text-[10px] font-medium ${active("/favorites")}`}>
+      <Link href="/favorites" dir="rtl" className={`flex flex-col items-center gap-0.5 px-3 py-2 text-[10px] font-medium ${active("/favorites")}`}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
         </svg>
@@ -34,6 +40,7 @@ export function BottomNav() {
       {/* أضف إعلان — center big */}
       <Link
         href="/submit-listing"
+        dir="rtl"
         className="relative -top-3 flex h-14 w-14 flex-col items-center justify-center rounded-full bg-[var(--brand)] text-[var(--brand-contrast)] shadow-lg"
       >
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -43,7 +50,7 @@ export function BottomNav() {
       </Link>
 
       {/* رسائل */}
-      <Link href="/messages" className={`flex flex-col items-center gap-0.5 px-3 py-2 text-[10px] font-medium ${active("/messages")}`}>
+      <Link href="/messages" dir="rtl" className={`flex flex-col items-center gap-0.5 px-3 py-2 text-[10px] font-medium ${active("/messages")}`}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
         </svg>
@@ -53,6 +60,7 @@ export function BottomNav() {
       {/* حساب */}
       <Link
         href={currentUser ? "/me" : "/login"}
+        dir="rtl"
         className={`flex flex-col items-center gap-0.5 px-3 py-2 text-[10px] font-medium ${active("/me")}`}
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

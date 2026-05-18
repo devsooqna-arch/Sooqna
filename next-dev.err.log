@@ -1,11 +1,3 @@
 Warning: Reverting webpack devtool to 'false'.
 Changing the webpack devtool in development mode will cause severe performance regressions.
 Read more: https://nextjs.org/docs/messages/improper-devtool
- ⚠ Fast Refresh had to perform a full reload due to a runtime error.
- ⚠ Fast Refresh had to perform a full reload due to a runtime error.
- ⨯ SyntaxError: Unexpected end of JSON input
-    at JSON.parse (<anonymous>) {
-  page: '/submit-listing'
-}
- ⚠ Fast Refresh had to perform a full reload due to a runtime error.
- ⚠ Fast Refresh had to perform a full reload due to a runtime error.

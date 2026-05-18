@@ -47,12 +47,50 @@ const THEME_INIT_SCRIPT = `
 })();
 `;
 
+const HYDRATION_ATTR_CLEANUP_SCRIPT = `
+(function () {
+  try {
+    var attr = "fdprocessedid";
+    var clean = function (root) {
+      if (!root || !root.querySelectorAll) return;
+      root.querySelectorAll("[" + attr + "]").forEach(function (node) {
+        node.removeAttribute(attr);
+      });
+    };
+    clean(document);
+    new MutationObserver(function (records) {
+      records.forEach(function (record) {
+        if (record.type === "attributes" && record.attributeName === attr) {
+          record.target.removeAttribute(attr);
+        }
+        record.addedNodes.forEach(function (node) {
+          if (node.nodeType === 1) {
+            if (node.hasAttribute && node.hasAttribute(attr)) {
+              node.removeAttribute(attr);
+            }
+            clean(node);
+          }
+        });
+      });
+    }).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: [attr],
+      childList: true,
+      subtree: true,
+    });
+  } catch (e) {}
+})();
+`;
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ar" dir="rtl" data-theme="classic" suppressHydrationWarning>
       <body suppressHydrationWarning>
         <Script id="sooqna-theme-init" strategy="beforeInteractive">
           {THEME_INIT_SCRIPT}
+        </Script>
+        <Script id="sooqna-hydration-attr-cleanup" strategy="beforeInteractive">
+          {HYDRATION_ATTR_CLEANUP_SCRIPT}
         </Script>
         <AppProviders>{children}</AppProviders>
       </body>
