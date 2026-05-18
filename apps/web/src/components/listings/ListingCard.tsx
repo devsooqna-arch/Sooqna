@@ -10,7 +10,7 @@ import { arabicCity } from "@/lib/locationNames";
 
 const PLACEHOLDER = "/images/placeholder-listing.png";
 
-export function ListingCard({ listing }: { listing: Listing }) {
+export function ListingCard({ listing, featured = false }: { listing: Listing; featured?: boolean }) {
   const firstImage = listing.images.find((img) => img.isPrimary) ?? listing.images[0];
   const preferredSrc = firstImage?.url?.trim()
     ? (resolvePublicMediaUrl(firstImage.url) ?? firstImage.url)
@@ -26,7 +26,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
   return (
     <article className="ui-card ui-card-hover group relative overflow-hidden">
       {/* Image */}
-      <div className="relative h-44 w-full overflow-hidden bg-[var(--surface-muted)]">
+      <div className={`relative w-full overflow-hidden bg-[var(--surface-muted)] ${featured ? "h-44 sm:h-52" : "h-28 sm:h-44"}`}>
         <Image
           src={imgSrc}
           alt={listing.title}
@@ -46,7 +46,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
 
         {/* Price gradient overlay */}
         <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/60 via-black/20 to-transparent px-3 pb-2 pt-6">
-          <span className="text-sm font-bold text-white drop-shadow">
+          <span className="text-xs font-bold text-white drop-shadow sm:text-sm">
             {listing.priceType === "contact"
               ? "تواصل معنا"
               : listing.priceType === "negotiable"
@@ -57,7 +57,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
       </div>
 
       {/* Content */}
-      <div className="p-3 pb-4">
+      <div className="p-2 pb-3 sm:p-3 sm:pb-4">
         <h3 className="line-clamp-2 text-sm font-bold leading-snug text-[var(--text)]">
           {listing.title}
         </h3>

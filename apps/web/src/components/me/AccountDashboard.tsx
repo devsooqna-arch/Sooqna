@@ -74,7 +74,7 @@ export function AccountDashboard() {
         {/* Welcome banner */}
         <section className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow)]">
           <div className="absolute inset-0 bg-gradient-to-l from-[var(--accent-soft)] to-transparent opacity-60" />
-          <div className="relative flex items-center gap-4">
+          <div className="relative flex flex-col items-center gap-3 text-center sm:flex-row sm:gap-4 sm:text-start">
             <ModernAvatar
               src={photoURL}
               name={displayName}
@@ -91,7 +91,7 @@ export function AccountDashboard() {
         </section>
 
         {/* Dashboard grid */}
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {dashCards.map((card) => (
             <DashLinkCard key={card.href} {...card} />
           ))}

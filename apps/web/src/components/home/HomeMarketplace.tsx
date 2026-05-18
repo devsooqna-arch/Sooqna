@@ -64,9 +64,9 @@ export function HomeMarketplace() {
   const heroSlides = ["/hero/slide-1.png", "/hero/slide-2.png"];
 
   return (
-    <div className="space-y-7">
-      <section className="ui-card overflow-hidden">
-        <div className="relative h-[235px]">
+    <div className="w-full space-y-7">
+      <section className="ui-card overflow-hidden -mx-4 rounded-none sm:mx-0 sm:rounded-2xl">
+        <div className="relative h-[175px] sm:h-[235px]">
           {heroSlides.map((slideSrc, index) => {
             const isActive = index === activeHeroIndex;
             const isBeforeActive = (index + 1) % heroSlides.length === activeHeroIndex;
@@ -137,35 +137,29 @@ export function HomeMarketplace() {
       </section>
 
       <section className="grid gap-4 lg:grid-cols-[270px_1fr]">
-        <aside className="ui-card p-4">
-          <h3 className="rounded-full bg-[var(--brand)] px-4 py-2 text-sm font-bold text-[var(--brand-contrast)]">
-            التصنيفات
-          </h3>
-          <ul className="mt-4 space-y-2 text-sm text-[var(--text-muted)]">
+        <aside className="ui-card p-3">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <span className="rounded-full bg-[var(--brand)] px-4 py-1.5 text-xs font-bold text-[var(--brand-contrast)]">
+              التصنيفات
+            </span>
             {topCategories.map((category) => (
-              <li key={category.id}>
-                <Link
-                  href={`/listings?category=${encodeURIComponent(category.slug || category.id)}`}
-                  className="flex items-center justify-between gap-2 rounded-md px-1 py-1.5 transition hover:bg-[var(--chip)] hover:text-[var(--text)]"
-                >
-                  <span className="flex min-w-0 items-center gap-2">
-                    <span className="h-3 w-3 shrink-0 rounded-full border border-[var(--chip-border)]" />
-                    <span className="truncate">{category.name.ar || category.name.en || category.slug}</span>
-                  </span>
-                  <span className="shrink-0 text-xs text-[var(--text-muted)]">
-                    {categoryCounts.get(category.id) ?? 0} إعلان
-                  </span>
-                </Link>
-              </li>
+              <Link
+                key={category.id}
+                href={`/listings?category=${encodeURIComponent(category.slug || category.id)}`}
+                className="rounded-full border border-[var(--chip-border)] bg-[var(--chip)] px-3 py-1.5 text-xs text-[var(--text)] transition hover:bg-[var(--brand)] hover:text-[var(--brand-contrast)]"
+              >
+                {category.name.ar || category.name.en || category.slug}
+                <span className="ms-1 text-[var(--text-muted)]">({categoryCounts.get(category.id) ?? 0})</span>
+              </Link>
             ))}
-          </ul>
+          </div>
         </aside>
 
-        <div className="space-y-5">
+        <div className="min-w-0 space-y-5">
           {showMarketplaceLoading ? (
             <div className="space-y-3">
               <div className="h-6 w-40 animate-pulse rounded-md bg-[var(--surface)]" />
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <div key={i} className="h-52 animate-pulse rounded-lg bg-[var(--surface)]" />
                 ))}
@@ -186,10 +180,10 @@ export function HomeMarketplace() {
                       عرض الكل
                     </Link>
                   </div>
-                  <div className="rounded-2xl border border-[var(--featured)]/30 bg-[var(--featured)]/5 p-3">
-                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  <div className="w-full rounded-2xl border border-[var(--featured)]/30 bg-[var(--featured)]/5 p-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                       {featuredListings.map((listing) => (
-                        <ListingCard key={listing.id} listing={listing} />
+                        <ListingCard key={listing.id} listing={listing} featured />
                       ))}
                     </div>
                   </div>
@@ -206,7 +200,7 @@ export function HomeMarketplace() {
                 {regularListings.length === 0 ? (
                   <p className="text-sm text-[var(--text-muted)]">لا توجد إعلانات حالياً.</p>
                 ) : (
-                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                     {regularListings.map((listing) => (
                       <ListingCard key={listing.id} listing={listing} />
                     ))}

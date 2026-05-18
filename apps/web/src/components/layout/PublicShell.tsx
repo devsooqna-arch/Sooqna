@@ -18,17 +18,22 @@ export function PublicShell({
   pageDescription?: string;
 }) {
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--bg)] text-[var(--text)]">
+    <div className="flex min-h-screen flex-col overflow-x-clip bg-[var(--bg)] text-[var(--text)]">
       <header className="sticky top-0 z-30">
         <div className="border-b border-[var(--border)] bg-[var(--surface)]">
-          <div className="mx-auto flex max-w-[1110px] items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
+          <div className="relative mx-auto flex max-w-[1110px] items-center justify-center px-4 py-2.5 sm:px-6 md:justify-between">
+            {/* ThemeSwitcher: absolute on physical left on mobile */}
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 md:hidden">
+              <ThemeSwitcher />
+            </div>
+
             <Link href="/" className="flex items-center gap-3">
               <Image
                 src="/branding/logo.png"
                 alt="سوقنا"
                 width={160}
                 height={72}
-                className="h-14 w-auto"
+                className="h-16 w-auto"
                 priority
               />
             </Link>
@@ -55,14 +60,9 @@ export function PublicShell({
           </div>
         </div>
 
-        <div className="border-b border-[var(--border)] bg-[var(--surface)] md:hidden">
-          <div className="mx-auto flex max-w-[1110px] items-center px-4 py-2 text-xs sm:px-6">
-            <ThemeSwitcher />
-          </div>
-        </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-[1110px] flex-1 px-4 py-7 pb-20 sm:px-6 md:pb-6">
+      <main className="mx-auto flex w-full max-w-[1110px] flex-1 flex-col px-4 py-7 pb-20 sm:px-6 md:pb-6">
         {pageTitle ? (
           <section className="mb-6">
               <h1 className="text-4xl font-extrabold tracking-tight text-[var(--text)] sm:text-5xl" style={{ lineHeight: 1.25 }}>
@@ -79,43 +79,34 @@ export function PublicShell({
       <BottomNav />
 
       <footer className="border-t border-[var(--border)] bg-[var(--surface)]">
-        <div className="mx-auto max-w-[1110px] px-4 py-10 sm:px-6">
-          <div className="grid gap-8 md:grid-cols-5">
-            <FooterColumn
-              title="عن سوقنا"
-              items={[
-                { label: "من نحن", href: "/about" },
-                { label: "الوظائف", href: "/careers" },
-                { label: "المركز الإعلامي", href: "/press" },
-                { label: "التطبيقات", href: "/packages" },
-                { label: "اتصل بنا", href: "/contact" },
-              ]}
-            />
-            <FooterColumn
-              title="معلومات"
-              items={[
-                { label: "المساعدة", href: "/help" },
-                { label: "نصائح الأمان", href: "/safety" },
-                { label: "سياسة الخصوصية", href: "/privacy" },
-                { label: "شروط الاستخدام", href: "/terms" },
-              ]}
-            />
-            <FooterColumn
-              title="للشركات"
-              items={[
-                { label: "الإعلان معنا", href: "/contact" },
-                { label: "الباقات الإعلانية", href: "/packages" },
-                { label: "حلول الشركات", href: "/contact" },
-              ]}
-            />
-            <FooterColumn
-              title="عام"
-              items={[
-                { label: "عمليات البحث الشائعة", href: "/listings" },
-                { label: "عرض التصنيفات", href: "/categories" },
-                { label: "إضافة إعلان", href: "/submit-listing" },
-              ]}
-            />
+        <div className="mx-auto max-w-[1110px] px-3 py-6 sm:px-6 sm:py-10">
+          {/* Mobile footer layout */}
+          <div className="md:hidden">
+            <div className="grid grid-cols-3 gap-x-3 gap-y-6">
+              <FooterColumn className="text-center" title="عن سوقنا" items={[{ label: "من نحن", href: "/about" }, { label: "الوظائف", href: "/careers" }, { label: "المركز الإعلامي", href: "/press" }, { label: "التطبيقات", href: "/packages" }, { label: "اتصل بنا", href: "/contact" }]} />
+              <FooterColumn className="text-center" title="معلومات" items={[{ label: "المساعدة", href: "/help" }, { label: "نصائح الأمان", href: "/safety" }, { label: "سياسة الخصوصية", href: "/privacy" }, { label: "شروط الاستخدام", href: "/terms" }]} />
+              <FooterColumn className="text-center" title="للشركات" items={[{ label: "الإعلان معنا", href: "/contact" }, { label: "الباقات الإعلانية", href: "/packages" }, { label: "حلول الشركات", href: "/contact" }]} />
+            </div>
+            <div className="mx-auto mt-6 grid max-w-xs grid-cols-2 gap-x-3">
+              <FooterColumn className="text-center" title="عام" items={[{ label: "عمليات البحث الشائعة", href: "/listings" }, { label: "عرض التصنيفات", href: "/categories" }, { label: "إضافة إعلان", href: "/submit-listing" }]} />
+              <div className="text-center">
+                <h3 className="mb-2 text-[11px] font-bold">التواصل الاجتماعي</h3>
+                <div className="flex items-center justify-center gap-2">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--chip-border)] bg-[var(--surface-muted)] text-xs shadow-[var(--shadow-sm)]">f</span>
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--chip-border)] bg-[var(--surface-muted)] text-xs shadow-[var(--shadow-sm)]">in</span>
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--chip-border)] bg-[var(--surface-muted)] text-xs shadow-[var(--shadow-sm)]">▶</span>
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--chip-border)] bg-[var(--surface-muted)] text-xs shadow-[var(--shadow-sm)]">◎</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop footer layout */}
+          <div className="hidden gap-8 md:grid md:grid-cols-5">
+            <FooterColumn title="عن سوقنا" items={[{ label: "من نحن", href: "/about" }, { label: "الوظائف", href: "/careers" }, { label: "المركز الإعلامي", href: "/press" }, { label: "التطبيقات", href: "/packages" }, { label: "اتصل بنا", href: "/contact" }]} />
+            <FooterColumn title="معلومات" items={[{ label: "المساعدة", href: "/help" }, { label: "نصائح الأمان", href: "/safety" }, { label: "سياسة الخصوصية", href: "/privacy" }, { label: "شروط الاستخدام", href: "/terms" }]} />
+            <FooterColumn title="للشركات" items={[{ label: "الإعلان معنا", href: "/contact" }, { label: "الباقات الإعلانية", href: "/packages" }, { label: "حلول الشركات", href: "/contact" }]} />
+            <FooterColumn title="عام" items={[{ label: "عمليات البحث الشائعة", href: "/listings" }, { label: "عرض التصنيفات", href: "/categories" }, { label: "إضافة إعلان", href: "/submit-listing" }]} />
             <div>
               <h3 className="mb-4 text-base font-bold">التواصل الاجتماعي</h3>
               <div className="flex items-center gap-2">
@@ -153,14 +144,14 @@ export function PublicShell({
   );
 }
 
-function FooterColumn({ title, items }: { title: string; items: { label: string; href: string }[] }) {
+function FooterColumn({ title, items, className }: { title: string; items: { label: string; href: string }[]; className?: string }) {
   return (
-    <div>
-      <h3 className="mb-4 text-base font-bold">{title}</h3>
-      <ul className="space-y-2">
+    <div className={className}>
+      <h3 className="mb-2 text-[11px] font-bold md:mb-4 md:text-base">{title}</h3>
+      <ul className="space-y-1.5 md:space-y-2">
         {items.map((item) => (
           <li key={item.label}>
-            <Link href={item.href} className="text-sm text-[var(--text-muted)] hover:text-[var(--brand)]">
+            <Link href={item.href} className="text-[10px] leading-tight text-[var(--text-muted)] hover:text-[var(--brand)] md:text-sm">
               {item.label}
             </Link>
           </li>

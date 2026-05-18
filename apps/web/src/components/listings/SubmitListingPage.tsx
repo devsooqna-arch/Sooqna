@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { attachListingImage, createListing, featureListing, publishListing } from "@/services/listingService";
@@ -43,6 +43,7 @@ export function SubmitListingPage() {
 
   const [activeStep, setActiveStep] = useState(0);
   const [busy, setBusy] = useState(false);
+  const submittingRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [createdListingId, setCreatedListingId] = useState<string | null>(null);
   const [optimisticNote, setOptimisticNote] = useState<string | null>(null);
@@ -174,6 +175,8 @@ export function SubmitListingPage() {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setError(null);
     const validationError = validate();
     if (validationError) {
@@ -219,6 +222,7 @@ export function SubmitListingPage() {
       setOptimisticNote(null);
     } finally {
       setBusy(false);
+      submittingRef.current = false;
     }
   }
 

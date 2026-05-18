@@ -83,7 +83,7 @@ export function FavoritesPageView() {
         <p className="text-sm text-[var(--danger)]">{error}</p>
       ) : items.length ? (
         <div className="space-y-4">
-          <div className="flex flex-wrap items-center justify-end gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-end">
             <label className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
               <span>ترتيب:</span>
               <select
@@ -99,7 +99,7 @@ export function FavoritesPageView() {
               </select>
             </label>
           </div>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
             {sortedItems.map((item) => (
               <ListingCard key={item.id} listing={item} />
             ))}
