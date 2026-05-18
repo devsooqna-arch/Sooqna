@@ -18,6 +18,7 @@ export async function createListing(
     body: JSON.stringify({
       title: input.title,
       price: input.price,
+      currency: input.currency ?? "SYP",
       categoryId: input.categoryId,
       description: input.description ?? "",
       location,

@@ -32,6 +32,7 @@ export function SubmitListingPage() {
 
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
+  const [currency, setCurrency] = useState<"SYP" | "USD">("SYP");
   const [categoryId, setCategoryId] = useState("");
   const [description, setDescription] = useState("");
   const [country, setCountry] = useState("Syria");
@@ -195,6 +196,7 @@ export function SubmitListingPage() {
       const result = await createListing({
         title: title.trim(),
         price: Number(price),
+        currency,
         categoryId: categoryId.trim(),
         description: description.trim(),
         location: {
@@ -255,7 +257,37 @@ export function SubmitListingPage() {
             <>
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="space-y-1"><span className="text-sm font-medium">عنوان الإعلان</span><input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]" placeholder="مثال: كاميرا سوني A7" disabled={busy} /></label>
-                <label className="space-y-1"><span className="text-sm font-medium">السعر</span><input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]" placeholder="0" disabled={busy} /></label>
+                <div className="space-y-1">
+                  <span className="text-sm font-medium">السعر والعملة</span>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      className="min-w-0 flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]"
+                      placeholder="0"
+                      disabled={busy}
+                    />
+                    <div className="flex overflow-hidden rounded-lg border border-[var(--border)] text-sm font-semibold">
+                      <button
+                        type="button"
+                        onClick={() => setCurrency("SYP")}
+                        disabled={busy}
+                        className={`px-3 py-2 transition ${currency === "SYP" ? "bg-[var(--brand)] text-[var(--brand-contrast)]" : "bg-[var(--surface)] text-[var(--text-muted)] hover:bg-[var(--chip)]"}`}
+                      >
+                        ل.س
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCurrency("USD")}
+                        disabled={busy}
+                        className={`px-3 py-2 transition ${currency === "USD" ? "bg-[var(--brand)] text-[var(--brand-contrast)]" : "bg-[var(--surface)] text-[var(--text-muted)] hover:bg-[var(--chip)]"}`}
+                      >
+                        $
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
               <label className="space-y-1"><span className="text-sm font-medium">وصف الإعلان</span><textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]" placeholder="اكتب وصفًا واضحًا..." disabled={busy} /></label>
               <div className="grid gap-4 sm:grid-cols-3">
@@ -361,7 +393,7 @@ export function SubmitListingPage() {
           {activeStep === 3 ? (
             <div className="space-y-2 rounded-lg border border-[var(--border)] bg-[var(--chip)] p-3 text-sm">
               <p><strong>العنوان:</strong> {title || "-"}</p>
-              <p><strong>السعر:</strong> {price || "0"} ل.س (SYP)</p>
+              <p><strong>السعر:</strong> {price || "0"} {currency === "SYP" ? "ل.س" : "$"}</p>
               <p><strong>التصنيف:</strong> {categoryOptions.find((c) => c.id === categoryId)?.label || "-"}</p>
               <p><strong>الموقع:</strong> {country} / {city} / {area || city}</p>
               <p><strong>عدد الصور:</strong> {images.length}</p>

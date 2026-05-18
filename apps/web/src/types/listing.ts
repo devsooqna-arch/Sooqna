@@ -63,6 +63,7 @@ export interface Listing {
 export interface CreateListingInput {
   title: string;
   price: number;
+  currency?: string;
   categoryId: string;
   description?: string;
   location?: {

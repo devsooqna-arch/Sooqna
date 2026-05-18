@@ -319,3 +319,24 @@
  GET /favorites 200 in 362ms
  GET /listings?sort=newest&page=1 200 in 366ms
  GET / 200 in 268ms
+ ✓ Compiled in 931ms (313 modules)
+ GET /favorites 200 in 431ms
+ GET / 200 in 429ms
+ GET /listings?sort=newest&page=1 200 in 431ms
+ ✓ Compiled in 584ms (777 modules)
+ ✓ Compiled in 475ms (791 modules)
+ GET /favorites 200 in 341ms
+ GET / 200 in 348ms
+ GET /listings?sort=newest&page=1 200 in 360ms
+ ✓ Compiled in 329ms (791 modules)
+ GET /favorites 200 in 253ms
+ GET / 200 in 259ms
+ GET /listings?sort=newest&page=1 200 in 264ms
+ ✓ Compiled in 1007ms (791 modules)
+ GET /favorites 200 in 1076ms
+ GET / 200 in 1078ms
+ GET /listings?sort=newest&page=1 200 in 1074ms
+ ✓ Compiled in 769ms (791 modules)
+ GET / 200 in 516ms
+ GET /listings?sort=newest&page=1 200 in 516ms
+ GET /favorites 200 in 312ms
