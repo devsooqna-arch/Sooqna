@@ -46,7 +46,7 @@ function mapListing(record: ListingWithImages): Listing {
     titleLower: listing.titleLower,
     description: listing.description,
     price: listing.price,
-    currency: listing.currency as "SYP" | "JOD",
+    currency: listing.currency as Listing["currency"],
     priceType: listing.priceType as Listing["priceType"],
     categoryId: listing.categoryId,
     ownerId: listing.ownerId ?? "",
@@ -313,4 +313,3 @@ export class PrismaListingsRepository implements ListingsRepository {
     }
   }
 }
-

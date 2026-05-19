@@ -3,6 +3,7 @@ import { AppError } from "../../shared/errors/appError";
 import { logAuditEvent } from "../audit/audit.service";
 import { PrismaListingsRepository } from "./repositories/listings.repository";
 import { ListingsService } from "./listings.service";
+import type { ListingCurrency } from "./listings.types";
 
 const service = new ListingsService(new PrismaListingsRepository());
 
@@ -16,6 +17,7 @@ export async function createListing(req: Request, res: Response): Promise<void> 
     ownerPhotoURL: req.authUser.picture ?? "",
     title: String(req.body?.title ?? ""),
     price: Number(req.body?.price),
+    currency: req.body?.currency as ListingCurrency | undefined,
     categoryId: String(req.body?.categoryId ?? ""),
     description: typeof req.body?.description === "string" ? req.body.description : "",
     location: {
@@ -223,4 +225,3 @@ export async function attachListingImage(req: Request, res: Response): Promise<v
   });
   res.json({ success: true, listing });
 }
-

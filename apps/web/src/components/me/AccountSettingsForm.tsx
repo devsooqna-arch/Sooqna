@@ -9,6 +9,7 @@ import { getBackendMe, syncBackendProfile } from "@/services/backendAuthService"
 import { uploadBackendProfileAvatar } from "@/services/backendUploadService";
 import { getAuthErrorMessage, sendPasswordResetLink } from "@/services/authService";
 import { ModernAvatar } from "@/components/ui/ModernAvatar";
+import { getAccountSettingsActionState } from "@/components/me/accountSettingsActions";
 
 export function AccountSettingsForm() {
   const router = useRouter();
@@ -41,6 +42,12 @@ export function AccountSettingsForm() {
   );
 
   const hasGooglePhoto = Boolean(currentUser?.photoURL?.trim());
+  const emailVerified = Boolean(currentUser?.emailVerified);
+  const actionState = getAccountSettingsActionState({
+    hasEmail: Boolean(currentUser?.email),
+    hasEmailPasswordProvider,
+    emailVerified,
+  });
 
   useEffect(() => {
     if (!currentUser) return;
@@ -75,7 +82,7 @@ export function AccountSettingsForm() {
   }
 
   async function handleSendPasswordReset() {
-    if (!currentUser?.email || !hasEmailPasswordProvider) return;
+    if (!currentUser?.email || !actionState.canSendPasswordReset) return;
     setResetSending(true);
     setError(null);
     setSuccess(null);
@@ -147,8 +154,6 @@ export function AccountSettingsForm() {
       setUploadingAvatar(false);
     }
   }
-
-  const emailVerified = Boolean(currentUser?.emailVerified);
 
   return (
     <RequireAuthGate fallbackMessage="يتم التحقق من الجلسة قبل إعدادات الحساب...">
@@ -273,13 +278,6 @@ export function AccountSettingsForm() {
                   >
                     {verificationSending ? "جاري الإرسال..." : "إعادة إرسال رابط التحقق"}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => void handleLogoutForSwitchAccount()}
-                    className="rounded-full border border-amber-300 bg-white px-4 py-2 text-xs font-semibold text-amber-950 transition hover:bg-amber-100"
-                  >
-                    تسجيل الخروج واستخدام حساب آخر
-                  </button>
                   <Link
                     href="/reset-password"
                     className="rounded-full border border-amber-300 bg-white px-4 py-2 text-center text-xs font-semibold text-amber-950 transition hover:bg-amber-100"
@@ -299,25 +297,43 @@ export function AccountSettingsForm() {
                 إدارة كلمة المرور عبر البريد الإلكتروني (Firebase).
               </p>
             </div>
-            {hasEmailPasswordProvider ? (
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-[var(--text-muted)]">
-                  نسيت كلمة المرور أو تريد تعييناً جديداً؟ نرسل لك رابطاً آمناً إلى بريدك.
-                </p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-[var(--text-muted)]">{actionState.passwordHelpText}</p>
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <button
                   type="button"
                   onClick={() => void handleSendPasswordReset()}
-                  disabled={resetSending || !currentUser?.email}
+                  disabled={resetSending || !actionState.canSendPasswordReset}
                   className="shrink-0 rounded-full border border-[var(--border)] bg-[var(--chip)] px-5 py-2 text-sm font-semibold text-[var(--text)] transition hover:border-[var(--brand)] hover:text-[var(--brand)] disabled:opacity-50"
                 >
-                  {resetSending ? "جاري الإرسال..." : "إرسال رابط إعادة التعيين"}
+                  {resetSending ? "جاري الإرسال..." : "إرسال رابط تغيير كلمة المرور"}
                 </button>
+                <Link
+                  href="/reset-password"
+                  className="shrink-0 rounded-full border border-[var(--border)] bg-[var(--surface)] px-5 py-2 text-center text-sm font-semibold text-[var(--text-muted)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
+                >
+                  فتح صفحة الاستعادة
+                </Link>
               </div>
-            ) : (
-              <p className="text-sm text-[var(--text-muted)]">
-                تسجيل الدخول عبر جوجل أو مزوّد خارجي — لا تُدار كلمة المرور من هذه الصفحة.
+            </div>
+          </section>
+
+          {/* إجراءات الحساب */}
+          <section className="ui-card space-y-4 p-5 sm:p-6">
+            <div className="border-b border-[var(--border)] pb-3">
+              <h2 className="text-lg font-bold text-[var(--text)]">إجراءات الحساب</h2>
+              <p className="mt-1 text-sm text-[var(--text-muted)]">
+                الخروج من هذا الجهاز أو استخدام حساب آخر.
               </p>
-            )}
+            </div>
+            <button
+              type="button"
+              onClick={() => void handleLogoutForSwitchAccount()}
+              disabled={!actionState.showLogout}
+              className="w-full rounded-full border border-red-200 bg-red-50 px-5 py-2.5 text-sm font-semibold text-red-900 transition hover:bg-red-100 disabled:opacity-50 sm:w-auto"
+            >
+              تسجيل الخروج
+            </button>
           </section>
 
           {/* روابط سريعة */}

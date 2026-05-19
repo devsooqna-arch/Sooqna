@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LISTING_CURRENCIES } from "../constants/domain";
 
 const idParamSchema = z.object({
   id: z.string().min(1),
@@ -43,6 +44,7 @@ export const createListingBodySchema = z
   .object({
     title: z.string().trim().min(1).max(160),
     price: z.number().finite().nonnegative(),
+    currency: z.enum(LISTING_CURRENCIES).optional().default("SYP"),
     categoryId: z.string().trim().min(1).max(120),
     description: z.string().trim().max(10000).optional(),
     location: listingLocationSchema,

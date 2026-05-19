@@ -1,6 +1,7 @@
 import {
   LISTING_CONDITIONS,
   LISTING_CONTACT_PREFERENCES,
+  LISTING_CURRENCIES,
   LISTING_PRICE_TYPES,
   LISTING_STATUSES,
 } from "../../shared/constants/domain";
@@ -9,6 +10,7 @@ export type ListingPriceType = (typeof LISTING_PRICE_TYPES)[number];
 export type ListingStatus = (typeof LISTING_STATUSES)[number];
 export type ListingCondition = (typeof LISTING_CONDITIONS)[number];
 export type ListingContactPreference = (typeof LISTING_CONTACT_PREFERENCES)[number];
+export type ListingCurrency = (typeof LISTING_CURRENCIES)[number];
 
 export interface ListingImage {
   url: string;
@@ -23,7 +25,7 @@ export interface Listing {
   titleLower: string;
   description: string;
   price: number;
-  currency: "SYP" | "JOD";
+  currency: ListingCurrency;
   priceType: ListingPriceType;
   categoryId: string;
   ownerId: string;

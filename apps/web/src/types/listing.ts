@@ -8,6 +8,7 @@ export type ListingStatus =
   | "archived";
 export type ListingCondition = "new" | "used";
 export type ListingContactPreference = "chat" | "phone";
+export type ListingCurrency = "SYP" | "USD" | "JOD";
 
 export interface ListingImage {
   url: string;
@@ -33,7 +34,7 @@ export interface Listing {
   titleLower: string;
   description: string;
   price: number;
-  currency: string;
+  currency: ListingCurrency;
   priceType: ListingPriceType;
   categoryId: string;
   ownerId: string;
@@ -63,7 +64,7 @@ export interface Listing {
 export interface CreateListingInput {
   title: string;
   price: number;
-  currency?: string;
+  currency?: ListingCurrency;
   categoryId: string;
   description?: string;
   location?: {
@@ -77,4 +78,3 @@ export interface CreateListingResult {
   success?: boolean;
   listingId: string;
 }
-

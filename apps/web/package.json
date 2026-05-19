@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "next dev",
     "validate:redirects": "node ./scripts/validate-wp-redirects.mjs",
-    "build": "npm run validate:redirects && next build",
+    "build": "npm run validate:redirects && next build && npm run assert:css",
+    "assert:css": "node ./scripts/assert-css-build.mjs",
     "start": "next start",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-pattern .next --ignore-pattern next-env.d.ts",
     "e2e": "playwright test",

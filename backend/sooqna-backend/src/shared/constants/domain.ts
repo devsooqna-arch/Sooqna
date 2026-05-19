@@ -9,6 +9,7 @@ export const LISTING_STATUSES = [
 ] as const;
 export const LISTING_CONDITIONS = ["new", "used"] as const;
 export const LISTING_CONTACT_PREFERENCES = ["chat", "phone"] as const;
+export const LISTING_CURRENCIES = ["SYP", "USD", "JOD"] as const;
 
 export const MESSAGE_TYPES = ["text", "image", "system"] as const;
 

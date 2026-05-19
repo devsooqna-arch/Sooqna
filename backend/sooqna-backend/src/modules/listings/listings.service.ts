@@ -6,7 +6,7 @@ import { CATEGORY_IDS, CITY_IDS } from "../../shared/constants/domain";
 import { PrismaUsersRepository } from "../users/repositories/users.repository";
 import { trackEngagementEvent } from "../engagement/engagement.service";
 import type { ListingsRepository, PaginationOptions } from "./repositories/listings.repository";
-import type { Listing } from "./listings.types";
+import type { Listing, ListingCurrency } from "./listings.types";
 
 type CreateListingInput = {
   ownerId: string;
@@ -14,6 +14,7 @@ type CreateListingInput = {
   ownerPhotoURL: string;
   title: string;
   price: number;
+  currency?: ListingCurrency;
   categoryId: string;
   description?: string;
   location?: {
@@ -117,7 +118,7 @@ export class ListingsService {
       titleLower: input.title.trim().toLowerCase(),
       description: input.description?.trim() ?? "",
       price: input.price,
-      currency: "SYP",
+      currency: input.currency ?? "SYP",
       priceType: "fixed",
       categoryId: input.categoryId.trim(),
       ownerId: input.ownerId,
@@ -392,4 +393,3 @@ export class ListingsService {
     };
   }
 }
-
