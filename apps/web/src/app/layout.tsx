@@ -84,7 +84,7 @@ const HYDRATION_ATTR_CLEANUP_SCRIPT = `
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" data-theme="classic" suppressHydrationWarning>
+    <html lang="ar" dir="rtl" data-theme="classic" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body suppressHydrationWarning>
         <Script id="sooqna-theme-init" strategy="beforeInteractive">
           {THEME_INIT_SCRIPT}

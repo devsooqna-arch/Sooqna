@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTheme, type AppTheme } from "@/contexts/theme-context";
+import { useAnimatedPresence } from "@/hooks/useAnimatedPresence";
 
 const THEMES: { key: AppTheme; label: string; dot: string }[] = [
   { key: "classic", label: "كلاسيكي", dot: "bg-green-600" },
@@ -13,6 +14,7 @@ export function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const { shouldRender, motionState } = useAnimatedPresence(open);
 
   useEffect(() => {
     if (!open) return;
@@ -30,20 +32,23 @@ export function ThemeSwitcher() {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label="تغيير الثيم"
-        className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--chip-border)] bg-[var(--surface)] text-lg font-bold leading-none text-[var(--text-muted)] transition hover:bg-[var(--chip)] md:hidden"
+        className="motion-press flex h-8 w-8 items-center justify-center rounded-full border border-[var(--chip-border)] bg-[var(--surface)] text-lg font-bold leading-none text-[var(--text-muted)] transition-colors hover:bg-[var(--chip)] md:hidden"
       >
         ⋮
       </button>
 
       {/* Mobile dropdown */}
-      {open && (
-        <div className="absolute left-0 top-10 z-50 min-w-[120px] overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-lg md:hidden">
+      {shouldRender && (
+        <div
+          className="motion-dropdown absolute left-0 top-10 z-50 min-w-[120px] overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-lg md:hidden"
+          data-motion-state={motionState}
+        >
           {THEMES.map(({ key, label, dot }) => (
             <button
               key={key}
               type="button"
               onClick={() => { setTheme(key); setOpen(false); }}
-              className={`flex w-full items-center gap-2 px-3 py-2.5 text-xs transition ${
+              className={`flex w-full items-center gap-2 px-3 py-2.5 text-xs transition-colors ${
                 key === theme
                   ? "bg-[var(--brand)] text-[var(--brand-contrast)] font-semibold"
                   : "text-[var(--text)] hover:bg-[var(--chip)]"
@@ -63,7 +68,7 @@ export function ThemeSwitcher() {
             key={key}
             type="button"
             onClick={() => setTheme(key)}
-            className={`rounded-full px-2.5 py-1 text-xs font-medium transition ${
+            className={`motion-press rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
               key === theme
                 ? "bg-[var(--brand)] text-[var(--brand-contrast)]"
                 : "text-[var(--text-muted)] hover:bg-[var(--chip)]"

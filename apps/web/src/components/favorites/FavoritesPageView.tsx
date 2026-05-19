@@ -81,11 +81,11 @@ export function FavoritesPageView() {
       {loading ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-52 animate-pulse rounded-lg bg-[var(--surface)]" />
+            <div key={i} className="motion-skeleton h-52 rounded-lg bg-[var(--surface)]" />
           ))}
         </div>
       ) : error ? (
-        <p className="text-sm text-[var(--danger)]">{error}</p>
+        <p className="motion-alert text-sm text-[var(--danger)]">{error}</p>
       ) : items.length ? (
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-end">
@@ -105,13 +105,13 @@ export function FavoritesPageView() {
             </label>
           </div>
           <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
-            {sortedItems.map((item) => (
-              <ListingCard key={item.id} listing={item} />
+            {sortedItems.map((item, index) => (
+              <ListingCard key={item.id} listing={item} motionIndex={index} />
             ))}
           </div>
         </div>
       ) : (
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-6 py-14 text-center shadow-[var(--shadow)]">
+        <div className="motion-section rounded-xl border border-[var(--border)] bg-[var(--surface)] px-6 py-14 text-center shadow-[var(--shadow)]">
           <span className="text-5xl">❤️</span>
           <p className="mt-4 text-base font-semibold text-[var(--text)]">قائمة المفضلة فارغة</p>
           <p className="mt-2 text-sm text-[var(--text-muted)]">
@@ -119,7 +119,7 @@ export function FavoritesPageView() {
           </p>
           <Link
             href="/listings"
-            className="mt-5 inline-block rounded-full bg-[var(--brand)] px-6 py-2.5 text-sm font-semibold text-[var(--brand-contrast)]"
+            className="ui-btn-primary mt-5 rounded-full px-6 py-2.5 text-sm"
           >
             تصفح الإعلانات
           </Link>

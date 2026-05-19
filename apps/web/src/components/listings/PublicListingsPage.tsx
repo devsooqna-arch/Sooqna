@@ -43,12 +43,12 @@ function buildPageNumbers(currentPage: number, totalPages: number): Array<number
 export function ListingsPageSkeleton() {
   return (
     <div className="grid gap-5 lg:grid-cols-[270px_1fr]">
-      <div className="h-48 animate-pulse rounded-lg bg-[var(--surface)]" />
+      <div className="motion-skeleton h-48 rounded-lg bg-[var(--surface)]" />
       <div className="space-y-4">
-        <div className="h-8 w-48 animate-pulse rounded-lg bg-[var(--surface)]" />
+        <div className="motion-skeleton h-8 w-48 rounded-lg bg-[var(--surface)]" />
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-52 animate-pulse rounded-lg bg-[var(--surface)]" />
+            <div key={i} className="motion-skeleton h-52 rounded-lg bg-[var(--surface)]" />
           ))}
         </div>
       </div>
@@ -175,7 +175,7 @@ function PublicListingsPageInner() {
   }
 
   if (error) {
-    return <p className="text-sm text-[var(--danger)]">{error}</p>;
+    return <p className="motion-alert text-sm text-[var(--danger)]">{error}</p>;
   }
 
   return (
@@ -221,7 +221,7 @@ function PublicListingsPageInner() {
                   </Link>
                 </div>
                 {isExpanded && subs.length > 0 && (
-                  <div className="bg-[var(--surface-muted,var(--surface))]">
+                  <div className="motion-dropdown bg-[var(--surface-muted,var(--surface))]" data-motion-state="enter">
                     {subs.map((sub) => (
                       <Link
                         key={sub}
@@ -242,11 +242,11 @@ function PublicListingsPageInner() {
       {/* Listings area */}
       <div className="order-1 lg:order-2 space-y-4">
         {(categoryFilter || cityFilterRaw || searchFilterRaw) ? (
-          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-2 transition-all duration-300 ease-out">
+          <div className="motion-alert flex flex-wrap items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-2">
             {categoryFilter ? (
               <Link
                 href={buildListingsHref({ category: null, page: 1 })}
-                className="translate-y-0 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800 opacity-100 transition-all duration-300 ease-out hover:bg-emerald-100"
+                className="motion-alert rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800 transition-colors hover:bg-emerald-100"
               >
                 🏷️ التصنيف:{" "}
                 {categories.find((c) => (c.slug || c.id).toLowerCase() === categoryFilter)?.name.ar ||
@@ -258,7 +258,7 @@ function PublicListingsPageInner() {
             {cityFilterRaw ? (
               <Link
                 href={buildListingsHref({ city: null, page: 1 })}
-                className="translate-y-0 rounded-full border border-sky-300 bg-sky-50 px-3 py-1 text-xs font-medium text-sky-800 opacity-100 transition-all duration-300 ease-out hover:bg-sky-100"
+                className="motion-alert rounded-full border border-sky-300 bg-sky-50 px-3 py-1 text-xs font-medium text-sky-800 transition-colors hover:bg-sky-100"
               >
                 📍 المدينة: {cityFilterRaw} ×
               </Link>
@@ -266,7 +266,7 @@ function PublicListingsPageInner() {
             {searchFilterRaw ? (
               <Link
                 href={buildListingsHref({ search: null, page: 1 })}
-                className="translate-y-0 rounded-full border border-violet-300 bg-violet-50 px-3 py-1 text-xs font-medium text-violet-800 opacity-100 transition-all duration-300 ease-out hover:bg-violet-100"
+                className="motion-alert rounded-full border border-violet-300 bg-violet-50 px-3 py-1 text-xs font-medium text-violet-800 transition-colors hover:bg-violet-100"
               >
                 🔎 بحث: {searchFilterRaw} ×
               </Link>
@@ -279,7 +279,7 @@ function PublicListingsPageInner() {
                 sort: null,
                 page: null,
               })}
-              className="rounded-full bg-[var(--brand)] px-3 py-1 text-xs font-semibold text-[var(--brand-contrast)] transition hover:opacity-90"
+              className="ui-btn-primary rounded-full px-3 py-1 text-xs"
             >
               مسح الفلاتر
             </Link>
@@ -333,8 +333,8 @@ function PublicListingsPageInner() {
         {listings.length ? (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
-              {listings.map((listing) => (
-                <ListingCard key={listing.id} listing={listing} />
+              {listings.map((listing, index) => (
+                <ListingCard key={listing.id} listing={listing} motionIndex={index} />
               ))}
             </div>
             <div className="flex items-center justify-center gap-2">
@@ -342,7 +342,7 @@ function PublicListingsPageInner() {
                 type="button"
                 onClick={() => router.replace(buildListingsHref({ page: safeCurrentPage - 1 }))}
                 disabled={safeCurrentPage <= 1}
-                className="rounded-full border border-[var(--border)] px-4 py-1.5 text-xs text-[var(--text)] disabled:cursor-not-allowed disabled:opacity-50"
+                className="ui-btn-ghost rounded-full px-4 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
               >
                 السابق
               </button>
@@ -376,18 +376,18 @@ function PublicListingsPageInner() {
                 type="button"
                 onClick={() => router.replace(buildListingsHref({ page: safeCurrentPage + 1 }))}
                 disabled={safeCurrentPage >= totalPages}
-                className="rounded-full border border-[var(--border)] px-4 py-1.5 text-xs text-[var(--text)] disabled:cursor-not-allowed disabled:opacity-50"
+              className="ui-btn-ghost rounded-full px-4 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
               >
                 التالي
               </button>
             </div>
           </div>
         ) : (
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-6 py-10 text-center">
+          <div className="motion-section rounded-xl border border-[var(--border)] bg-[var(--surface)] px-6 py-10 text-center">
             <p className="text-sm text-[var(--text-muted)]">لا توجد إعلانات مطابقة حاليًا.</p>
             <Link
               href="/listings"
-              className="mt-3 inline-block rounded-full bg-[var(--brand)] px-5 py-2 text-xs font-semibold text-[var(--brand-contrast)]"
+              className="ui-btn-primary mt-3 rounded-full px-5 py-2 text-xs"
             >
               عرض كل الإعلانات
             </Link>

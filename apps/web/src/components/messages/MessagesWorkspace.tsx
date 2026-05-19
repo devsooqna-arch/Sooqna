@@ -189,7 +189,7 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
     <RequireAuthGate fallbackMessage="يتم التحقق من الجلسة قبل فتح الرسائل...">
       <div className="space-y-5">
         {emailUnverified && <EmailVerificationBanner />}
-        <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm sm:p-6">
+        <section className="ui-card motion-section rounded-2xl p-5 sm:p-6">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-base font-semibold">صندوق المحادثات</h2>
             <div className="flex items-center gap-2">
@@ -214,7 +214,7 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
                   key={item.id}
                   type="button"
                   onClick={() => setConversationId(item.id)}
-                  className="block w-full rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-start text-sm shadow-[var(--shadow-sm)] transition hover:border-[var(--brand)] hover:shadow-[var(--shadow-md)]"
+                className="ui-card ui-card-hover motion-card block w-full rounded-xl bg-[var(--surface-muted)] px-3 py-2 text-start text-sm"
                 >
                   <div className="flex items-center gap-2">
                     <ModernAvatar
@@ -247,12 +247,12 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
               ))}
             </div>
           ) : (
-            <p className="text-sm text-[var(--text-muted)]">لا توجد محادثات حتى الآن.</p>
+            <p className="motion-alert text-sm text-[var(--text-muted)]">لا توجد محادثات حتى الآن.</p>
           )}
         </section>
 
         {showDevTools ? (
-          <section className="grid gap-4 rounded-2xl border border-dashed border-amber-400/60 bg-amber-50/40 p-5 shadow-sm dark:bg-amber-950/20 sm:grid-cols-2 sm:p-6">
+          <section className="motion-section grid gap-4 rounded-2xl border border-dashed border-amber-400/60 bg-amber-50/40 p-5 shadow-sm dark:bg-amber-950/20 sm:grid-cols-2 sm:p-6">
             <p className="sm:col-span-2 text-xs font-semibold text-amber-800 dark:text-amber-200">
               وضع المطوّر فقط — إنشاء محادثة يدوياً
             </p>
@@ -297,9 +297,9 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
           </section>
         ) : null}
 
-        <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm sm:p-6">
+        <section className="ui-card motion-section rounded-2xl p-5 sm:p-6">
           {error ? (
-            <p className="mb-3 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">
+            <p className="motion-alert mb-3 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">
               {error}
             </p>
           ) : null}
@@ -332,7 +332,7 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
                 rows={3}
-                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]"
+                className="ui-input h-auto w-full rounded-lg py-2"
                 placeholder="اكتب رسالتك..."
               />
             </label>
@@ -340,14 +340,14 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
               type="button"
               onClick={() => void handleSendMessage()}
               disabled={loading || !conversationId.trim() || !messageText.trim()}
-              className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2 text-sm font-semibold transition hover:border-[var(--brand)] hover:text-[var(--brand)] disabled:opacity-60"
+              className="ui-btn-ghost rounded-lg px-4 py-2 text-sm"
             >
               إرسال الرسالة
             </button>
           </div>
         </section>
 
-        <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm sm:p-6">
+        <section className="ui-card motion-section rounded-2xl p-5 sm:p-6">
           <h2 className="mb-3 text-base font-semibold">سجل الرسائل</h2>
           {loading ? (
             <p className="text-sm text-[var(--text-muted)]">جاري التحميل...</p>
@@ -356,7 +356,7 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
               {messages.map((message) => (
                 <article
                   key={message.id}
-                  className="rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm shadow-[var(--shadow-sm)]"
+                className="motion-alert rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm shadow-[var(--shadow-sm)]"
                 >
                   <div className="flex items-start gap-2">
                     <ModernAvatar

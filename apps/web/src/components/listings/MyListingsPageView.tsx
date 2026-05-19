@@ -9,6 +9,7 @@ import type { Listing, ListingStatus } from "@/types/listing";
 import { arabicCity } from "@/lib/locationNames";
 import { isEmailNotVerified } from "@/lib/apiError";
 import { EmailVerificationBanner } from "@/components/ui/EmailVerificationBanner";
+import { getMotionStaggerStyle } from "@/lib/motion";
 
 const STATUS_LABELS: Record<ListingStatus, string> = {
   draft:     "مسودة",
@@ -93,11 +94,11 @@ export function MyListingsPageView() {
       {loading ? (
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-20 animate-pulse rounded-xl bg-[var(--surface)]" />
+            <div key={i} className="motion-skeleton h-20 rounded-xl bg-[var(--surface)]" />
           ))}
         </div>
       ) : error ? (
-        <p className="text-sm text-[var(--danger)]">{error}</p>
+        <p className="motion-alert text-sm text-[var(--danger)]">{error}</p>
       ) : myListings.length ? (
         <div className="space-y-4">
           <div className="flex flex-wrap gap-2 border-b border-[var(--border)] pb-3">
@@ -118,16 +119,17 @@ export function MyListingsPageView() {
           </div>
 
           {filteredListings.length === 0 ? (
-            <p className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-8 text-center text-sm text-[var(--text-muted)]">
+            <p className="motion-section rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-8 text-center text-sm text-[var(--text-muted)]">
               لا توجد إعلانات في هذا التبويب.
             </p>
           ) : null}
 
           <div className="space-y-3">
-          {filteredListings.map((listing) => (
+          {filteredListings.map((listing, index) => (
             <article
               key={listing.id}
-              className="flex flex-col gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow)] transition hover:shadow-[var(--shadow-md)] sm:flex-row sm:items-center sm:justify-between"
+              className="ui-card ui-card-hover motion-card flex flex-col gap-3 rounded-xl p-4 sm:flex-row sm:items-center sm:justify-between"
+              style={getMotionStaggerStyle(index)}
             >
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
@@ -185,7 +187,7 @@ export function MyListingsPageView() {
           </div>
         </div>
       ) : (
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-6 py-14 text-center shadow-[var(--shadow)]">
+        <div className="motion-section rounded-xl border border-[var(--border)] bg-[var(--surface)] px-6 py-14 text-center shadow-[var(--shadow)]">
           <span className="text-5xl">📋</span>
           <p className="mt-4 text-base font-semibold text-[var(--text)]">لا توجد إعلانات بعد</p>
           <p className="mt-2 text-sm text-[var(--text-muted)]">
@@ -193,7 +195,7 @@ export function MyListingsPageView() {
           </p>
           <Link
             href="/submit-listing"
-            className="mt-5 inline-block rounded-full bg-[var(--brand)] px-6 py-2.5 text-sm font-semibold text-[var(--brand-contrast)]"
+            className="ui-btn-primary mt-5 rounded-full px-6 py-2.5 text-sm"
           >
             + أضف إعلانك الأول
           </Link>

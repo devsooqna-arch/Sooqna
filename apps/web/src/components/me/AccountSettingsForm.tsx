@@ -163,18 +163,18 @@ export function AccountSettingsForm() {
         <div className="space-y-8">
           <form onSubmit={onSubmit} className="space-y-8">
             {error ? (
-              <p className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-950/30 dark:text-red-200">
+              <p className="motion-alert rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-950/30 dark:text-red-200">
                 {error}
               </p>
             ) : null}
             {success ? (
-              <p className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-200">
+              <p className="motion-alert rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-200">
                 {success}
               </p>
             ) : null}
 
             {/* الملف الشخصي */}
-            <section className="ui-card space-y-4 p-5 sm:p-6">
+            <section className="ui-card motion-section space-y-4 p-5 sm:p-6">
               <div className="border-b border-[var(--border)] pb-3">
                 <h2 className="text-lg font-bold text-[var(--text)]">الملف الشخصي</h2>
                 <p className="mt-1 text-sm text-[var(--text-muted)]">
@@ -219,7 +219,7 @@ export function AccountSettingsForm() {
               </div>
 
               {(previewUrl || photoURL) && (
-                <div className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3">
+                <div className="motion-alert flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3">
                   <ModernAvatar src={previewUrl ?? photoURL} name={fullName || "المستخدم"} size="lg" />
                   <div>
                     <p className="text-sm font-medium text-[var(--text)]">
@@ -243,7 +243,7 @@ export function AccountSettingsForm() {
           </form>
 
           {/* الحساب */}
-          <section className="ui-card space-y-4 p-5 sm:p-6">
+          <section className="ui-card motion-section space-y-4 p-5 sm:p-6">
             <div className="border-b border-[var(--border)] pb-3">
               <h2 className="text-lg font-bold text-[var(--text)]">الحساب</h2>
               <p className="mt-1 text-sm text-[var(--text-muted)]">البريد مرتبط بتسجيل الدخول ولا يُغيَّر من هنا.</p>
@@ -264,7 +264,7 @@ export function AccountSettingsForm() {
               </span>
             </div>
             {!emailVerified ? (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+              <div className="motion-alert rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
                 <p className="font-semibold">يلزم تأكيد البريد قبل استخدام كل مزايا الحساب.</p>
                 <p className="mt-1 text-xs leading-6">
                   إذا لم يصلك الرابط، أعد الإرسال أو سجل الخروج لاستخدام بريد آخر.
@@ -290,7 +290,7 @@ export function AccountSettingsForm() {
           </section>
 
           {/* الأمان */}
-          <section className="ui-card space-y-4 p-5 sm:p-6">
+          <section className="ui-card motion-section space-y-4 p-5 sm:p-6">
             <div className="border-b border-[var(--border)] pb-3">
               <h2 className="text-lg font-bold text-[var(--text)]">الأمان</h2>
               <p className="mt-1 text-sm text-[var(--text-muted)]">
@@ -319,7 +319,7 @@ export function AccountSettingsForm() {
           </section>
 
           {/* إجراءات الحساب */}
-          <section className="ui-card space-y-4 p-5 sm:p-6">
+          <section className="ui-card motion-section space-y-4 p-5 sm:p-6">
             <div className="border-b border-[var(--border)] pb-3">
               <h2 className="text-lg font-bold text-[var(--text)]">إجراءات الحساب</h2>
               <p className="mt-1 text-sm text-[var(--text-muted)]">
@@ -337,7 +337,7 @@ export function AccountSettingsForm() {
           </section>
 
           {/* روابط سريعة */}
-          <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)] p-5">
+          <section className="motion-section rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)] p-5">
             <h2 className="mb-3 text-sm font-bold text-[var(--text)]">اختصارات</h2>
             <div className="flex flex-wrap gap-2">
               <Link href="/my-listings" className="ui-chip px-4 py-2 text-xs font-semibold hover:border-[var(--brand)]">

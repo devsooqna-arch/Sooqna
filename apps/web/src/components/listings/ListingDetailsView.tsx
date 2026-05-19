@@ -174,21 +174,21 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
     return (
       <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
         <div className="space-y-4">
-          <div className="h-[400px] animate-pulse rounded-xl bg-[var(--surface)]" />
-          <div className="h-32 animate-pulse rounded-xl bg-[var(--surface)]" />
+          <div className="motion-skeleton h-[400px] rounded-xl bg-[var(--surface)]" />
+          <div className="motion-skeleton h-32 rounded-xl bg-[var(--surface)]" />
         </div>
-        <div className="h-64 animate-pulse rounded-xl bg-[var(--surface)]" />
+        <div className="motion-skeleton h-64 rounded-xl bg-[var(--surface)]" />
       </div>
     );
   }
 
   if (error) {
-    return <p className="text-sm text-[var(--danger)]">{error}</p>;
+    return <p className="motion-alert text-sm text-[var(--danger)]">{error}</p>;
   }
 
   if (!listing) {
     return (
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-6 py-20 text-center shadow-[var(--shadow-sm)]">
+      <div className="motion-section rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-6 py-20 text-center shadow-[var(--shadow-sm)]">
         <p className="mb-4 text-6xl leading-none" aria-hidden>
           🔍
         </p>
@@ -199,13 +199,13 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/listings"
-            className="inline-flex rounded-full bg-[var(--brand)] px-6 py-2.5 text-sm font-semibold text-[var(--brand-contrast)] shadow transition hover:opacity-90"
+            className="ui-btn-primary rounded-full px-6 py-2.5 text-sm"
           >
             تصفّح إعلانات مشابهة
           </Link>
           <Link
             href="/"
-            className="inline-flex rounded-full border border-[var(--border)] bg-[var(--chip)] px-6 py-2.5 text-sm font-semibold text-[var(--text)] transition hover:border-[var(--brand)]"
+            className="ui-btn-ghost rounded-full px-6 py-2.5 text-sm"
           >
             الصفحة الرئيسية
           </Link>
@@ -241,7 +241,7 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
         <div className="space-y-4">
 
           {/* Image Gallery */}
-          <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow)]">
+          <div className="ui-card motion-section overflow-hidden rounded-xl">
             <div className="relative h-[360px] w-full sm:h-[460px]">
               <ListingHeroImage sortedImages={sortedImages} activeImg={activeImg} alt={listing.title} />
               {listing.isFeatured && (
@@ -255,7 +255,7 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
                 onClick={() => void toggleFavorite()}
                 disabled={favoriteLoading}
                 aria-label="أضف للمفضلة"
-                className="absolute left-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow transition hover:scale-110 disabled:opacity-50"
+                className="motion-press absolute left-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow transition-opacity hover:opacity-95 disabled:opacity-50"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill={favorite ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" className={favorite ? "text-red-500" : "text-gray-400"}>
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
@@ -289,7 +289,7 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
           </div>
 
           {/* Title + meta */}
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow)]">
+          <div className="ui-card motion-section rounded-xl p-5">
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-[var(--chip)] px-3 py-1 text-xs text-[var(--text-muted)]">
                 {categoryName}
@@ -306,7 +306,7 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
                 type="button"
                 onClick={() => void handleShare()}
                 title="مشاركة الإعلان"
-                className="mt-1 shrink-0 rounded-full border border-[var(--chip-border)] bg-[var(--chip)] p-2 text-[var(--text-muted)] transition hover:text-[var(--text)]"
+                className="motion-press mt-1 shrink-0 rounded-full border border-[var(--chip-border)] bg-[var(--chip)] p-2 text-[var(--text-muted)] transition-colors hover:text-[var(--text)]"
               >
                 {shareCopied ? (
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
@@ -340,7 +340,7 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
           </div>
 
           {/* Description */}
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow)]">
+          <div className="ui-card motion-section rounded-xl p-5">
             <h2 className="mb-3 text-sm font-bold text-[var(--text)]">تفاصيل الإعلان</h2>
             <p className="whitespace-pre-line text-sm leading-7 text-[var(--text-muted)]">
               {listing.description || "لا يوجد وصف متاح لهذا الإعلان."}
@@ -348,14 +348,14 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
           </div>
 
           {actionError && (
-            <p className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-800">
+            <p className="motion-alert rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-800">
               {actionError}
             </p>
           )}
 
           <Link
             href="/listings"
-            className="inline-flex items-center gap-1.5 rounded-full border border-[var(--chip-border)] bg-[var(--chip)] px-4 py-2 text-xs font-semibold text-[var(--text-muted)] transition hover:text-[var(--text)]"
+            className="ui-btn-ghost inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="m9 18 6-6-6-6"/>
@@ -367,7 +367,7 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
         {/* ── Sidebar ── */}
         <aside className="space-y-4">
           {/* Seller card */}
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow)]">
+          <div className="ui-card motion-section rounded-xl p-5">
             <h3 className="mb-3 text-xs font-bold uppercase tracking-wide text-[var(--text-muted)]">البائع</h3>
             <div className="flex items-center gap-3">
               {listing.ownerSnapshot.photoURL ? (
@@ -394,11 +394,11 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
           </div>
 
           {/* Actions card */}
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow)]">
+          <div className="ui-card motion-section rounded-xl p-5">
             <button
               type="button"
               onClick={() => void startConversation()}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--brand)] px-4 py-3 text-sm font-semibold text-[var(--brand-contrast)] shadow transition hover:opacity-90"
+              className="ui-btn-primary flex w-full items-center justify-center gap-2 rounded-full px-4 py-3 text-sm"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -417,7 +417,7 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
                 تواصل عبر واتساب
               </a>
             ) : listing.contactPreference === "phone" ? (
-              <p className="mt-2 text-center text-xs text-[var(--text-muted)]">
+              <p className="motion-alert mt-2 text-center text-xs text-[var(--text-muted)]">
                 يفضّل البائع التواصل الصوتي — ابدأ بمحادثة داخل المنصة ثم نسّق الطريقة المناسبة.
               </p>
             ) : null}
@@ -488,7 +488,7 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
 
             <div className="mt-3 space-y-1 border-t border-[var(--border)] pt-3">
               {reviewMsg ? (
-                <p className="rounded-lg bg-[var(--surface-muted)] px-3 py-2 text-center text-xs text-[var(--text-muted)]">{reviewMsg}</p>
+                <p className="motion-alert rounded-lg bg-[var(--surface-muted)] px-3 py-2 text-center text-xs text-[var(--text-muted)]">{reviewMsg}</p>
               ) : (
                 <button
                   type="button"
@@ -500,7 +500,7 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
                 </button>
               )}
               {reportMsg ? (
-                <p className="rounded-lg bg-[var(--surface-muted)] px-3 py-2 text-center text-xs text-[var(--text-muted)]">{reportMsg}</p>
+                <p className="motion-alert rounded-lg bg-[var(--surface-muted)] px-3 py-2 text-center text-xs text-[var(--text-muted)]">{reportMsg}</p>
               ) : (
                 <button
                   type="button"
@@ -515,7 +515,7 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
           </div>
 
           {/* Listing meta */}
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow)]">
+          <div className="ui-card motion-section rounded-xl p-4">
             <h3 className="mb-3 text-xs font-bold uppercase tracking-wide text-[var(--text-muted)]">معلومات الإعلان</h3>
             <dl className="space-y-2 text-xs">
               <MetaRow label="التصنيف" value={categoryName} />

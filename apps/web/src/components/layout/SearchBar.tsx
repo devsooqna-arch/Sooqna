@@ -6,6 +6,7 @@ import { getCategories } from "@/services/categoryService";
 import type { Category } from "@/types/category";
 
 import { SYRIAN_GOVERNORATES } from "@/lib/locations";
+import { useAnimatedPresence } from "@/hooks/useAnimatedPresence";
 
 const CITY_OPTIONS = SYRIAN_GOVERNORATES.map((g) => ({ value: g.value, label: g.labelAr }));
 
@@ -65,6 +66,7 @@ function ModernDropdown({
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const selectedLabel = options.find((item) => item.value === value)?.label || placeholder;
+  const { shouldRender, motionState } = useAnimatedPresence(open);
 
   useEffect(() => {
     function handleOutsideClick(event: MouseEvent) {
@@ -89,15 +91,18 @@ function ModernDropdown({
       >
         <span className="truncate">{selectedLabel}</span>
       </button>
-      {open ? (
-        <div className="absolute right-0 z-50 mt-2 max-h-64 min-w-full overflow-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1 shadow-[var(--shadow-md)]">
+      {shouldRender ? (
+        <div
+          className="motion-dropdown absolute right-0 z-50 mt-2 max-h-64 min-w-full overflow-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1 shadow-[var(--shadow-md)]"
+          data-motion-state={motionState}
+        >
           <button
             type="button"
             onClick={() => {
               onChange("");
               setOpen(false);
             }}
-            className={`block w-full rounded-lg px-3 py-2 text-right text-sm transition ${
+            className={`block w-full rounded-lg px-3 py-2 text-right text-sm transition-colors ${
               value === "" ? "bg-[var(--brand)] text-[var(--brand-contrast)]" : "text-[var(--text)] hover:bg-[var(--surface-muted)]"
             }`}
           >
@@ -111,7 +116,7 @@ function ModernDropdown({
                 onChange(option.value);
                 setOpen(false);
               }}
-              className={`block w-full rounded-lg px-3 py-2 text-right text-sm transition ${
+              className={`block w-full rounded-lg px-3 py-2 text-right text-sm transition-colors ${
                 value === option.value
                   ? "bg-[var(--brand)] text-[var(--brand-contrast)]"
                   : "text-[var(--text)] hover:bg-[var(--surface-muted)]"

@@ -233,22 +233,22 @@ export function SubmitListingPage() {
     <RequireAuthGate fallbackMessage="يتم التحقق من تسجيل الدخول قبل إنشاء الإعلان...">
       <RequireVerifiedEmailGate>
         <div className="space-y-5">
-        <form onSubmit={onSubmit} className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm sm:p-6">
+        <form onSubmit={onSubmit} className="motion-section space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm sm:p-6">
           <div className="grid grid-cols-4 gap-2">
             {STEPS.map((step, idx) => (
-              <div key={step} className={`rounded-lg px-2 py-2 text-center text-xs font-semibold ${idx === activeStep ? "bg-[var(--brand)] text-[var(--brand-contrast)]" : idx < activeStep ? "bg-[var(--brand)]/20 text-[var(--brand)]" : "bg-[var(--chip)] text-[var(--text-muted)]"}`}>
+              <div key={step} className={`motion-press rounded-lg px-2 py-2 text-center text-xs font-semibold transition-colors ${idx === activeStep ? "bg-[var(--brand)] text-[var(--brand-contrast)]" : idx < activeStep ? "bg-[var(--brand)]/20 text-[var(--brand)]" : "bg-[var(--chip)] text-[var(--text-muted)]"}`}>
                 {idx + 1}. {step}
               </div>
             ))}
           </div>
 
-          {error ? <p className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p> : null}
-          {optimisticNote ? <p className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-800">{optimisticNote}</p> : null}
+          {error ? <p className="motion-alert rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p> : null}
+          {optimisticNote ? <p className="motion-alert rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-800">{optimisticNote}</p> : null}
 
           {createdListingId ? (
-            <div className="rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 space-y-3">
+            <div className="motion-alert rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 space-y-3">
               <p className="font-semibold">✅ تم إنشاء الإعلان بنجاح!</p>
-              <button type="button" onClick={() => router.push(`/listings/${createdListingId}`)} className="mt-2 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90">
+              <button type="button" onClick={() => router.push(`/listings/${createdListingId}`)} className="ui-btn-primary mt-2 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800">
                 عرض الإعلان ←
               </button>
             </div>
@@ -257,7 +257,7 @@ export function SubmitListingPage() {
           {activeStep === 0 ? (
             <>
               <div className="grid gap-4 sm:grid-cols-2">
-                <label className="space-y-1"><span className="text-sm font-medium">عنوان الإعلان</span><input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]" placeholder="مثال: كاميرا سوني A7" disabled={busy} /></label>
+              <label className="space-y-1"><span className="text-sm font-medium">عنوان الإعلان</span><input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="ui-input w-full rounded-lg" placeholder="مثال: كاميرا سوني A7" disabled={busy} /></label>
                 <div className="space-y-1">
                   <span className="text-sm font-medium">السعر والعملة</span>
                   <div className="flex gap-2">
@@ -265,7 +265,7 @@ export function SubmitListingPage() {
                       type="number"
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
-                      className="min-w-0 flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]"
+                      className="ui-input min-w-0 flex-1 rounded-lg"
                       placeholder="0"
                       disabled={busy}
                     />
@@ -290,11 +290,11 @@ export function SubmitListingPage() {
                   </div>
                 </div>
               </div>
-              <label className="space-y-1"><span className="text-sm font-medium">وصف الإعلان</span><textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]" placeholder="اكتب وصفًا واضحًا..." disabled={busy} /></label>
+              <label className="space-y-1"><span className="text-sm font-medium">وصف الإعلان</span><textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)} className="ui-input h-auto w-full rounded-lg py-2" placeholder="اكتب وصفًا واضحًا..." disabled={busy} /></label>
               <div className="grid gap-4 sm:grid-cols-3">
-                <label className="space-y-1"><span className="text-sm font-medium">الدولة</span><input type="text" value={country} onChange={(e) => setCountry(e.target.value)} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]" disabled={busy} /></label>
-                <label className="space-y-1"><span className="text-sm font-medium">المدينة</span><select value={city} onChange={(e) => setCity(e.target.value)} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]" disabled={busy}><option value="">اختر المدينة</option>{SYRIAN_GOVERNORATES.map((g) => (<option key={g.value} value={g.value}>{g.labelAr}</option>))}</select></label>
-                <label className="space-y-1"><span className="text-sm font-medium">المنطقة</span><input type="text" value={area} onChange={(e) => setArea(e.target.value)} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]" placeholder="اختياري" disabled={busy} /></label>
+                <label className="space-y-1"><span className="text-sm font-medium">الدولة</span><input type="text" value={country} onChange={(e) => setCountry(e.target.value)} className="ui-input w-full rounded-lg" disabled={busy} /></label>
+                <label className="space-y-1"><span className="text-sm font-medium">المدينة</span><select value={city} onChange={(e) => setCity(e.target.value)} className="ui-input ui-select w-full rounded-lg" disabled={busy}><option value="">اختر المدينة</option>{SYRIAN_GOVERNORATES.map((g) => (<option key={g.value} value={g.value}>{g.labelAr}</option>))}</select></label>
+                <label className="space-y-1"><span className="text-sm font-medium">المنطقة</span><input type="text" value={area} onChange={(e) => setArea(e.target.value)} className="ui-input w-full rounded-lg" placeholder="اختياري" disabled={busy} /></label>
               </div>
               <label className="space-y-1">
                 <span className="text-sm font-medium">التصنيف</span>
@@ -317,7 +317,7 @@ export function SubmitListingPage() {
               <p className="text-xs text-[var(--text-muted)]">أضف حتى {MAX_IMAGES} صور. JPG/PNG/WEBP وبحجم أقصى 5MB للصورة.</p>
               <input type="file" multiple accept="image/jpeg,image/jpg,image/png,image/webp" onChange={(e) => onPickImages(e.target.files)} disabled={busy} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm" />
               {images.map((img, idx) => (
-                <div key={img.id} className="flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-2">
+                <div key={img.id} className="motion-alert flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-2">
                   <Image src={img.previewUrl} alt={`preview-${idx + 1}`} width={56} height={56} className="h-14 w-14 rounded-md object-cover" unoptimized />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-xs font-semibold text-[var(--text)]">{img.file.name}</p>
@@ -344,7 +344,7 @@ export function SubmitListingPage() {
                 type="button"
                 onClick={() => setWantFeatured((prev) => !prev)}
                 disabled={busy}
-                className={`w-full rounded-2xl border-2 p-5 text-right transition-all ${
+                className={`motion-press w-full rounded-2xl border-2 p-5 text-right transition-colors ${
                   wantFeatured
                     ? "border-[var(--featured)] bg-[var(--featured)]/10"
                     : "border-[var(--border)] bg-[var(--surface)] hover:border-[var(--featured)]/50"
@@ -363,7 +363,7 @@ export function SubmitListingPage() {
                       <li>✓ مشاهدات أكثر وتواصل أسرع</li>
                     </ul>
                   </div>
-                  <div className={`h-6 w-6 shrink-0 rounded-full border-2 transition-all ${
+                  <div className={`h-6 w-6 shrink-0 rounded-full border-2 transition-colors ${
                     wantFeatured
                       ? "border-[var(--featured)] bg-[var(--featured)]"
                       : "border-[var(--border)] bg-[var(--surface)]"
@@ -378,7 +378,7 @@ export function SubmitListingPage() {
               </button>
 
               <div
-                className={`rounded-xl border p-3 text-xs transition-all ${
+                className={`motion-alert rounded-xl border p-3 text-xs transition-colors ${
                   wantFeatured
                     ? "border-[var(--featured)]/40 bg-[var(--featured)]/5 text-[var(--text)]"
                     : "border-[var(--border)] bg-[var(--chip)] text-[var(--text-muted)]"
@@ -403,11 +403,11 @@ export function SubmitListingPage() {
           ) : null}
 
           <div className="flex items-center gap-2">
-            <button type="button" onClick={prevStep} disabled={busy || activeStep === 0} className="rounded-full border border-[var(--chip-border)] px-4 py-2 text-xs font-semibold disabled:opacity-50">السابق</button>
+            <button type="button" onClick={prevStep} disabled={busy || activeStep === 0} className="ui-btn-ghost rounded-full px-4 py-2 text-xs font-semibold disabled:opacity-50">السابق</button>
             {activeStep < STEPS.length - 1 ? (
-              <button type="button" onClick={nextStep} disabled={busy} className="rounded-full bg-[var(--brand)] px-4 py-2 text-xs font-semibold text-[var(--brand-contrast)]">التالي</button>
+              <button type="button" onClick={nextStep} disabled={busy} className="ui-btn-primary rounded-full px-4 py-2 text-xs font-semibold">التالي</button>
             ) : (
-              <button type="submit" disabled={busy || categoryLoading} className="rounded-full bg-[var(--brand)] px-4 py-2 text-xs font-bold text-[var(--brand-contrast)] disabled:opacity-60">
+              <button type="submit" disabled={busy || categoryLoading} className="ui-btn-primary rounded-full px-4 py-2 text-xs font-bold disabled:opacity-60">
                 {busy ? "جارٍ النشر..." : wantFeatured ? "نشر الإعلان المميز ⭐" : "نشر الإعلان"}
               </button>
             )}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getCategories } from "@/services/categoryService";
 import type { Category } from "@/types/category";
+import { getMotionStaggerStyle } from "@/lib/motion";
 
 const CATEGORY_ICONS: Record<string, string> = {
   cars: "🚗",
@@ -36,28 +37,29 @@ export function CategoriesDirectory() {
     return (
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="h-24 animate-pulse rounded-xl bg-[var(--surface)]" />
+          <div key={i} className="motion-skeleton h-24 rounded-xl bg-[var(--surface)]" />
         ))}
       </div>
     );
   }
 
   if (error) {
-    return <p className="text-sm text-[var(--danger)]">{error}</p>;
+    return <p className="motion-alert text-sm text-[var(--danger)]">{error}</p>;
   }
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {categories.map((category) => {
+      {categories.map((category, index) => {
         const slug = category.slug || category.id;
         const icon = CATEGORY_ICONS[slug] ?? "📦";
         return (
           <Link
             key={category.id}
             href={`/listings?category=${encodeURIComponent(slug)}`}
-            className="group flex items-center gap-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow)] transition hover:border-[var(--brand)] hover:shadow-[var(--shadow-md)]"
+            className="ui-card ui-card-hover motion-card group flex items-center gap-4 rounded-xl p-4"
+            style={getMotionStaggerStyle(index)}
           >
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-2xl transition group-hover:scale-110">
+            <span className="motion-press flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-2xl">
               {icon}
             </span>
             <div>

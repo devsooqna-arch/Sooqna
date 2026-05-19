@@ -68,7 +68,7 @@ export function HomeMarketplace() {
 
   return (
     <div className="w-full space-y-7">
-      <section className="ui-card overflow-hidden -mx-4 rounded-none sm:mx-0 sm:rounded-2xl">
+      <section className="ui-card motion-section overflow-hidden -mx-4 rounded-none sm:mx-0 sm:rounded-2xl">
         <div className="relative h-[175px] sm:h-[235px]">
           {heroSlides.map((slideSrc, index) => {
             const isActive = index === activeHeroIndex;
@@ -86,7 +86,7 @@ export function HomeMarketplace() {
                 alt={`صورة رئيسية ${index + 1}`}
                 fill
                 unoptimized
-                className={`object-cover transition-all duration-700 ease-in-out ${positionClass}`}
+                className={`object-cover transition-[opacity,transform] duration-[var(--motion-page)] ease-[var(--ease-standard)] ${positionClass}`}
                 priority={index === 0}
               />
             );
@@ -106,7 +106,7 @@ export function HomeMarketplace() {
               </Link>
               <Link
                 href="/submit-listing"
-                className="inline-flex items-center justify-center rounded-full border border-white/70 bg-white/15 px-6 py-2 text-xs font-semibold text-white transition hover:bg-white/20"
+                className="motion-press inline-flex items-center justify-center rounded-full border border-white/70 bg-white/15 px-6 py-2 text-xs font-semibold text-white transition-colors hover:bg-white/20"
               >
                 أضف إعلان
               </Link>
@@ -158,7 +158,7 @@ export function HomeMarketplace() {
                       <button
                         type="button"
                         onClick={() => setExpandedSlug(isExpanded ? null : slug)}
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--brand)] text-lg font-bold leading-none text-[var(--brand-contrast)] transition hover:opacity-80"
+                        className="motion-press flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--brand)] text-lg font-bold leading-none text-[var(--brand-contrast)] transition-opacity hover:opacity-80"
                       >
                         {isExpanded ? "×" : "+"}
                       </button>
@@ -173,7 +173,7 @@ export function HomeMarketplace() {
                     </Link>
                   </div>
                   {isExpanded && subs.length > 0 && (
-                    <div className="bg-[var(--surface-muted,var(--surface))]">
+                    <div className="motion-dropdown bg-[var(--surface-muted,var(--surface))]" data-motion-state="enter">
                       {subs.map((sub) => (
                         <Link
                           key={sub}
@@ -194,15 +194,15 @@ export function HomeMarketplace() {
         <div className="min-w-0 space-y-5">
           {showMarketplaceLoading ? (
             <div className="space-y-3">
-              <div className="h-6 w-40 animate-pulse rounded-md bg-[var(--surface)]" />
+              <div className="motion-skeleton h-6 w-40 rounded-md bg-[var(--surface)]" />
               <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="h-52 animate-pulse rounded-lg bg-[var(--surface)]" />
+                  <div key={i} className="motion-skeleton h-52 rounded-lg bg-[var(--surface)]" />
                 ))}
               </div>
             </div>
           ) : error ? (
-            <p className="text-sm text-[var(--danger)]">{error}</p>
+            <p className="motion-alert text-sm text-[var(--danger)]">{error}</p>
           ) : (
             <>
               {featuredListings.length > 0 && (
@@ -218,8 +218,8 @@ export function HomeMarketplace() {
                   </div>
                   <div className="w-full rounded-2xl border border-[var(--featured)]/30 bg-[var(--featured)]/5 p-3">
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                      {featuredListings.map((listing) => (
-                        <ListingCard key={listing.id} listing={listing} featured />
+                      {featuredListings.map((listing, index) => (
+                        <ListingCard key={listing.id} listing={listing} featured motionIndex={index} />
                       ))}
                     </div>
                   </div>
@@ -237,8 +237,8 @@ export function HomeMarketplace() {
                   <p className="text-sm text-[var(--text-muted)]">لا توجد إعلانات حالياً.</p>
                 ) : (
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                    {regularListings.map((listing) => (
-                      <ListingCard key={listing.id} listing={listing} />
+                    {regularListings.map((listing, index) => (
+                      <ListingCard key={listing.id} listing={listing} motionIndex={index} />
                     ))}
                   </div>
                 )}

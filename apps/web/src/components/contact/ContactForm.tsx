@@ -41,7 +41,7 @@ export function ContactForm() {
   if (status === "success") {
     return (
       <div
-        className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-8 text-center text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-100"
+        className="motion-alert mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-8 text-center text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-100"
         role="status"
       >
         <p className="text-lg font-bold">تم إرسال رسالتك ✓</p>
@@ -52,7 +52,7 @@ export function ContactForm() {
             setStatus("idle");
             setErrorMessage(null);
           }}
-          className="mt-5 text-sm font-semibold text-[var(--brand)] underline hover:opacity-90"
+          className="motion-press mt-5 text-sm font-semibold text-[var(--brand)] underline hover:opacity-90"
         >
           إرسال رسالة أخرى
         </button>
@@ -61,7 +61,7 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-6 space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)] p-5 sm:p-6">
+    <form onSubmit={onSubmit} className="motion-section mt-6 space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)] p-5 sm:p-6">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="space-y-1">
           <span className="text-sm font-medium text-[var(--text)]">الاسم</span>
@@ -69,7 +69,7 @@ export function ContactForm() {
             name="name"
             required
             disabled={status === "sending"}
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)] disabled:opacity-60"
+            className="ui-input w-full rounded-lg"
             placeholder="اسمك الكامل"
           />
         </label>
@@ -80,7 +80,7 @@ export function ContactForm() {
             type="email"
             required
             disabled={status === "sending"}
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)] disabled:opacity-60"
+            className="ui-input w-full rounded-lg"
             placeholder="you@example.com"
           />
         </label>
@@ -90,7 +90,7 @@ export function ContactForm() {
         <input
           name="subject"
           disabled={status === "sending"}
-          className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)] disabled:opacity-60"
+          className="ui-input w-full rounded-lg"
           placeholder="موجز لطلبك"
         />
       </label>
@@ -101,7 +101,7 @@ export function ContactForm() {
           required
           rows={5}
           disabled={status === "sending"}
-          className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)] disabled:opacity-60"
+          className="ui-input h-auto w-full rounded-lg py-2"
           placeholder="اكتب رسالتك هنا..."
         />
       </label>
@@ -112,7 +112,7 @@ export function ContactForm() {
       >
         {status === "sending" ? "جاري الإرسال..." : "إرسال"}
       </button>
-      {errorMessage ? <p className="text-sm text-red-600 dark:text-red-400">{errorMessage}</p> : null}
+      {errorMessage ? <p className="motion-alert text-sm text-red-600 dark:text-red-400">{errorMessage}</p> : null}
     </form>
   );
 }

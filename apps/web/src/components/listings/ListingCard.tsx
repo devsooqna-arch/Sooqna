@@ -7,10 +7,19 @@ import { useEffect, useState } from "react";
 import { formatListedAgo } from "@/lib/formatListedAgo";
 import { resolvePublicMediaUrl } from "@/lib/mediaUrl";
 import { arabicCity } from "@/lib/locationNames";
+import { getMotionStaggerStyle } from "@/lib/motion";
 
 const PLACEHOLDER = "/images/placeholder-listing.png";
 
-export function ListingCard({ listing, featured = false }: { listing: Listing; featured?: boolean }) {
+export function ListingCard({
+  listing,
+  featured = false,
+  motionIndex = 0,
+}: {
+  listing: Listing;
+  featured?: boolean;
+  motionIndex?: number;
+}) {
   const firstImage = listing.images.find((img) => img.isPrimary) ?? listing.images[0];
   const preferredSrc = firstImage?.url?.trim()
     ? (resolvePublicMediaUrl(firstImage.url) ?? firstImage.url)
@@ -24,14 +33,14 @@ export function ListingCard({ listing, featured = false }: { listing: Listing; f
   const listedAgo = formatListedAgo(listing.publishedAt ?? listing.createdAt);
 
   return (
-    <article className="ui-card ui-card-hover group relative overflow-hidden">
+    <article className="ui-card ui-card-hover motion-card group relative overflow-hidden" style={getMotionStaggerStyle(motionIndex)}>
       {/* Image */}
       <div className={`relative w-full overflow-hidden bg-[var(--surface-muted)] ${featured ? "h-44 sm:h-52" : "h-28 sm:h-44"}`}>
         <Image
           src={imgSrc}
           alt={listing.title}
           fill
-          className="object-cover transition duration-300 group-hover:scale-105"
+          className="motion-image-hover object-cover"
           loading="lazy"
           unoptimized
           onError={() => setImgSrc(PLACEHOLDER)}

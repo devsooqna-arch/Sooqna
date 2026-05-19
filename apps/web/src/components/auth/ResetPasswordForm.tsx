@@ -40,7 +40,7 @@ export function ResetPasswordForm() {
   }
 
   return (
-    <div className="w-full max-w-md space-y-6">
+    <div className="motion-section w-full max-w-md space-y-6">
       <div className="text-center">
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900">استعادة كلمة المرور</h1>
         <p className="mt-2 text-sm text-slate-500">
@@ -49,13 +49,13 @@ export function ResetPasswordForm() {
       </div>
 
       {error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-center text-sm text-red-800">
+        <div className="motion-alert rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-center text-sm text-red-800">
           {error}
         </div>
       ) : null}
 
       {success ? (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-center text-sm text-emerald-800">
+        <div className="motion-alert rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-center text-sm text-emerald-800">
           {success}
         </div>
       ) : null}
@@ -70,7 +70,7 @@ export function ResetPasswordForm() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none ring-slate-400 transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-900/10"
+            className="ui-input w-full"
             placeholder="you@example.com"
             disabled={submitting}
           />
@@ -79,7 +79,7 @@ export function ResetPasswordForm() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-60"
+          className="ui-btn-primary w-full rounded-lg px-4 py-2.5"
         >
           {submitting ? "جاري الإرسال..." : "إرسال رابط الاستعادة"}
         </button>

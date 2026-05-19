@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { RequireAuthGate } from "@/components/auth/RequireAuthGate";
 import { getBackendMe, type BackendProfile } from "@/services/backendAuthService";
 import { ModernAvatar } from "@/components/ui/ModernAvatar";
+import { getMotionStaggerStyle } from "@/lib/motion";
 
 type DashCard = {
   title: string;
@@ -72,7 +73,7 @@ export function AccountDashboard() {
     <RequireAuthGate fallbackMessage="جاري تحميل لوحة الحساب...">
       <div className="space-y-6">
         {/* Welcome banner */}
-        <section className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow)]">
+        <section className="motion-section relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow)]">
           <div className="absolute inset-0 bg-gradient-to-l from-[var(--accent-soft)] to-transparent opacity-60" />
           <div className="relative flex flex-col items-center gap-3 text-center sm:flex-row sm:gap-4 sm:text-start">
             <ModernAvatar
@@ -92,8 +93,8 @@ export function AccountDashboard() {
 
         {/* Dashboard grid */}
         <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {dashCards.map((card) => (
-            <DashLinkCard key={card.href} {...card} />
+          {dashCards.map((card, index) => (
+            <DashLinkCard key={card.href} motionIndex={index} {...card} />
           ))}
         </section>
       </div>
@@ -101,15 +102,16 @@ export function AccountDashboard() {
   );
 }
 
-function DashLinkCard({ title, description, href, icon, accent }: DashCard) {
+function DashLinkCard({ title, description, href, icon, accent, motionIndex = 0 }: DashCard & { motionIndex?: number }) {
   return (
     <Link
       href={href}
-      className={`group rounded-2xl border p-5 shadow-[var(--shadow)] transition hover:shadow-[var(--shadow-md)] ${
+      className={`ui-card ui-card-hover motion-card group rounded-2xl border p-5 ${
         accent
           ? "border-[var(--brand)] bg-[var(--brand)] text-[var(--brand-contrast)]"
           : "border-[var(--border)] bg-[var(--surface)] hover:border-[var(--brand)]"
       }`}
+      style={getMotionStaggerStyle(motionIndex)}
     >
       <span className="mb-3 block text-3xl">{icon}</span>
       <h3 className={`text-sm font-bold ${accent ? "text-[var(--brand-contrast)]" : "text-[var(--text)]"}`}>

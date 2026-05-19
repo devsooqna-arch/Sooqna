@@ -149,7 +149,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
   }
 
   return (
-    <div className="w-full max-w-md space-y-5">
+    <div className="motion-section w-full max-w-md space-y-5">
       <div className="text-center">
         <h1 className="text-4xl font-extrabold text-[var(--text)]">
           {isSignup ? "إنشاء حساب جديد" : "تسجيل الدخول"}
@@ -171,7 +171,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
 
       {success && (
         <div
-          className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-center text-sm text-emerald-800"
+          className="motion-alert rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-center text-sm text-emerald-800"
           role="status"
         >
           تم تسجيل الدخول بنجاح
@@ -180,7 +180,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
 
       {submitError && (
         <div
-          className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-center text-sm text-red-800"
+          className="motion-alert rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-center text-sm text-red-800"
           role="alert"
         >
           {submitError}
@@ -210,7 +210,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
               aria-describedby={fieldErrors.fullName ? "fullName-error" : undefined}
             />
             {fieldErrors.fullName && (
-              <p id="fullName-error" className="mt-1 text-xs text-red-600">
+              <p id="fullName-error" className="motion-field-error mt-1 text-xs text-red-600">
                 {fieldErrors.fullName}
               </p>
             )}
@@ -243,7 +243,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
             aria-describedby={fieldErrors.email ? "email-error" : undefined}
           />
           {fieldErrors.email && (
-            <p id="email-error" className="mt-1 text-xs text-red-600">
+            <p id="email-error" className="motion-field-error mt-1 text-xs text-red-600">
               {fieldErrors.email}
             </p>
           )}
@@ -277,7 +277,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
             }
           />
           {fieldErrors.password && (
-            <p id="password-error" className="mt-1 text-xs text-red-600">
+            <p id="password-error" className="motion-field-error mt-1 text-xs text-red-600">
               {fieldErrors.password}
             </p>
           )}
