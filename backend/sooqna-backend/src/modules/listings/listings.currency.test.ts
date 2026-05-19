@@ -37,6 +37,23 @@ describe("listing currency contract", () => {
     expect(parsed.currency).toBe("USD");
   });
 
+  it("rejects unsupported listing currencies", () => {
+    expect(() =>
+      createListingBodySchema.parse({
+        title: "Camera",
+        price: 125,
+        currency: "JOD",
+        categoryId: "electronics",
+        description: "A clean camera",
+        location: {
+          country: "Syria",
+          city: "aleppo",
+          area: "aleppo",
+        },
+      })
+    ).toThrow();
+  });
+
   it("persists the requested listing currency instead of forcing SYP", async () => {
     const repo = createRepo();
     const service = new ListingsService(repo);

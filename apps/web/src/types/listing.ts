@@ -8,7 +8,7 @@ export type ListingStatus =
   | "archived";
 export type ListingCondition = "new" | "used";
 export type ListingContactPreference = "chat" | "phone";
-export type ListingCurrency = "SYP" | "USD" | "JOD";
+export type ListingCurrency = "SYP" | "USD";
 
 export interface ListingImage {
   url: string;

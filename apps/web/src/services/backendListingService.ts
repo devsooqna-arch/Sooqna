@@ -1,4 +1,5 @@
 import { apiFetch } from "./apiClient";
+import type { ListingCurrency } from "@/types/listing";
 
 export type BackendListing = {
   id: string;
@@ -6,7 +7,7 @@ export type BackendListing = {
   titleLower: string;
   description: string;
   price: number;
-  currency: string;
+  currency: ListingCurrency;
   priceType: "fixed" | "negotiable" | "contact";
   categoryId: string;
   ownerId: string;
@@ -44,6 +45,7 @@ export type BackendListing = {
 export async function createBackendListing(input: {
   title: string;
   price: number;
+  currency?: ListingCurrency;
   categoryId: string;
   description?: string;
   location?: { country?: string; city?: string; area?: string };
