@@ -29,7 +29,7 @@ export function PublicShell({
 
             <Link href="/" className="flex items-center gap-3">
               <Image
-                src="/branding/logo.png"
+                src="/branding/logo-transparent.png"
                 alt="سوقنا"
                 width={160}
                 height={72}

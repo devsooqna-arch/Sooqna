@@ -53,3 +53,4 @@ Database check passed.
 [0mGET /api/listings [36m304[0m 50.936 ms - -[0m
 [0mGET /api/categories?activeOnly=true [36m304[0m 3.781 ms - -[0m
 [0mGET /api/listings [36m304[0m 7.480 ms - -[0m
+[0mGET /api/categories?activeOnly=true [36m304[0m 34.343 ms - -[0m

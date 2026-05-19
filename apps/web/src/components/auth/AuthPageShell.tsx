@@ -19,7 +19,7 @@ export function AuthPageShell({ activeTab, children }: AuthPageShellProps) {
         <div className="mx-auto flex max-w-[1110px] items-center justify-between px-4 py-2.5 sm:px-6">
           <Link href="/">
             <Image
-              src="/branding/logo.png"
+              src="/branding/logo-transparent.png"
               alt="سوقنا"
               width={82}
               height={40}

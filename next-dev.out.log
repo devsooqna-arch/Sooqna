@@ -10,19 +10,13 @@
      ⨯ devtoolSegmentExplorer
 
  ✓ Starting...
- ✓ Ready in 2s
+ ✓ Ready in 1894ms
  ○ Compiling / ...
- ✓ Compiled / in 5.5s (744 modules)
- ✓ Compiled in 1068ms (296 modules)
- ✓ Compiled in 90ms (282 modules)
- GET / 200 in 6767ms
- GET / 200 in 235ms
- GET / 200 in 212ms
- GET / 200 in 232ms
- GET / 200 in 240ms
- ○ Compiling /me ...
- ✓ Compiled /me in 556ms (742 modules)
- GET /me 200 in 758ms
- ✓ Compiled /me/settings in 422ms (754 modules)
- GET /me/settings 200 in 603ms
- GET / 200 in 71ms
+ ✓ Compiled / in 9.4s (744 modules)
+ ✓ Compiled in 1357ms (296 modules)
+ ✓ Compiled in 149ms (282 modules)
+ GET / 200 in 11038ms
+ ○ Compiling /login ...
+ ✓ Compiled /login in 923ms (743 modules)
+ GET /login 200 in 1668ms
+ GET /login 200 in 186ms
