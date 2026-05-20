@@ -5,7 +5,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { getAuthErrorMessage, verifyRecaptchaIfEnabled } from "@/services/authService";
-import { shouldDisableAuthControls, shouldRedirectSignedInFromAuthPage } from "./authRecovery";
+import {
+  shouldDisableAuthControls,
+  shouldRedirectSignedInFromAuthPage,
+  shouldShowUnverifiedRecovery,
+} from "./authRecovery";
+import { completeSignupVerification } from "./signupVerification";
+import {
+  getDuplicateSignupRecoveryMessage,
+  isEmailAlreadyInUseError,
+} from "./signupRecovery";
 
 function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
@@ -28,7 +37,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
   const [nextPath, setNextPath] = useState("/me");
   const isSignup = mode === "signup";
 
-  const { currentUser, loading: authLoading, register, login, loginWithGoogle, resendEmailVerification } =
+  const { currentUser, loading: authLoading, register, login, loginWithGoogle, resendEmailVerification, logout } =
     useAuth();
 
   useEffect(() => {
@@ -46,7 +55,8 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [verificationSending, setVerificationSending] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [authInitTimedOut, setAuthInitTimedOut] = useState(false);
 
   useEffect(() => {
@@ -61,6 +71,12 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
   }, [authLoading]);
 
   const shouldRedirectSignedIn = shouldRedirectSignedInFromAuthPage({
+    hasUser: Boolean(currentUser),
+    emailVerified: Boolean(currentUser?.emailVerified),
+    authLoading,
+    authPageMode: mode,
+  });
+  const showUnverifiedRecovery = shouldShowUnverifiedRecovery({
     hasUser: Boolean(currentUser),
     emailVerified: Boolean(currentUser?.emailVerified),
     authLoading,
@@ -96,6 +112,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
   async function handleEmailLogin(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitError(null);
+    setSuccessMessage(null);
     if (!validateForm()) return;
 
     setSubmitting(true);
@@ -103,19 +120,64 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
       await verifyRecaptchaIfEnabled(isSignup ? "signup" : "login");
       if (isSignup) {
         const result = await register(email, password, fullName);
-        if (!result.emailVerified) {
-          void resendEmailVerification().catch(() => undefined);
+        const verification = await completeSignupVerification({
+          emailVerified: result.emailVerified,
+          resendEmailVerification,
+        });
+        setSuccessMessage(verification.message);
+        if (verification.shouldRedirect) {
+          router.replace(nextPath);
         }
       } else {
         await login(email, password);
+        setSuccessMessage("تم تسجيل الدخول بنجاح");
+        router.replace(nextPath);
       }
-      setSuccess(true);
-      router.replace(nextPath);
     } catch (err) {
+      if (isSignup && isEmailAlreadyInUseError(err)) {
+        try {
+          const result = await login(email, password);
+          if (!result.emailVerified) {
+            const verification = await completeSignupVerification({
+              emailVerified: result.emailVerified,
+              resendEmailVerification,
+            });
+            setSuccessMessage(
+              `هذا البريد لديه حساب غير مؤكد. ${verification.message}`
+            );
+            return;
+          }
+          router.replace(nextPath);
+          return;
+        } catch {
+          setSubmitError(getDuplicateSignupRecoveryMessage());
+          return;
+        }
+      }
       setSubmitError(getAuthErrorMessage(err));
     } finally {
       setSubmitting(false);
     }
+  }
+
+  async function handleResendVerification() {
+    setSubmitError(null);
+    setSuccessMessage(null);
+    setVerificationSending(true);
+    try {
+      await resendEmailVerification();
+      setSuccessMessage("تم إرسال رابط التحقق إلى بريدك الإلكتروني.");
+    } catch (err) {
+      setSubmitError(getAuthErrorMessage(err));
+    } finally {
+      setVerificationSending(false);
+    }
+  }
+
+  async function logoutThenReload() {
+    await logout();
+    setSuccessMessage(null);
+    setSubmitError(null);
   }
 
   async function handleGoogleLogin() {
@@ -138,7 +200,51 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
     authInitTimedOut,
   });
   /** Do not block the whole UI on auth init — avoids infinite "جاري التحميل" if Auth stalls. */
-  const showForm = !currentUser;
+  const showForm = !currentUser || showUnverifiedRecovery;
+
+  if (showUnverifiedRecovery) {
+    return (
+      <div className="motion-section w-full max-w-md space-y-5 text-center">
+        <div>
+          <h1 className="text-3xl font-extrabold text-[var(--text)]">تأكيد البريد الإلكتروني</h1>
+          <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
+            الحساب موجود لكنه غير مؤكد. أرسلنا رابط التحقق إلى:
+          </p>
+          <p className="mt-2 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm font-semibold text-[var(--text)]">
+            {currentUser?.email}
+          </p>
+        </div>
+
+        {successMessage ? (
+          <div className="motion-alert rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800" role="status">
+            {successMessage}
+          </div>
+        ) : null}
+        {submitError ? (
+          <div className="motion-alert rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
+            {submitError}
+          </div>
+        ) : null}
+
+        <button
+          type="button"
+          onClick={() => void handleResendVerification()}
+          disabled={verificationSending}
+          className="ui-btn-primary w-full rounded-full py-2.5"
+        >
+          {verificationSending ? "جاري الإرسال..." : "إعادة إرسال رابط التحقق"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => void logoutThenReload()}
+          className="ui-btn-ghost w-full rounded-full py-2.5"
+        >
+          استخدام بريد آخر
+        </button>
+      </div>
+    );
+  }
 
   if (!showForm) {
     return (
@@ -169,12 +275,12 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
         )}
       </div>
 
-      {success && (
+      {successMessage && (
         <div
           className="motion-alert rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-center text-sm text-emerald-800"
           role="status"
         >
-          تم تسجيل الدخول بنجاح
+          {successMessage}
         </div>
       )}
 

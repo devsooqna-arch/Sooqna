@@ -12,8 +12,8 @@ assert.equal(
     authLoading: false,
     authPageMode: "login",
   }),
-  true,
-  "unverified signed-in users should still leave the login page"
+  false,
+  "unverified signed-in users should stay on auth pages so they can resend verification"
 );
 
 assert.equal(

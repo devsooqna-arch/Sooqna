@@ -18,9 +18,10 @@ export function shouldShowUnverifiedRecovery({
 
 export function shouldRedirectSignedInFromAuthPage({
   hasUser,
+  emailVerified,
   authLoading,
 }: UnverifiedRecoveryState): boolean {
-  return !authLoading && hasUser;
+  return !authLoading && hasUser && emailVerified;
 }
 
 export function shouldBlockVerifiedAction({
