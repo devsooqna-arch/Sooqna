@@ -28,7 +28,7 @@ function sanitizeFileName(name: string): string {
 export function createImageUploader(folderType: "listings" | "profiles") {
   const storage = multer.diskStorage({
     destination: (req, _file, cb) => {
-      const userId = req.authUser?.uid;
+      const userId = req.currentUser?.firebaseUid;
       if (!userId) {
         cb(new Error("Unauthorized"), "");
         return;

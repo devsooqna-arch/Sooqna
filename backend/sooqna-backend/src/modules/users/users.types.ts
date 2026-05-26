@@ -4,6 +4,7 @@ export type UserRole = (typeof USER_ROLES)[number];
 export type AccountStatus = (typeof ACCOUNT_STATUSES)[number];
 
 export interface UserProfile {
+  id?: string;
   uid: string;
   fullName: string;
   email: string;

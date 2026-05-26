@@ -14,7 +14,7 @@ export const LISTING_CURRENCIES = ["SYP", "USD"] as const;
 export const MESSAGE_TYPES = ["text", "image", "system"] as const;
 
 export const USER_ROLES = ["ADMIN", "BUYER", "SELLER"] as const;
-export const ACCOUNT_STATUSES = ["active"] as const;
+export const ACCOUNT_STATUSES = ["active", "suspended", "deleted"] as const;
 
 export const CATEGORY_IDS = [
   "cars",

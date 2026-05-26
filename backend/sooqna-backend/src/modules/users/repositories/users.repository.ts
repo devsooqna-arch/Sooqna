@@ -26,6 +26,7 @@ export class PrismaUsersRepository implements UsersRepository {
       });
       if (!user) return null;
       return {
+        id: user.id,
         uid: user.firebaseUid,
         fullName: user.name,
         email: user.email,
@@ -72,6 +73,7 @@ export class PrismaUsersRepository implements UsersRepository {
         },
       });
       return {
+        id: user.id,
         uid: user.firebaseUid,
         fullName: user.name,
         email: user.email,

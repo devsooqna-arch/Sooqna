@@ -8,12 +8,13 @@ export function requireVerifiedEmail(req: Request, res: Response, next: NextFunc
     return;
   }
 
-  if (!req.authUser) {
+  if (!req.authUser && !req.currentUser) {
     sendError(res, 401, "UNAUTHORIZED", "Unauthorized.");
     return;
   }
 
-  if (!req.authUser.email_verified) {
+  const emailVerified = req.currentUser?.emailVerified ?? req.authUser?.email_verified ?? false;
+  if (!emailVerified) {
     sendError(
       res,
       403,

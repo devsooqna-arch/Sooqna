@@ -7,7 +7,7 @@ import { FavoritesService } from "./favorites.service";
 const service = new FavoritesService(new PrismaFavoritesRepository());
 
 export async function addFavorite(req: Request, res: Response): Promise<void> {
-  const uid = req.authUser?.uid;
+  const uid = req.currentUser?.firebaseUid;
   if (!uid) {
     throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
   }
@@ -22,7 +22,7 @@ export async function addFavorite(req: Request, res: Response): Promise<void> {
 }
 
 export async function removeFavorite(req: Request, res: Response): Promise<void> {
-  const uid = req.authUser?.uid;
+  const uid = req.currentUser?.firebaseUid;
   if (!uid) {
     throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
   }
@@ -37,7 +37,7 @@ export async function removeFavorite(req: Request, res: Response): Promise<void>
 }
 
 export async function listFavorites(req: Request, res: Response): Promise<void> {
-  const uid = req.authUser?.uid;
+  const uid = req.currentUser?.firebaseUid;
   if (!uid) {
     throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
   }

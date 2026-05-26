@@ -1,0 +1,103 @@
+import type { Request, Response } from "express";
+
+const mockFindListingById = jest.fn();
+const mockCreateConversationInService = jest.fn();
+
+jest.mock("../listings/repositories/listings.repository", () => ({
+  PrismaListingsRepository: jest.fn().mockImplementation(() => ({
+    findById: mockFindListingById,
+  })),
+}));
+
+jest.mock("./messages.service", () => ({
+  MessagesService: jest.fn().mockImplementation(() => ({
+    createConversation: mockCreateConversationInService,
+  })),
+}));
+
+jest.mock("./repositories/messages.repository", () => ({
+  PrismaMessagesRepository: jest.fn(),
+}));
+
+function createResponse(): jest.Mocked<Pick<Response, "status" | "json">> {
+  const res = {
+    status: jest.fn().mockReturnThis(),
+    json: jest.fn().mockReturnThis(),
+  };
+  return res;
+}
+
+describe("message conversation identity", () => {
+  beforeEach(() => {
+    mockFindListingById.mockReset();
+    mockCreateConversationInService.mockReset();
+  });
+
+  it("derives participants from authenticated user and listing owner instead of trusting client participantIds", async () => {
+    mockFindListingById.mockResolvedValue({
+      id: "listing-1",
+      ownerId: "seller-1",
+      title: "Camera",
+      images: [{ url: "https://cdn.example.com/camera.jpg", path: "uploads/listings/camera.jpg", isPrimary: true, order: 0 }],
+      ownerSnapshot: { fullName: "Seller One", photoURL: "https://cdn.example.com/seller.jpg" },
+    });
+    mockCreateConversationInService.mockResolvedValue({
+      id: "conv-1",
+      participantIds: ["buyer-1", "seller-1"],
+    });
+
+    const req = {
+      authUser: {
+        uid: "buyer-1",
+        name: "Buyer One",
+        picture: "https://cdn.example.com/buyer.jpg",
+      },
+      currentUser: {
+        firebaseUid: "buyer-1",
+        email: "buyer@example.com",
+        emailVerified: true,
+        displayName: "Buyer One",
+        photoURL: "https://cdn.example.com/buyer.jpg",
+        dbUser: { id: "buyer-1", firebaseUid: "buyer-1" },
+        role: "BUYER",
+        accountStatus: "active",
+      },
+      body: {
+        listingId: "listing-1",
+        participantIds: ["attacker-uid"],
+        participants: {
+          "attacker-uid": { fullName: "Attacker" },
+        },
+        listingSnapshot: {
+          title: "Fake title",
+          primaryImageURL: "https://cdn.example.com/fake.jpg",
+        },
+      },
+    } as unknown as Request;
+    const res = createResponse();
+
+    const { createConversation } = await import("./messages.controller");
+    await createConversation(req, res as unknown as Response);
+
+    expect(mockCreateConversationInService).toHaveBeenCalledWith(
+      expect.objectContaining({
+        participantIds: ["buyer-1", "seller-1"],
+        participants: {
+          "buyer-1": {
+            fullName: "Buyer One",
+            photoURL: "https://cdn.example.com/buyer.jpg",
+          },
+          "seller-1": {
+            fullName: "Seller One",
+            photoURL: "https://cdn.example.com/seller.jpg",
+          },
+        },
+        listingSnapshot: {
+          title: "Camera",
+          primaryImageURL: "https://cdn.example.com/camera.jpg",
+        },
+        createdBy: "buyer-1",
+      })
+    );
+  });
+});

@@ -1,42 +1,55 @@
 import type { Request, Response } from "express";
 import { AppError } from "../../shared/errors/appError";
 import { logAuditEvent } from "../audit/audit.service";
+import { PrismaListingsRepository } from "../listings/repositories/listings.repository";
 import { PrismaMessagesRepository } from "./repositories/messages.repository";
 import { MessagesService } from "./messages.service";
 
 const service = new MessagesService(new PrismaMessagesRepository());
+const listingsRepository = new PrismaListingsRepository();
+
+function requireTrustedUid(req: Request): string {
+  const uid = req.currentUser?.firebaseUid;
+  if (!uid) {
+    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
+  }
+  return uid;
+}
 
 export async function createConversation(req: Request, res: Response): Promise<void> {
-  const uid = req.authUser?.uid;
-  if (!uid) {
-    res.status(401).json({ success: false, message: "Unauthorized" });
-    return;
+  const uid = requireTrustedUid(req);
+
+  const listingId = String(req.body?.listingId ?? "");
+  const listing = await listingsRepository.findById(listingId);
+  if (!listing) {
+    throw new AppError(404, "Listing not found", "NOT_FOUND");
   }
 
-  const participantIds = Array.isArray(req.body?.participantIds)
-    ? req.body.participantIds.map(String)
-    : [uid];
-  if (!participantIds.includes(uid)) {
-    participantIds.push(uid);
-  }
-
-  const participants =
-    req.body?.participants && typeof req.body.participants === "object"
-      ? req.body.participants
-      : {
-          [uid]: {
-            fullName: req.authUser?.name ?? "",
-            photoURL: req.authUser?.picture ?? "",
+  const participantIds = Array.from(new Set([uid, listing.ownerId].filter(Boolean)));
+  const primaryImage =
+    listing.images.find((image) => image.isPrimary)?.url ?? listing.images[0]?.url ?? "";
+  const participants = {
+    [uid]: {
+      fullName: req.currentUser?.displayName ?? "",
+      photoURL: req.currentUser?.photoURL ?? "",
+    },
+    ...(listing.ownerId
+      ? {
+          [listing.ownerId]: {
+            fullName: listing.ownerSnapshot.fullName,
+            photoURL: listing.ownerSnapshot.photoURL,
           },
-        };
+        }
+      : {}),
+  };
 
   const conversation = await service.createConversation({
     participantIds,
     participants,
-    listingId: String(req.body?.listingId ?? ""),
+    listingId,
     listingSnapshot: {
-      title: String(req.body?.listingSnapshot?.title ?? ""),
-      primaryImageURL: String(req.body?.listingSnapshot?.primaryImageURL ?? ""),
+      title: listing.title,
+      primaryImageURL: primaryImage,
     },
     createdBy: uid,
   });
@@ -44,11 +57,7 @@ export async function createConversation(req: Request, res: Response): Promise<v
 }
 
 export async function createMessage(req: Request, res: Response): Promise<void> {
-  const uid = req.authUser?.uid;
-  if (!uid) {
-    res.status(401).json({ success: false, message: "Unauthorized" });
-    return;
-  }
+  const uid = requireTrustedUid(req);
 
   const message = await service.createMessage({
     conversationId: req.params.conversationId,
@@ -68,10 +77,7 @@ export async function createMessage(req: Request, res: Response): Promise<void> 
 }
 
 export async function getConversation(req: Request, res: Response): Promise<void> {
-  const uid = req.authUser?.uid;
-  if (!uid) {
-    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
-  }
+  const uid = requireTrustedUid(req);
 
   const conversation = await service.getConversationForUser(req.params.conversationId, uid);
   if (!conversation) {
@@ -82,30 +88,21 @@ export async function getConversation(req: Request, res: Response): Promise<void
 }
 
 export async function listConversations(req: Request, res: Response): Promise<void> {
-  const uid = req.authUser?.uid;
-  if (!uid) {
-    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
-  }
+  const uid = requireTrustedUid(req);
 
   const conversations = await service.listUserConversations(uid);
   res.json({ success: true, conversations });
 }
 
 export async function getConversationMessages(req: Request, res: Response): Promise<void> {
-  const uid = req.authUser?.uid;
-  if (!uid) {
-    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
-  }
+  const uid = requireTrustedUid(req);
 
   const messages = await service.getMessages(req.params.conversationId, uid);
   res.json({ success: true, messages });
 }
 
 export async function markConversationRead(req: Request, res: Response): Promise<void> {
-  const uid = req.authUser?.uid;
-  if (!uid) {
-    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
-  }
+  const uid = requireTrustedUid(req);
   const updatedCount = await service.markConversationRead(req.params.conversationId, uid);
   await logAuditEvent({
     actorId: uid,
@@ -118,11 +115,7 @@ export async function markConversationRead(req: Request, res: Response): Promise
 }
 
 export async function getUnreadSummary(req: Request, res: Response): Promise<void> {
-  const uid = req.authUser?.uid;
-  if (!uid) {
-    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
-  }
+  const uid = requireTrustedUid(req);
   const summary = await service.getUnreadSummary(uid);
   res.json({ success: true, ...summary });
 }
-

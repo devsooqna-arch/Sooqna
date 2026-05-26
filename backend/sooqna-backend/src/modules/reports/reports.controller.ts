@@ -8,7 +8,7 @@ import type { ReportStatus } from "./reports.types";
 const service = new ReportsService(new PrismaReportsRepository());
 
 export async function submitReport(req: Request, res: Response): Promise<void> {
-  const uid = req.authUser?.uid;
+  const uid = req.currentUser?.firebaseUid;
   if (!uid) throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
   const report = await service.submit({
     targetType: req.body.targetType,
@@ -40,7 +40,7 @@ export async function listModerationQueue(req: Request, res: Response): Promise<
 }
 
 export async function updateModerationReport(req: Request, res: Response): Promise<void> {
-  const uid = req.authUser?.uid;
+  const uid = req.currentUser?.firebaseUid;
   if (!uid) throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
   const report = await service.updateStatus({
     reportId: req.params.id,

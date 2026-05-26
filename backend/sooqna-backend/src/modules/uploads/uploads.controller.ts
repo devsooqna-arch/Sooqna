@@ -15,7 +15,7 @@ function toPublicUrl(relativePath: string): string {
 
 export async function uploadListingImage(req: Request, res: Response): Promise<void> {
   const file = req.file;
-  const userId = req.authUser?.uid;
+  const userId = req.currentUser?.firebaseUid;
   if (!userId) {
     throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
   }
@@ -45,7 +45,7 @@ export async function uploadListingImage(req: Request, res: Response): Promise<v
 
 export async function uploadProfileAvatar(req: Request, res: Response): Promise<void> {
   const file = req.file;
-  const userId = req.authUser?.uid;
+  const userId = req.currentUser?.firebaseUid;
   if (!userId) {
     throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
   }

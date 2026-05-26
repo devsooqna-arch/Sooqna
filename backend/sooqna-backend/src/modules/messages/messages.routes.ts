@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { verifyFirebaseToken } from "../../middleware/verifyFirebaseToken";
+import { requireActiveUser, requireCurrentUser } from "../../middleware/authContext";
 import { requireVerifiedEmail } from "../../middleware/requireVerifiedEmail";
 import { contentFilter } from "../../middleware/contentFilter";
 import { validateRequest } from "../../middleware/validateRequest";
@@ -24,16 +25,20 @@ export const messagesRouter = Router();
 messagesRouter.post(
   "/conversations",
   verifyFirebaseToken,
+  requireCurrentUser,
+  requireActiveUser,
   requireVerifiedEmail,
   contentFilter,
   validateRequest({ body: createConversationBodySchema }),
   createConversation
 );
-messagesRouter.get("/conversations", verifyFirebaseToken, requireVerifiedEmail, listConversations);
-messagesRouter.get("/conversations/unread-summary", verifyFirebaseToken, requireVerifiedEmail, getUnreadSummary);
+messagesRouter.get("/conversations", verifyFirebaseToken, requireCurrentUser, requireActiveUser, requireVerifiedEmail, listConversations);
+messagesRouter.get("/conversations/unread-summary", verifyFirebaseToken, requireCurrentUser, requireActiveUser, requireVerifiedEmail, getUnreadSummary);
 messagesRouter.post(
   "/conversations/:conversationId/messages",
   verifyFirebaseToken,
+  requireCurrentUser,
+  requireActiveUser,
   requireVerifiedEmail,
   contentFilter,
   validateRequest({
@@ -45,6 +50,8 @@ messagesRouter.post(
 messagesRouter.get(
   "/conversations/:conversationId",
   verifyFirebaseToken,
+  requireCurrentUser,
+  requireActiveUser,
   requireVerifiedEmail,
   validateRequest({ params: conversationIdParamsSchema }),
   getConversation
@@ -52,6 +59,8 @@ messagesRouter.get(
 messagesRouter.get(
   "/conversations/:conversationId/messages",
   verifyFirebaseToken,
+  requireCurrentUser,
+  requireActiveUser,
   requireVerifiedEmail,
   validateRequest({ params: conversationIdParamsSchema }),
   getConversationMessages
@@ -59,8 +68,9 @@ messagesRouter.get(
 messagesRouter.post(
   "/conversations/:conversationId/read",
   verifyFirebaseToken,
+  requireCurrentUser,
+  requireActiveUser,
   requireVerifiedEmail,
   validateRequest({ params: conversationUnreadParams }),
   markConversationRead
 );
-

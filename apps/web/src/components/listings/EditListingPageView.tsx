@@ -55,7 +55,11 @@ export function EditListingPageView({ listingId }: { listingId: string }) {
       })
       .catch((err) => {
         if (!mounted) return;
-        isEmailNotVerified(err) ? setEmailUnverified(true) : setError(err instanceof Error ? err.message : "حدث خطأ أثناء تحميل الإعلان.");
+        if (isEmailNotVerified(err)) {
+          setEmailUnverified(true);
+        } else {
+          setError(err instanceof Error ? err.message : "حدث خطأ أثناء تحميل الإعلان.");
+        }
       })
       .finally(() => {
         if (!mounted) return;
@@ -89,7 +93,11 @@ export function EditListingPageView({ listingId }: { listingId: string }) {
       setListing(updated);
       setSuccess("تم حفظ التعديلات بنجاح.");
     } catch (err) {
-      isEmailNotVerified(err) ? setEmailUnverified(true) : setError(err instanceof Error ? err.message : "حدث خطأ أثناء حفظ التعديلات.");
+      if (isEmailNotVerified(err)) {
+        setEmailUnverified(true);
+      } else {
+        setError(err instanceof Error ? err.message : "حدث خطأ أثناء حفظ التعديلات.");
+      }
     } finally {
       setSaving(false);
     }
@@ -103,7 +111,11 @@ export function EditListingPageView({ listingId }: { listingId: string }) {
       await deleteListing(listingId);
       router.push("/my-listings");
     } catch (err) {
-      isEmailNotVerified(err) ? setEmailUnverified(true) : setError(err instanceof Error ? err.message : "حدث خطأ أثناء حذف الإعلان.");
+      if (isEmailNotVerified(err)) {
+        setEmailUnverified(true);
+      } else {
+        setError(err instanceof Error ? err.message : "حدث خطأ أثناء حذف الإعلان.");
+      }
     } finally {
       setDeleting(false);
     }

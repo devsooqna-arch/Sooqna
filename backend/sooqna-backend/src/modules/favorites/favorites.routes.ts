@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { verifyFirebaseToken } from "../../middleware/verifyFirebaseToken";
+import { requireActiveUser, requireCurrentUser } from "../../middleware/authContext";
 import { requireVerifiedEmail } from "../../middleware/requireVerifiedEmail";
 import { validateRequest } from "../../middleware/validateRequest";
 import { listingIdParamsSchema } from "../../shared/validation/schemas";
@@ -8,6 +9,8 @@ import { addFavorite, listFavorites, removeFavorite } from "./favorites.controll
 export const favoritesRouter = Router();
 
 favoritesRouter.use(verifyFirebaseToken);
+favoritesRouter.use(requireCurrentUser);
+favoritesRouter.use(requireActiveUser);
 favoritesRouter.use(requireVerifiedEmail);
 favoritesRouter.post("/:listingId", validateRequest({ params: listingIdParamsSchema }), addFavorite);
 favoritesRouter.delete(
