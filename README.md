@@ -58,6 +58,8 @@ Current workflow assumes:
 
 ### Production Server Readiness Checklist
 
+Detailed Phase 9 SEO/deployment/backup notes live in `docs/seo-production-readiness.md`.
+
 Run these checks on the production server before first deployment:
 
 1) Operating user + project path

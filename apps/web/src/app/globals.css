@@ -428,4 +428,20 @@ html[data-theme="dark"] {
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+
+  .admin-action {
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 0.35rem 0.55rem;
+    color: var(--text);
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .admin-action:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
 }

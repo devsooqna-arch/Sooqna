@@ -4,10 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getListingById } from "@/services/listingService";
+import { getListingDetail, getListingsFiltered } from "@/services/listingService";
+import { createReview } from "@/services/reviewService";
 import { getCategories } from "@/services/categoryService";
 import type { Listing, ListingImage } from "@/types/listing";
 import type { Category } from "@/types/category";
+import type { PublicSellerProfile, PublicReview } from "@/types/review";
+import { ListingCard } from "@/components/listings/ListingCard";
 import { useAuth } from "@/hooks/useAuth";
 import { addToFavorites, removeFromFavorites, isFavorite } from "@/services/favoriteService";
 import { createConversation } from "@/services/messageService";
@@ -15,6 +18,7 @@ import { trackEngagementEvent } from "@/services/engagementService";
 import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { resolvePublicMediaUrl } from "@/lib/mediaUrl";
 import { arabicCity, arabicArea } from "@/lib/locationNames";
+import { addRecentlyViewedListingId } from "@/lib/recentlyViewedListings";
 
 const LISTING_IMG_PLACEHOLDER = "/images/placeholder-listing.png";
 
@@ -35,24 +39,36 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
   const router = useRouter();
   const { currentUser } = useAuth();
   const [listing, setListing] = useState<Listing | null>(null);
+  const [seller, setSeller] = useState<PublicSellerProfile | null>(null);
+  const [reviews, setReviews] = useState<PublicReview[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [similarListings, setSimilarListings] = useState<Listing[]>([]);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [favorite, setFavorite] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [reviewMsg, setReviewMsg] = useState<string | null>(null);
   const [reportMsg, setReportMsg] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
   const [activeImg, setActiveImg] = useState(0);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [reviewSuccess, setReviewSuccess] = useState(false);
   const showLoadingUi = useDelayedLoading(loading);
 
   useEffect(() => {
     let mounted = true;
-    void Promise.all([getListingById(listingId), getCategories()])
-      .then(([item, cats]) => {
+    void Promise.all([getListingDetail(listingId), getCategories()])
+      .then(([detail, cats]) => {
         if (!mounted) return;
-        setListing(item);
+        if (detail) {
+          setListing(detail.listing);
+          setSeller(detail.seller ?? null);
+          setReviews(detail.reviews ?? []);
+        }
         setCategories(cats);
       })
       .catch((err) => {
@@ -74,6 +90,34 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
       .catch(() => { if (mounted) setFavorite(false); });
     return () => { mounted = false; };
   }, [currentUser, listingId]);
+
+  useEffect(() => {
+    if (!listing) return;
+    addRecentlyViewedListingId(listing.id);
+
+    let mounted = true;
+    void getListingsFiltered({
+      category: listing.categoryId,
+      city: listing.location.city,
+      limit: 7,
+      sort: "newest",
+    })
+      .then((response) => {
+        if (!mounted) return;
+        setSimilarListings(
+          response.listings
+            .filter((item) => item.id !== listing.id && item.status === "published")
+            .slice(0, 6)
+        );
+      })
+      .catch(() => {
+        if (mounted) setSimilarListings([]);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [listing]);
 
   const sortedImages = useMemo(() => {
     if (!listing) return [] as ListingImage[];
@@ -347,10 +391,79 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
             </p>
           </div>
 
+          {/* Reviews section */}
+          {reviews.length > 0 && (
+            <div className="ui-card motion-section rounded-xl p-5">
+              <h2 className="mb-4 text-sm font-bold text-[var(--text)]">
+                تقييمات المشترين
+                {seller?.stats.totalReviews ? (
+                  <span className="mr-2 text-xs font-normal text-[var(--text-muted)]">
+                    ({seller.stats.totalReviews} تقييم)
+                  </span>
+                ) : null}
+              </h2>
+              <div className="space-y-4">
+                {reviews.map((review) => (
+                  <div key={review.id} className="border-b border-[var(--border)] pb-3 last:border-0 last:pb-0">
+                    <div className="flex items-center gap-2">
+                      {review.reviewer.photoURL ? (
+                        <Image
+                          src={review.reviewer.photoURL}
+                          alt={review.reviewer.fullName}
+                          width={28}
+                          height={28}
+                          className="h-7 w-7 rounded-full object-cover"
+                          unoptimized
+                        />
+                      ) : (
+                        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent-soft)] text-xs">
+                          👤
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-[var(--text)]">
+                            {review.reviewer.fullName || "مستخدم"}
+                          </span>
+                          <StarRating rating={review.rating} size={10} />
+                        </div>
+                        <p className="text-[10px] text-[var(--text-muted)]">
+                          {formatDate(review.createdAt)}
+                        </p>
+                      </div>
+                    </div>
+                    {review.comment && (
+                      <p className="mt-2 text-xs leading-5 text-[var(--text-muted)]">{review.comment}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {actionError && (
             <p className="motion-alert rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-800">
               {actionError}
             </p>
+          )}
+
+          {similarListings.length > 0 && (
+            <div className="ui-card motion-section rounded-xl p-5">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <h2 className="text-sm font-bold text-[var(--text)]">إعلانات مشابهة</h2>
+                <Link
+                  href={`/listings?category=${encodeURIComponent(listing.categoryId)}&city=${encodeURIComponent(listing.location.city)}`}
+                  className="text-xs font-semibold text-[var(--brand)] hover:underline"
+                >
+                  عرض المزيد
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {similarListings.map((item, index) => (
+                  <ListingCard key={item.id} listing={item} motionIndex={index} />
+                ))}
+              </div>
+            </div>
           )}
 
           <Link
@@ -370,10 +483,10 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
           <div className="ui-card motion-section rounded-xl p-5">
             <h3 className="mb-3 text-xs font-bold uppercase tracking-wide text-[var(--text-muted)]">البائع</h3>
             <div className="flex items-center gap-3">
-              {listing.ownerSnapshot.photoURL ? (
+              {(seller?.photoURL || listing.ownerSnapshot.photoURL) ? (
                 <Image
-                  src={listing.ownerSnapshot.photoURL}
-                  alt={listing.ownerSnapshot.fullName}
+                  src={seller?.photoURL || listing.ownerSnapshot.photoURL}
+                  alt={seller?.fullName || listing.ownerSnapshot.fullName}
                   width={48}
                   height={48}
                   className="h-12 w-12 rounded-full object-cover"
@@ -384,13 +497,68 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
                   👤
                 </div>
               )}
-              <div>
-                <p className="font-bold text-[var(--text)]">
-                  {listing.ownerSnapshot.fullName || "مستخدم سوقنا"}
-                </p>
-                <p className="text-xs text-[var(--text-muted)]">عضو نشط</p>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <p className="truncate font-bold text-[var(--text)]">
+                    {seller?.fullName || listing.ownerSnapshot.fullName || "مستخدم سوقنا"}
+                  </p>
+                  {seller?.stats.isEmailVerified && (
+                    <span title="بريد إلكتروني موثّق" className="shrink-0">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-blue-500">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                      </svg>
+                    </span>
+                  )}
+                  {seller?.stats.isIdVerified && (
+                    <span title="هوية موثّقة" className="shrink-0">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-emerald-500">
+                        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+                      </svg>
+                    </span>
+                  )}
+                </div>
+                {seller?.stats ? (
+                  <div className="mt-1 flex items-center gap-2">
+                    {seller.stats.totalReviews > 0 ? (
+                      <span className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
+                        <StarRating rating={seller.stats.avgRating} size={11} />
+                        <span className="font-semibold text-[var(--text)]">{seller.stats.avgRating}</span>
+                        <span>({seller.stats.totalReviews})</span>
+                      </span>
+                    ) : (
+                      <span className="text-xs text-[var(--text-muted)]">لا توجد تقييمات بعد</span>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-xs text-[var(--text-muted)]">عضو نشط</p>
+                )}
               </div>
             </div>
+
+            {seller?.stats && (
+              <div className="mt-4 grid grid-cols-3 gap-2 border-t border-[var(--border)] pt-3">
+                <div className="text-center">
+                  <p className="text-sm font-bold text-[var(--text)]">{seller.stats.totalListings}</p>
+                  <p className="text-[10px] text-[var(--text-muted)]">إعلان</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-bold text-[var(--text)]">{seller.stats.totalSold}</p>
+                  <p className="text-[10px] text-[var(--text-muted)]">تم البيع</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-bold text-[var(--text)]">
+                    {formatMemberSince(seller.stats.memberSince)}
+                  </p>
+                  <p className="text-[10px] text-[var(--text-muted)]">عضو منذ</p>
+                </div>
+              </div>
+            )}
+
+            {seller?.bio && (
+              <p className="mt-3 border-t border-[var(--border)] pt-3 text-xs leading-5 text-[var(--text-muted)]">
+                {seller.bio}
+              </p>
+            )}
           </div>
 
           {/* Actions card */}
@@ -487,12 +655,102 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
             </div>
 
             <div className="mt-3 space-y-1 border-t border-[var(--border)] pt-3">
-              {reviewMsg ? (
-                <p className="motion-alert rounded-lg bg-[var(--surface-muted)] px-3 py-2 text-center text-xs text-[var(--text-muted)]">{reviewMsg}</p>
+              {reviewSuccess ? (
+                <p className="motion-alert rounded-lg bg-green-50 px-3 py-2 text-center text-xs text-green-700">
+                  تم إرسال تقييمك بنجاح!
+                </p>
+              ) : reviewOpen ? (
+                <div className="space-y-2">
+                  <p className="text-xs font-bold text-[var(--text)]">تقييم البائع</p>
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setReviewRating(star)}
+                        className="transition hover:scale-110"
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill={star <= reviewRating ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5" className={star <= reviewRating ? "text-amber-400" : "text-gray-300"}>
+                          <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 0 0 .95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 0 0-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 0 0-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 0 0-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 0 0 .951-.69l1.519-4.674z"/>
+                        </svg>
+                      </button>
+                    ))}
+                  </div>
+                  <textarea
+                    value={reviewComment}
+                    onChange={(e) => setReviewComment(e.target.value)}
+                    placeholder="اكتب تعليقك هنا (اختياري)..."
+                    rows={3}
+                    maxLength={2000}
+                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
+                  />
+                  {reviewError && (
+                    <p className="text-xs text-red-600">{reviewError}</p>
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      disabled={reviewSubmitting}
+                      onClick={async () => {
+                        if (!listing || !currentUser) return;
+                        setReviewSubmitting(true);
+                        setReviewError(null);
+                        try {
+                          const newReview = await createReview({
+                            sellerId: listing.ownerId,
+                            listingId: listing.id,
+                            rating: reviewRating,
+                            comment: reviewComment,
+                          });
+                          setReviews((prev) => [
+                            {
+                              ...newReview,
+                              reviewer: { fullName: currentUser.displayName ?? "", photoURL: currentUser.photoURL ?? "" },
+                              listingId: listing.id,
+                              createdAt: newReview.createdAt ?? new Date().toISOString(),
+                            },
+                            ...prev,
+                          ]);
+                          if (seller) {
+                            setSeller({
+                              ...seller,
+                              stats: {
+                                ...seller.stats,
+                                totalReviews: seller.stats.totalReviews + 1,
+                              },
+                            });
+                          }
+                          setReviewSuccess(true);
+                          setReviewOpen(false);
+                        } catch (err) {
+                          setReviewError(err instanceof Error ? err.message : "فشل إرسال التقييم.");
+                        } finally {
+                          setReviewSubmitting(false);
+                        }
+                      }}
+                      className="ui-btn-primary flex-1 rounded-full px-3 py-2 text-xs disabled:opacity-50"
+                    >
+                      {reviewSubmitting ? "..." : "إرسال التقييم"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setReviewOpen(false); setReviewError(null); }}
+                      className="rounded-full border border-[var(--chip-border)] bg-[var(--chip)] px-3 py-2 text-xs text-[var(--text-muted)]"
+                    >
+                      إلغاء
+                    </button>
+                  </div>
+                </div>
               ) : (
                 <button
                   type="button"
-                  onClick={() => setReviewMsg("ميزة التقييم قريباً!")}
+                  onClick={() => {
+                    if (!currentUser) {
+                      router.push(`/login?next=${encodeURIComponent(`/listings/${listingId}`)}`);
+                      return;
+                    }
+                    setReviewOpen(true);
+                  }}
                   className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-[var(--text-muted)] transition hover:bg-[var(--surface-muted)]"
                 >
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 0 0 .95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 0 0-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 0 0-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 0 0-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 0 0 .951-.69l1.519-4.674z"/></svg>
@@ -571,4 +829,50 @@ function MetaRow({ label, value }: { label: string; value: string }) {
       <dd className="font-semibold text-[var(--text)]">{value}</dd>
     </div>
   );
+}
+
+function StarRating({ rating, size = 12 }: { rating: number; size?: number }) {
+  return (
+    <span className="inline-flex items-center gap-px">
+      {[1, 2, 3, 4, 5].map((star) => {
+        const filled = rating >= star;
+        const half = !filled && rating >= star - 0.5;
+        return (
+          <svg
+            key={star}
+            width={size}
+            height={size}
+            viewBox="0 0 24 24"
+            fill={filled ? "currentColor" : half ? "url(#halfStar)" : "none"}
+            stroke="currentColor"
+            strokeWidth="1.5"
+            className={filled || half ? "text-amber-400" : "text-gray-300"}
+          >
+            {half && (
+              <defs>
+                <linearGradient id="halfStar">
+                  <stop offset="50%" stopColor="currentColor" />
+                  <stop offset="50%" stopColor="transparent" />
+                </linearGradient>
+              </defs>
+            )}
+            <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 0 0 .95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 0 0-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 0 0-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 0 0-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 0 0 .951-.69l1.519-4.674z"/>
+          </svg>
+        );
+      })}
+    </span>
+  );
+}
+
+function formatMemberSince(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  const now = new Date();
+  const diffMs = now.getTime() - d.getTime();
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (days < 30) return `${days} يوم`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months} شهر`;
+  const years = Math.floor(months / 12);
+  return `${years} سنة`;
 }

@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { adminAuth } from "../config/firebaseAdmin";
+import { logger } from "../config/logger";
 import { sendError } from "../shared/contracts/api";
 
 export async function verifyFirebaseToken(
@@ -16,7 +17,9 @@ export async function verifyFirebaseToken(
     req.authUser = await adminAuth.verifyIdToken(authHeader.slice(7));
     next();
   } catch (error) {
-    console.error("Firebase Token Verification Error:", error);
-    sendError(res, 401, "UNAUTHORIZED", "Invalid or expired token.", String(error));
+    logger.warn("Firebase token verification failed", {
+      reason: error instanceof Error ? error.name : "unknown",
+    });
+    sendError(res, 401, "UNAUTHORIZED", "Invalid or expired token.");
   }
 }

@@ -21,6 +21,7 @@ export interface ListingsRepository {
   list(pagination?: PaginationOptions): Promise<{ items: Listing[]; total: number }>;
   listByOwner(ownerId: string): Promise<Listing[]>;
   findById(id: string): Promise<Listing | null>;
+  findByIds(ids: string[]): Promise<Listing[]>;
   findByIdIncludingDeleted(id: string): Promise<Listing | null>;
   findByClientRequestId(ownerId: string, clientRequestId: string): Promise<Listing | null>;
   update(id: string, listing: Listing): Promise<Listing>;
@@ -282,6 +283,24 @@ export class PrismaListingsRepository implements ListingsRepository {
         return listing ?? null;
       }
       throw new Error("Failed to fetch listing.", { cause: error });
+    }
+  }
+
+  async findByIds(ids: string[]): Promise<Listing[]> {
+    if (!ids.length) return [];
+    try {
+      const listings = await prisma.listing.findMany({
+        where: { id: { in: ids }, deletedAt: null },
+        include: INCLUDE_IMAGES,
+      });
+      return listings.map(mapListing);
+    } catch (error) {
+      if (useJsonFallback()) {
+        const all = readJsonArrayFile<Listing>(listingsDataPath);
+        const idSet = new Set(ids);
+        return all.filter((item) => idSet.has(item.id) && item.deletedAt === null);
+      }
+      throw new Error("Failed to fetch listings by IDs.", { cause: error });
     }
   }
 

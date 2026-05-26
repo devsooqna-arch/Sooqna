@@ -7,36 +7,33 @@ import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { ListingCard } from "@/components/listings/ListingCard";
 import { getListingsFiltered } from "@/services/listingService";
 import { getCategories } from "@/services/categoryService";
-import type { Listing } from "@/types/listing";
+import type { Listing, ListingsPageResponse } from "@/types/listing";
 import type { Category } from "@/types/category";
 import { CategoryIcon } from "@/lib/categoryIcons";
 import { SUBCATEGORIES } from "@/lib/categorySubcategories";
+import { SYRIAN_GOVERNORATES } from "@/lib/locations";
 
 type SortKey = "newest" | "price_asc" | "price_desc";
 const PAGE_SIZE = 12;
+const SORT_OPTIONS: Array<{ value: SortKey; label: string }> = [
+  { value: "newest", label: "الأحدث أولاً" },
+  { value: "price_asc", label: "السعر: الأقل أولاً" },
+  { value: "price_desc", label: "السعر: الأعلى أولاً" },
+];
 
-const SORT_LABELS: Record<SortKey, string> = {
-  newest: "الأحدث أولاً",
-  price_asc: "السعر: الأقل أولاً",
-  price_desc: "السعر: الأعلى أولاً",
-};
+function isValidSort(v: string | null): v is SortKey {
+  return v === "newest" || v === "price_asc" || v === "price_desc";
+}
 
 function buildPageNumbers(currentPage: number, totalPages: number): Array<number | "..."> {
-  if (totalPages <= 7) {
-    return Array.from({ length: totalPages }, (_, i) => i + 1);
-  }
-
+  if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
   const pages: Array<number | "..."> = [1];
   const start = Math.max(2, currentPage - 1);
   const end = Math.min(totalPages - 1, currentPage + 1);
-
   if (start > 2) pages.push("...");
-  for (let page = start; page <= end; page += 1) {
-    pages.push(page);
-  }
+  for (let page = start; page <= end; page += 1) pages.push(page);
   if (end < totalPages - 1) pages.push("...");
   pages.push(totalPages);
-
   return pages;
 }
 
@@ -59,25 +56,31 @@ export function ListingsPageSkeleton() {
 function PublicListingsPageInner() {
   const router = useRouter();
   const params = useSearchParams();
+
+  // --- Read filters from URL ---
   const categoryFilter = (params.get("category") ?? "").toLowerCase();
-  const cityFilterRaw = (params.get("city") ?? "").toLowerCase();
-  const cityFilter = cityFilterRaw;
-  const searchFilterRaw = params.get("search") ?? "";
-  const searchFilter = searchFilterRaw.toLowerCase();
+  const cityFilter = (params.get("city") ?? "").toLowerCase();
+  const searchFilter = params.get("search") ?? "";
   const sortParam = params.get("sort");
-  const sort: SortKey =
-    sortParam === "newest" || sortParam === "price_asc" || sortParam === "price_desc"
-      ? sortParam
-      : "newest";
+  const sort: SortKey = isValidSort(sortParam) ? sortParam : "newest";
   const pageRaw = Number(params.get("page") ?? "1");
   const currentPage = Number.isFinite(pageRaw) && pageRaw > 0 ? Math.floor(pageRaw) : 1;
+  const priceMinRaw = Number(params.get("priceMin") ?? "");
+  const priceMaxRaw = Number(params.get("priceMax") ?? "");
+  const priceMin = Number.isFinite(priceMinRaw) && priceMinRaw > 0 ? priceMinRaw : undefined;
+  const priceMax = Number.isFinite(priceMaxRaw) && priceMaxRaw > 0 ? priceMaxRaw : undefined;
 
+  const hasAnyFilter = !!(categoryFilter || cityFilter || searchFilter || priceMin || priceMax);
+
+  // --- URL builder ---
   const buildListingsHref = useCallback((overrides?: {
     category?: string | null;
     city?: string | null;
     search?: string | null;
     sort?: SortKey | null;
     page?: number | null;
+    priceMin?: number | null;
+    priceMax?: number | null;
   }): string => {
     const nextParams = new URLSearchParams(params.toString());
     const entries: Array<[string, string | null | undefined]> = [
@@ -86,29 +89,40 @@ function PublicListingsPageInner() {
       ["search", overrides?.search],
       ["sort", overrides?.sort],
       ["page", overrides?.page ? String(overrides.page) : overrides?.page === null ? null : undefined],
+      ["priceMin", overrides?.priceMin ? String(overrides.priceMin) : overrides?.priceMin === null ? null : undefined],
+      ["priceMax", overrides?.priceMax ? String(overrides.priceMax) : overrides?.priceMax === null ? null : undefined],
     ];
-
     for (const [key, value] of entries) {
       if (value === undefined) continue;
-      if (value === null || value === "") {
-        nextParams.delete(key);
-      } else {
-        nextParams.set(key, value);
-      }
+      if (value === null || value === "") nextParams.delete(key);
+      else nextParams.set(key, value);
     }
-
     const queryString = nextParams.toString();
     return queryString ? `/listings?${queryString}` : "/listings";
   }, [params]);
 
+  // --- State ---
   const [listings, setListings] = useState<Listing[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [total, setTotal] = useState(0);
+  const [paginationMeta, setPaginationMeta] = useState<Pick<ListingsPageResponse, "total" | "totalPages" | "hasNextPage" | "hasPreviousPage" | "currentPage">>({
+    total: 0, totalPages: 1, hasNextPage: false, hasPreviousPage: false, currentPage: 1,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedSlug, setExpandedSlug] = useState<string | null>(null);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const showSkeleton = useDelayedLoading(loading);
 
+  // --- Price filter local state ---
+  const [localPriceMin, setLocalPriceMin] = useState(priceMin?.toString() ?? "");
+  const [localPriceMax, setLocalPriceMax] = useState(priceMax?.toString() ?? "");
+
+  useEffect(() => {
+    setLocalPriceMin(priceMin?.toString() ?? "");
+    setLocalPriceMax(priceMax?.toString() ?? "");
+  }, [priceMin, priceMax]);
+
+  // --- Fetch ---
   useEffect(() => {
     let mounted = true;
     setLoading(true);
@@ -117,83 +131,139 @@ function PublicListingsPageInner() {
     void Promise.all([
       getListingsFiltered({
         category: categoryFilter || undefined,
-        city: cityFilterRaw || undefined,
-        search: searchFilterRaw || undefined,
+        city: cityFilter || undefined,
+        search: searchFilter || undefined,
         sort,
         limit: PAGE_SIZE,
         offset: (currentPage - 1) * PAGE_SIZE,
+        priceMin,
+        priceMax,
       }),
       getCategories(),
     ])
       .then(([result, cats]) => {
         if (!mounted) return;
         setListings(result.listings);
-        setTotal(result.total);
+        setPaginationMeta({
+          total: result.total,
+          totalPages: result.totalPages ?? Math.max(1, Math.ceil(result.total / PAGE_SIZE)),
+          hasNextPage: result.hasNextPage ?? false,
+          hasPreviousPage: result.hasPreviousPage ?? false,
+          currentPage: result.currentPage ?? currentPage,
+        });
         setCategories(cats);
-        if (result.filters) {
-          const normalizedUrl = buildListingsHref({
-            category: result.filters.category,
-            city: result.filters.city,
-            search: result.filters.search,
-            sort: result.filters.sort,
-            page: currentPage,
-          });
-          const currentUrl = buildListingsHref({});
-          if (normalizedUrl !== currentUrl) {
-            router.replace(normalizedUrl);
-          }
-        }
       })
       .catch((err) => {
         if (!mounted) return;
-        setError(err instanceof Error ? err.message : "Failed to fetch listings.");
+        setError(err instanceof Error ? err.message : "حدث خطأ أثناء تحميل الإعلانات.");
       })
       .finally(() => {
         if (!mounted) return;
         setLoading(false);
       });
 
-    return () => {
-      mounted = false;
-    };
-  }, [categoryFilter, cityFilterRaw, searchFilterRaw, sort, currentPage, router, buildListingsHref]);
+    return () => { mounted = false; };
+  }, [categoryFilter, cityFilter, searchFilter, sort, currentPage, priceMin, priceMax]);
 
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const { total, totalPages, hasNextPage, hasPreviousPage } = paginationMeta;
   const safeCurrentPage = Math.min(currentPage, totalPages);
   const startCount = total === 0 ? 0 : (safeCurrentPage - 1) * PAGE_SIZE + 1;
   const endCount = total === 0 ? 0 : Math.min((safeCurrentPage - 1) * PAGE_SIZE + listings.length, total);
   const pageNumbers = buildPageNumbers(safeCurrentPage, totalPages);
 
+  // Auto-redirect if page exceeds total
   useEffect(() => {
-    if (currentPage > totalPages) {
+    if (!loading && currentPage > totalPages && totalPages > 0) {
       router.replace(buildListingsHref({ page: totalPages }));
     }
-  }, [currentPage, totalPages, router, buildListingsHref]);
+  }, [currentPage, totalPages, loading, router, buildListingsHref]);
 
-  if (showSkeleton) {
-    return <ListingsPageSkeleton />;
+  function applyPriceFilter() {
+    const min = Number(localPriceMin);
+    const max = Number(localPriceMax);
+    router.replace(buildListingsHref({
+      priceMin: Number.isFinite(min) && min > 0 ? min : null,
+      priceMax: Number.isFinite(max) && max > 0 ? max : null,
+      page: 1,
+    }));
   }
 
-  if (error) {
-    return <p className="motion-alert text-sm text-[var(--danger)]">{error}</p>;
+  function clearAllFilters() {
+    router.replace("/listings");
   }
 
-  return (
-    <div className="grid gap-5 lg:grid-cols-[270px_1fr]">
-      {/* Sidebar */}
-      <aside className="order-2 lg:order-1 h-fit ui-card overflow-hidden">
+  // --- Category name helper ---
+  function getCategoryName(slug: string): string {
+    const cat = categories.find((c) => (c.slug || c.id).toLowerCase() === slug);
+    return cat?.name.ar || cat?.name.en || slug;
+  }
+
+  function getCityName(value: string): string {
+    const gov = SYRIAN_GOVERNORATES.find((g) => g.value === value);
+    return gov?.labelAr ?? value;
+  }
+
+  // --- Active filters chips ---
+  const activeFilterChips: Array<{ key: string; label: string; color: string; onRemove: string }> = [];
+  if (categoryFilter) {
+    activeFilterChips.push({
+      key: "category",
+      label: `التصنيف: ${getCategoryName(categoryFilter)}`,
+      color: "border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100",
+      onRemove: buildListingsHref({ category: null, page: 1 }),
+    });
+  }
+  if (cityFilter) {
+    activeFilterChips.push({
+      key: "city",
+      label: `المدينة: ${getCityName(cityFilter)}`,
+      color: "border-sky-300 bg-sky-50 text-sky-800 hover:bg-sky-100",
+      onRemove: buildListingsHref({ city: null, page: 1 }),
+    });
+  }
+  if (searchFilter) {
+    activeFilterChips.push({
+      key: "search",
+      label: `بحث: ${searchFilter}`,
+      color: "border-violet-300 bg-violet-50 text-violet-800 hover:bg-violet-100",
+      onRemove: buildListingsHref({ search: null, page: 1 }),
+    });
+  }
+  if (priceMin) {
+    activeFilterChips.push({
+      key: "priceMin",
+      label: `السعر من: ${priceMin}`,
+      color: "border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100",
+      onRemove: buildListingsHref({ priceMin: null, page: 1 }),
+    });
+  }
+  if (priceMax) {
+    activeFilterChips.push({
+      key: "priceMax",
+      label: `السعر حتى: ${priceMax}`,
+      color: "border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100",
+      onRemove: buildListingsHref({ priceMax: null, page: 1 }),
+    });
+  }
+
+  if (showSkeleton) return <ListingsPageSkeleton />;
+
+  // --- Sidebar content (shared between desktop and mobile) ---
+  const sidebarContent = (
+    <>
+      {/* Categories */}
+      <div className="ui-card overflow-hidden">
         <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
           <span />
           <h3 className="text-sm font-bold text-[var(--text)]">التصنيفات</h3>
         </div>
         <div className="divide-y divide-[var(--border)]">
-          {/* All categories row */}
           <Link
-            href={buildListingsHref({ category: null, city: null, search: null, sort: null, page: null })}
+            href={buildListingsHref({ category: null, city: null, search: null, sort: null, page: null, priceMin: null, priceMax: null })}
             className={`flex items-center justify-between px-4 py-3 transition ${!categoryFilter ? "bg-[var(--accent-soft)]" : "hover:bg-[var(--accent-soft)]"}`}
           >
             <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-base font-bold leading-none text-[var(--brand-contrast)] ${!categoryFilter ? "bg-red-500" : "bg-[var(--brand)]"}`}>
-              {!categoryFilter ? "×" : "+"}
+              {!categoryFilter ? "×" : "☰"}
             </span>
             <span className={`text-sm ${!categoryFilter ? "font-bold text-[var(--brand)]" : "font-semibold text-[var(--text)]"}`}>كل التصنيفات</span>
           </Link>
@@ -205,13 +275,21 @@ function PublicListingsPageInner() {
             return (
               <div key={cat.id} className="divide-y divide-[var(--border)]">
                 <div className={`flex items-center justify-between px-4 py-3 transition ${isActive || isExpanded ? "bg-[var(--accent-soft)]" : "hover:bg-[var(--accent-soft)]"}`}>
-                  <button
-                    type="button"
-                    onClick={() => setExpandedSlug(isExpanded ? null : slug)}
-                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-base font-bold leading-none text-[var(--brand-contrast)] transition hover:opacity-80 ${isActive ? "bg-red-500" : "bg-[var(--brand)]"}`}
-                  >
-                    {isExpanded ? "×" : "+"}
-                  </button>
+                  {subs.length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => setExpandedSlug(isExpanded ? null : slug)}
+                      aria-label={isExpanded ? `طي التصنيفات الفرعية لـ ${cat.name.ar || cat.name.en}` : `عرض التصنيفات الفرعية لـ ${cat.name.ar || cat.name.en}`}
+                      aria-expanded={isExpanded}
+                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-base font-bold leading-none text-[var(--brand-contrast)] transition hover:opacity-80 ${isActive ? "bg-red-500" : "bg-[var(--brand)]"}`}
+                    >
+                      {isExpanded ? "−" : "+"}
+                    </button>
+                  ) : (
+                    <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm leading-none text-[var(--brand-contrast)] ${isActive ? "bg-red-500" : "bg-[var(--brand)]"}`}>
+                      •
+                    </span>
+                  )}
                   <Link
                     href={buildListingsHref({ category: slug, page: 1 })}
                     className="flex items-center gap-2"
@@ -237,160 +315,243 @@ function PublicListingsPageInner() {
             );
           })}
         </div>
+      </div>
+
+      {/* Price filter */}
+      <div className="ui-card overflow-hidden">
+        <div className="border-b border-[var(--border)] px-4 py-3">
+          <h3 className="text-sm font-bold text-[var(--text)] text-right">نطاق السعر</h3>
+        </div>
+        <div className="p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              value={localPriceMin}
+              onChange={(e) => setLocalPriceMin(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && applyPriceFilter()}
+              placeholder="من"
+              min={0}
+              aria-label="الحد الأدنى للسعر"
+              className="ui-pill-input h-9 flex-1 text-center text-xs"
+            />
+            <span className="text-xs text-[var(--text-muted)]">—</span>
+            <input
+              type="number"
+              value={localPriceMax}
+              onChange={(e) => setLocalPriceMax(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && applyPriceFilter()}
+              placeholder="إلى"
+              min={0}
+              aria-label="الحد الأقصى للسعر"
+              className="ui-pill-input h-9 flex-1 text-center text-xs"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={applyPriceFilter}
+            className="ui-btn-primary w-full rounded-full py-1.5 text-xs"
+          >
+            تطبيق السعر
+          </button>
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="grid gap-5 lg:grid-cols-[270px_1fr]">
+      {/* Desktop Sidebar */}
+      <aside className="order-2 lg:order-1 hidden lg:block h-fit space-y-4">
+        {sidebarContent}
       </aside>
+
+      {/* Mobile filter toggle */}
+      <div className="lg:hidden order-1">
+        <button
+          type="button"
+          onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+          aria-expanded={mobileFiltersOpen}
+          aria-label={mobileFiltersOpen ? "إخفاء الفلاتر" : "عرض الفلاتر"}
+          className="ui-btn-ghost flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--border)] py-2.5 text-sm"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6" /><line x1="8" y1="12" x2="20" y2="12" /><line x1="12" y1="18" x2="20" y2="18" />
+          </svg>
+          <span>الفلاتر والتصنيفات</span>
+          {hasAnyFilter && (
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--brand)] text-[10px] font-bold text-[var(--brand-contrast)]">
+              {activeFilterChips.length}
+            </span>
+          )}
+        </button>
+        {mobileFiltersOpen && (
+          <div className="motion-dropdown mt-3 space-y-4" data-motion-state="enter">
+            {sidebarContent}
+          </div>
+        )}
+      </div>
 
       {/* Listings area */}
       <div className="order-1 lg:order-2 space-y-4">
-        {(categoryFilter || cityFilterRaw || searchFilterRaw) ? (
+        {/* Active filter chips */}
+        {activeFilterChips.length > 0 && (
           <div className="motion-alert flex flex-wrap items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-2">
-            {categoryFilter ? (
+            {activeFilterChips.map((chip) => (
               <Link
-                href={buildListingsHref({ category: null, page: 1 })}
-                className="motion-alert rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800 transition-colors hover:bg-emerald-100"
+                key={chip.key}
+                href={chip.onRemove}
+                className={`motion-alert rounded-full border px-3 py-1 text-xs font-medium transition-colors ${chip.color}`}
               >
-                🏷️ التصنيف:{" "}
-                {categories.find((c) => (c.slug || c.id).toLowerCase() === categoryFilter)?.name.ar ||
-                  categories.find((c) => (c.slug || c.id).toLowerCase() === categoryFilter)?.name.en ||
-                  categoryFilter}{" "}
-                ×
+                {chip.label} ×
               </Link>
-            ) : null}
-            {cityFilterRaw ? (
-              <Link
-                href={buildListingsHref({ city: null, page: 1 })}
-                className="motion-alert rounded-full border border-sky-300 bg-sky-50 px-3 py-1 text-xs font-medium text-sky-800 transition-colors hover:bg-sky-100"
-              >
-                📍 المدينة: {cityFilterRaw} ×
-              </Link>
-            ) : null}
-            {searchFilterRaw ? (
-              <Link
-                href={buildListingsHref({ search: null, page: 1 })}
-                className="motion-alert rounded-full border border-violet-300 bg-violet-50 px-3 py-1 text-xs font-medium text-violet-800 transition-colors hover:bg-violet-100"
-              >
-                🔎 بحث: {searchFilterRaw} ×
-              </Link>
-            ) : null}
-            <Link
-              href={buildListingsHref({
-                category: null,
-                city: null,
-                search: null,
-                sort: null,
-                page: null,
-              })}
+            ))}
+            <button
+              type="button"
+              onClick={clearAllFilters}
               className="ui-btn-primary rounded-full px-3 py-1 text-xs"
             >
               مسح الفلاتر
-            </Link>
+            </button>
           </div>
-        ) : null}
+        )}
 
         {/* Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            {(categoryFilter || cityFilter || searchFilter) ? (
-              <p className="text-sm text-[var(--text-muted)]">
-                {categoryFilter && (
-                  <>
-                    فلتر التصنيف:{" "}
-                    <span className="font-semibold text-[var(--text)]">
-                      {categories.find((c) => (c.slug || c.id).toLowerCase() === categoryFilter)?.name.ar ||
-                        categories.find((c) => (c.slug || c.id).toLowerCase() === categoryFilter)?.name.en ||
-                        categoryFilter}
-                    </span>
-                  </>
-                )}
-                {categoryFilter && (cityFilter || searchFilter) && " • "}
-                {cityFilter && (
-                  <>المدينة: <span className="font-semibold text-[var(--text)]">{cityFilterRaw}</span></>
-                )}
-                {cityFilter && searchFilter && " • "}
-                {searchFilter && (
-                  <>بحث: <span className="font-semibold text-[var(--text)]">{searchFilterRaw}</span></>
-                )}
-              </p>
-            ) : null}
-            <p className="text-xs text-[var(--text-muted)]">
-              {total} إعلان {total > 0 ? `(${startCount}-${endCount})` : ""}
-            </p>
-          </div>
-
+          <p className="text-xs text-[var(--text-muted)]">
+            {total} إعلان {total > 0 ? `(${startCount}-${endCount})` : ""}
+          </p>
           <select
             value={sort}
             onChange={(e) => {
               const nextSort = e.target.value as SortKey;
-              router.replace(buildListingsHref({ sort: nextSort, page: 1 }));
+              if (isValidSort(nextSort)) {
+                router.replace(buildListingsHref({ sort: nextSort, page: 1 }));
+              }
             }}
+            aria-label="ترتيب النتائج"
             className="ui-pill-input ui-select h-9 border-[var(--border)] py-1.5 text-xs"
           >
-            {Object.entries(SORT_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
+            {SORT_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
         </div>
 
-        {listings.length ? (
+        {/* Error state */}
+        {error ? (
+          <div className="motion-section rounded-xl border border-[var(--danger)]/30 bg-[var(--danger)]/5 px-6 py-10 text-center space-y-4">
+            <div className="flex justify-center">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--danger)]">
+                <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+            <p className="text-sm font-semibold text-[var(--text)]">حدث خطأ أثناء تحميل الإعلانات</p>
+            <p className="text-xs text-[var(--text-muted)]">{error}</p>
+            <button
+              type="button"
+              onClick={() => router.refresh()}
+              className="ui-btn-primary rounded-full px-6 py-2 text-xs"
+            >
+              إعادة المحاولة
+            </button>
+          </div>
+        ) : listings.length > 0 ? (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
               {listings.map((listing, index) => (
                 <ListingCard key={listing.id} listing={listing} motionIndex={index} />
               ))}
             </div>
-            <div className="flex items-center justify-center gap-2">
-              <button
-                type="button"
-                onClick={() => router.replace(buildListingsHref({ page: safeCurrentPage - 1 }))}
-                disabled={safeCurrentPage <= 1}
-                className="ui-btn-ghost rounded-full px-4 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                السابق
-              </button>
-              <span className="text-xs text-[var(--text-muted)]">
-                صفحة {safeCurrentPage} من {totalPages}
-              </span>
-              {pageNumbers.map((pageNum, index) =>
-                pageNum === "..." ? (
-                  <span
-                    key={`ellipsis-${index}`}
-                    className="inline-flex h-8 min-w-8 items-center justify-center px-1 text-xs text-[var(--text-muted)]"
-                  >
-                    ...
-                  </span>
-                ) : (
-                  <button
-                    key={pageNum}
-                    type="button"
-                    onClick={() => router.replace(buildListingsHref({ page: pageNum }))}
-                    className={`inline-flex h-8 min-w-8 items-center justify-center rounded-full border px-2 text-xs transition ${
-                      pageNum === safeCurrentPage
-                        ? "border-[var(--brand)] bg-[var(--brand)] text-[var(--brand-contrast)]"
-                        : "border-[var(--border)] text-[var(--text)] hover:border-[var(--brand)]"
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                )
-              )}
-              <button
-                type="button"
-                onClick={() => router.replace(buildListingsHref({ page: safeCurrentPage + 1 }))}
-                disabled={safeCurrentPage >= totalPages}
-              className="ui-btn-ghost rounded-full px-4 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                التالي
-              </button>
-            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <nav aria-label="التنقل بين الصفحات" className="flex flex-wrap items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => router.replace(buildListingsHref({ page: safeCurrentPage - 1 }))}
+                  disabled={!hasPreviousPage && safeCurrentPage <= 1}
+                  aria-label="الصفحة السابقة"
+                  className="ui-btn-ghost rounded-full px-4 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  السابق
+                </button>
+                {pageNumbers.map((pageNum, index) =>
+                  pageNum === "..." ? (
+                    <span
+                      key={`ellipsis-${index}`}
+                      className="inline-flex h-8 min-w-8 items-center justify-center px-1 text-xs text-[var(--text-muted)]"
+                    >
+                      ...
+                    </span>
+                  ) : (
+                    <button
+                      key={pageNum}
+                      type="button"
+                      onClick={() => router.replace(buildListingsHref({ page: pageNum }))}
+                      aria-label={`الصفحة ${pageNum}`}
+                      aria-current={pageNum === safeCurrentPage ? "page" : undefined}
+                      className={`inline-flex h-8 min-w-8 items-center justify-center rounded-full border px-2 text-xs transition ${
+                        pageNum === safeCurrentPage
+                          ? "border-[var(--brand)] bg-[var(--brand)] text-[var(--brand-contrast)]"
+                          : "border-[var(--border)] text-[var(--text)] hover:border-[var(--brand)]"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  )
+                )}
+                <button
+                  type="button"
+                  onClick={() => router.replace(buildListingsHref({ page: safeCurrentPage + 1 }))}
+                  disabled={!hasNextPage && safeCurrentPage >= totalPages}
+                  aria-label="الصفحة التالية"
+                  className="ui-btn-ghost rounded-full px-4 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  التالي
+                </button>
+              </nav>
+            )}
           </div>
         ) : (
-          <div className="motion-section rounded-xl border border-[var(--border)] bg-[var(--surface)] px-6 py-10 text-center">
-            <p className="text-sm text-[var(--text-muted)]">لا توجد إعلانات مطابقة حاليًا.</p>
-            <Link
-              href="/listings"
-              className="ui-btn-primary mt-3 rounded-full px-5 py-2 text-xs"
-            >
-              عرض كل الإعلانات
-            </Link>
+          /* Empty state */
+          <div className="motion-section rounded-xl border border-[var(--border)] bg-[var(--surface)] px-6 py-12 text-center space-y-4">
+            <div className="flex justify-center">
+              <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" className="text-[var(--text-muted)]">
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="8" y1="11" x2="14" y2="11" />
+              </svg>
+            </div>
+            <p className="text-base font-semibold text-[var(--text)]">لا توجد إعلانات مطابقة لبحثك</p>
+            <p className="text-sm text-[var(--text-muted)]">
+              {hasAnyFilter
+                ? "جرّب تعديل الفلاتر أو البحث بكلمات مختلفة"
+                : "لا توجد إعلانات منشورة حالياً"}
+            </p>
+            {activeFilterChips.length > 0 && (
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {activeFilterChips.map((chip) => (
+                  <span key={chip.key} className={`rounded-full border px-3 py-1 text-[11px] font-medium ${chip.color}`}>
+                    {chip.label}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              {hasAnyFilter && (
+                <button
+                  type="button"
+                  onClick={clearAllFilters}
+                  className="ui-btn-ghost rounded-full border border-[var(--border)] px-5 py-2 text-xs"
+                >
+                  مسح الفلاتر
+                </button>
+              )}
+              <Link href="/listings" className="ui-btn-primary rounded-full px-5 py-2 text-xs">
+                العودة لكل الإعلانات
+              </Link>
+              <Link href="/submit-listing" className="ui-btn-ghost rounded-full border border-[var(--brand)] px-5 py-2 text-xs text-[var(--brand)]">
+                أضف إعلانك
+              </Link>
+            </div>
           </div>
         )}
       </div>

@@ -71,6 +71,8 @@ jobs:
       - name: Build
         env:
           NEXT_PUBLIC_SITE_URL: https://ci.flashpointjordan.local
+          NEXT_PUBLIC_BACKEND_API_BASE_URL: https://ci.flashpointjordan.local/api
+          NEXT_PUBLIC_UPLOADS_PUBLIC_BASE_URL: https://ci.flashpointjordan.local/uploads
           NEXT_PUBLIC_FIREBASE_API_KEY: ci-placeholder-api-key
           NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ci-placeholder-auth-domain
           NEXT_PUBLIC_FIREBASE_PROJECT_ID: ci-placeholder-project-id

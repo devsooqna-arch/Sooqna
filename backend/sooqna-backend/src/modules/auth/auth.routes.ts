@@ -65,8 +65,7 @@ authRouter.post(
       res,
       500,
       "VERIFICATION_RESEND_POLICY_FAILED",
-      "Failed to validate verification resend policy.",
-      error instanceof Error ? error.message : String(error)
+      "Failed to validate verification resend policy."
     );
   }
   }
@@ -84,8 +83,7 @@ authRouter.post(
     }
 
     if (!env.recaptchaSecretKey) {
-      console.warn("[reCAPTCHA] RECAPTCHA_ENABLED is true but RECAPTCHA_SECRET_KEY is not set — bypassing verification.");
-      sendSuccess(res, { verified: true, bypassed: true });
+      sendError(res, 503, "RECAPTCHA_NOT_CONFIGURED", "reCAPTCHA verification is not configured.");
       return;
     }
 
@@ -111,7 +109,7 @@ authRouter.post(
     };
 
     if (!result.success) {
-      sendError(res, 403, "RECAPTCHA_FAILED", "reCAPTCHA verification failed.", result["error-codes"]);
+      sendError(res, 403, "RECAPTCHA_FAILED", "reCAPTCHA verification failed.");
       return;
     }
 
@@ -126,7 +124,7 @@ authRouter.post(
       500,
       "RECAPTCHA_VERIFY_FAILED",
       "reCAPTCHA verification failed unexpectedly.",
-      error instanceof Error ? error.message : String(error)
+      undefined
     );
   }
   }

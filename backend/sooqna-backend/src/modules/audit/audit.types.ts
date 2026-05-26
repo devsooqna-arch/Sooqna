@@ -14,8 +14,19 @@ export type AuditAction =
   | "favorite.remove"
   | "message.create"
   | "message.read"
+  | "review.create"
   | "report.submit"
   | "report.update"
+  | "admin.listing.publish"
+  | "admin.listing.reject"
+  | "admin.listing.archive"
+  | "admin.listing.sold"
+  | "admin.listing.feature"
+  | "admin.listing.unfeature"
+  | "admin.user.update"
+  | "admin.report.update"
+  | "admin.category.create"
+  | "admin.category.update"
   | "security.content_blocked";
 
 export interface AuditLogEntry {

@@ -24,14 +24,24 @@ model User {
   email           String
   name            String
   avatarUrl       String?
+  bio             String?
+  phone           String?
   role            Role     @default(BUYER)
   accountStatus   String
   isEmailVerified Boolean
+  isPhoneVerified Boolean   @default(false)
+  isIdVerified    Boolean   @default(false)
+  avgRating       Float     @default(0)
+  totalReviews    Int       @default(0)
+  totalListings   Int       @default(0)
+  totalSold       Int       @default(0)
   createdAt       DateTime
   updatedAt       DateTime
 
-  listings  Listing[]
-  favorites Favorite[]
+  listings        Listing[]
+  favorites       Favorite[]
+  reviewsGiven    Review[]   @relation("ReviewerRelation")
+  reviewsReceived Review[]   @relation("SellerRelation")
 }
 
 model Listing {
@@ -210,6 +220,24 @@ model AuditLog {
   @@index([createdAt])
   @@index([action, createdAt])
   @@index([targetType, targetId])
+}
+
+model Review {
+  id         String   @id
+  sellerId   String
+  reviewerId String
+  listingId  String
+  rating     Int
+  comment    String
+  createdAt  DateTime
+  updatedAt  DateTime
+
+  seller   User @relation("SellerRelation", fields: [sellerId], references: [firebaseUid], onDelete: Cascade)
+  reviewer User @relation("ReviewerRelation", fields: [reviewerId], references: [firebaseUid], onDelete: Cascade)
+
+  @@unique([reviewerId, listingId], map: "reviews_reviewer_listing_unique")
+  @@index([sellerId, createdAt])
+  @@index([listingId])
 }
 
 model EngagementEvent {

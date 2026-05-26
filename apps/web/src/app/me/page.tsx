@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { PublicShell } from "@/components/layout/PublicShell";
 import { AccountDashboard } from "@/components/me/AccountDashboard";
+import { noIndexMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "حسابي",
-  description: "لوحة حساب المستخدم داخل سوقنا.",
-};
+export const metadata: Metadata = noIndexMetadata("حسابي", "لوحة حساب المستخدم داخل سوقنا.");
 
 export default function MePage() {
   return (

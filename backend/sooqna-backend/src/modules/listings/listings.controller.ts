@@ -1,11 +1,15 @@
 import type { Request, Response } from "express";
 import { AppError } from "../../shared/errors/appError";
 import { logAuditEvent } from "../audit/audit.service";
+import { PrismaReviewsRepository } from "../reviews/repositories/reviews.repository";
+import { ReviewsService } from "../reviews/reviews.service";
 import { PrismaListingsRepository } from "./repositories/listings.repository";
 import { ListingsService } from "./listings.service";
 import type { ListingCurrency } from "./listings.types";
+import { toPublicListing } from "./listings.types";
 
 const service = new ListingsService(new PrismaListingsRepository());
+const reviewsService = new ReviewsService(new PrismaReviewsRepository());
 
 function requireTrustedUid(req: Request): string {
   const uid = req.currentUser?.firebaseUid;
@@ -69,12 +73,18 @@ export async function listListings(req: Request, res: Response): Promise<void> {
 
   const normalizedFilters = service.normalizeFilters({ limit, offset, category, city, search, sort, priceMin, priceMax });
   const { items, total } = await service.list(normalizedFilters);
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const currentPage = Math.floor(offset / limit) + 1;
   res.json({
     success: true,
-    listings: items,
+    listings: items.map(toPublicListing),
     total,
     limit,
     offset,
+    currentPage,
+    totalPages,
+    hasNextPage: currentPage < totalPages,
+    hasPreviousPage: currentPage > 1,
     filters: {
       category: normalizedFilters.category ?? null,
       city: normalizedFilters.city ?? null,
@@ -99,7 +109,23 @@ export async function getListingById(req: Request, res: Response): Promise<void>
     res.status(404).json({ success: false, message: "Listing not found" });
     return;
   }
-  res.json({ success: true, listing });
+
+  let sellerProfile = null;
+  let recentReviews: unknown[] = [];
+  if (listing.ownerId) {
+    try {
+      const [profile, reviews] = await Promise.all([
+        reviewsService.getPublicSellerProfile(listing.ownerId),
+        reviewsService.getListingReviews(listing.id, 3),
+      ]);
+      sellerProfile = profile;
+      recentReviews = reviews;
+    } catch {
+      // Seller data is supplementary — don't fail the listing response
+    }
+  }
+
+  res.json({ success: true, listing, seller: sellerProfile, reviews: recentReviews });
 }
 
 export async function patchListing(req: Request, res: Response): Promise<void> {
@@ -231,6 +257,12 @@ export async function unfeatureListing(req: Request, res: Response): Promise<voi
     targetId: listing.id,
   });
   res.json({ success: true, listing });
+}
+
+export async function getListingsByIds(req: Request, res: Response): Promise<void> {
+  const ids: string[] = req.body?.ids ?? [];
+  const listings = await service.findPublicByIds(ids);
+  res.json({ success: true, listings: listings.map(toPublicListing) });
 }
 
 export async function attachListingImage(req: Request, res: Response): Promise<void> {

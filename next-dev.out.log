@@ -68,3 +68,28 @@
  GET / 200 in 73ms
  GET /login 200 in 32ms
  GET /me 200 in 89ms
+ GET / 500 in 1284ms
+ GET /me 500 in 843ms
+ GET / 200 in 874ms
+ GET /me 500 in 1735ms
+ ✓ Compiled in 915ms (478 modules)
+ GET /me 200 in 36ms
+ GET /login?next=%2Fme 200 in 635ms
+ GET /login?next=%2Fme 200 in 720ms
+ GET /me 200 in 1258ms
+ GET /me 200 in 1257ms
+ GET /me 500 in 1117ms
+ GET /me 500 in 40ms
+ GET /me 500 in 1215ms
+ GET /me 500 in 41ms
+ GET /me 500 in 1916ms
+ GET /me 500 in 67ms
+ GET / 500 in 2051ms
+ GET / 500 in 61ms
+ GET / 500 in 2192ms
+ GET / 500 in 78ms
+ GET / 500 in 2021ms
+ GET / 500 in 71ms
+ GET / 500 in 1884ms
+ GET / 500 in 87ms
+[?25h

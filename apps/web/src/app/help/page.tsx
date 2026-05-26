@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicShell } from "@/components/layout/PublicShell";
+import { buildPublicPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPublicPageMetadata({
   title: "المساعدة",
-  description: "الأسئلة الشائعة ومركز المساعدة في سوقنا",
-};
+  description: "إجابات الأسئلة الشائعة حول نشر الإعلانات، التواصل مع البائعين، إدارة الحساب، والإبلاغ عن الإعلانات المشبوهة في سوقنا.",
+  pathname: "/help",
+});
 
 export default function HelpPage() {
   return (

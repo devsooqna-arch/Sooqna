@@ -24,6 +24,12 @@ export async function createConversation(req: Request, res: Response): Promise<v
   if (!listing) {
     throw new AppError(404, "Listing not found", "NOT_FOUND");
   }
+  if (listing.ownerId === uid) {
+    throw new AppError(400, "You cannot message your own listing.", "VALIDATION_ERROR");
+  }
+  if (listing.status !== "published") {
+    throw new AppError(400, "Listing is not available for messaging.", "VALIDATION_ERROR");
+  }
 
   const participantIds = Array.from(new Set([uid, listing.ownerId].filter(Boolean)));
   const primaryImage =

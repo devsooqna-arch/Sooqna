@@ -1,5 +1,5 @@
 import { apiFetch } from "@/services/apiClient";
-import type { CreateListingInput, CreateListingResult, Listing } from "@/types/listing";
+import type { CreateListingInput, CreateListingResult, Listing, ListingDetailResponse, ListingsPageResponse } from "@/types/listing";
 import { buildCreateListingPayload } from "./listingCreatePayload";
 
 /**
@@ -41,18 +41,7 @@ export type ListingsFilterParams = {
   priceMax?: number;
 };
 
-export async function getListingsFiltered(params: ListingsFilterParams): Promise<{
-  listings: Listing[];
-  total: number;
-  limit: number;
-  offset: number;
-  filters?: {
-    category: string | null;
-    city: string | null;
-    search: string | null;
-    sort: "newest" | "price_asc" | "price_desc";
-  };
-}> {
+export async function getListingsFiltered(params: ListingsFilterParams): Promise<ListingsPageResponse> {
   const query = new URLSearchParams();
   if (typeof params.limit === "number") query.set("limit", String(params.limit));
   if (typeof params.offset === "number") query.set("offset", String(params.offset));
@@ -60,25 +49,11 @@ export async function getListingsFiltered(params: ListingsFilterParams): Promise
   if (params.city?.trim()) query.set("city", params.city.trim());
   if (params.search?.trim()) query.set("search", params.search.trim());
   if (params.sort) query.set("sort", params.sort);
-  if (typeof params.priceMin === "number") query.set("priceMin", String(params.priceMin));
-  if (typeof params.priceMax === "number") query.set("priceMax", String(params.priceMax));
+  if (typeof params.priceMin === "number" && params.priceMin > 0) query.set("priceMin", String(params.priceMin));
+  if (typeof params.priceMax === "number" && params.priceMax > 0) query.set("priceMax", String(params.priceMax));
 
   const suffix = query.toString() ? `?${query.toString()}` : "";
-  return apiFetch<{
-    success: true;
-    listings: Listing[];
-    total: number;
-    limit: number;
-    offset: number;
-    filters?: {
-      category: string | null;
-      city: string | null;
-      search: string | null;
-      sort: "newest" | "price_asc" | "price_desc";
-    };
-  }>(
-    `/listings${suffix}`
-  );
+  return apiFetch<ListingsPageResponse>(`/listings${suffix}`);
 }
 
 export async function getMyListings(): Promise<Listing[]> {
@@ -89,12 +64,29 @@ export async function getMyListings(): Promise<Listing[]> {
 }
 
 /**
- * Fetch a single listing by id.
+ * Fetch a single listing by id with seller trust data.
  */
 export async function getListingById(id: string): Promise<Listing | null> {
   try {
     const response = await apiFetch<{ success: true; listing: Listing }>(`/listings/${id}`);
     return response.listing;
+  } catch {
+    return null;
+  }
+}
+
+export async function getListingsByIds(ids: string[]): Promise<Listing[]> {
+  if (!ids.length) return [];
+  const response = await apiFetch<{ success: true; listings: Listing[] }>("/listings/batch", {
+    method: "POST",
+    body: JSON.stringify({ ids }),
+  });
+  return response.listings;
+}
+
+export async function getListingDetail(id: string): Promise<ListingDetailResponse | null> {
+  try {
+    return await apiFetch<ListingDetailResponse>(`/listings/${id}`);
   } catch {
     return null;
   }

@@ -9,9 +9,17 @@ export interface UserProfile {
   fullName: string;
   email: string;
   photoURL: string;
+  bio?: string;
+  phone?: string;
   role: UserRole;
   accountStatus: AccountStatus;
   isEmailVerified: boolean;
+  isPhoneVerified?: boolean;
+  isIdVerified?: boolean;
+  avgRating?: number;
+  totalReviews?: number;
+  totalListings?: number;
+  totalSold?: number;
   createdAt: string;
   updatedAt: string;
 }

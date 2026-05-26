@@ -1,9 +1,11 @@
 import type { Request, Response } from "express";
 import multer from "multer";
+import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { env } from "../../config/env";
 import { AppError } from "../../shared/errors/appError";
 import { PrismaUploadsRepository } from "./uploads.repository";
+import { hasValidImageSignature } from "./uploads.config";
 
 const uploadsRepository = new PrismaUploadsRepository();
 
@@ -11,6 +13,20 @@ function toPublicUrl(relativePath: string): string {
   const normalized = relativePath.replace(/\\/g, "/");
   const base = env.uploadsPublicBaseUrl.replace(/\/$/, "");
   return `${base}/${normalized.replace(/^uploads\//, "")}`;
+}
+
+async function assertValidStoredImage(filePath: string): Promise<void> {
+  const handle = await fs.open(filePath, "r");
+  try {
+    const buffer = Buffer.alloc(16);
+    const { bytesRead } = await handle.read(buffer, 0, buffer.length, 0);
+    if (!hasValidImageSignature(buffer.subarray(0, bytesRead))) {
+      await fs.unlink(filePath).catch(() => undefined);
+      throw new AppError(400, "Uploaded file is not a valid JPG, PNG, or WEBP image.", "VALIDATION_ERROR");
+    }
+  } finally {
+    await handle.close();
+  }
 }
 
 export async function uploadListingImage(req: Request, res: Response): Promise<void> {
@@ -22,6 +38,7 @@ export async function uploadListingImage(req: Request, res: Response): Promise<v
   if (!file) {
     throw new AppError(400, "Image file is required.", "VALIDATION_ERROR");
   }
+  await assertValidStoredImage(file.path);
 
   const relativePath = path
     .relative(process.cwd(), file.path)
@@ -52,6 +69,7 @@ export async function uploadProfileAvatar(req: Request, res: Response): Promise<
   if (!file) {
     throw new AppError(400, "Image file is required.", "VALIDATION_ERROR");
   }
+  await assertValidStoredImage(file.path);
 
   const relativePath = path
     .relative(process.cwd(), file.path)

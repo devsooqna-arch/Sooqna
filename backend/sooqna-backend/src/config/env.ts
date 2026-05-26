@@ -41,12 +41,25 @@ function parseCsv(value: string | undefined): string[] {
     .filter(Boolean);
 }
 
+function parseTrustProxy(value: string | undefined): boolean | number | string {
+  if (!value) return false;
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "true") return true;
+  if (normalized === "false") return false;
+  const numeric = Number(normalized);
+  if (Number.isInteger(numeric) && numeric >= 0) return numeric;
+  return value.trim();
+}
+
 const enableCategoriesJsonFallback = parseBoolean(
   process.env.ENABLE_CATEGORIES_JSON_FALLBACK,
   false
 );
 const databaseUrl = process.env.DATABASE_URL ?? "";
 const requireDatabase = isProduction || !enableCategoriesJsonFallback;
+const corsOrigins = parseCsv(
+  process.env.CORS_ORIGIN ?? (isProduction ? undefined : "http://localhost:3000")
+);
 
 if (!databaseUrl && requireDatabase) {
   throw new Error(
@@ -63,15 +76,20 @@ function resolveUploadsPublicBaseUrl(): string {
   if (explicit) return explicit.replace(/\/$/, "");
   const origin = process.env.BACKEND_PUBLIC_ORIGIN?.trim();
   if (origin) return `${origin.replace(/\/$/, "")}/uploads`;
+  if (isProduction) {
+    throw new Error("UPLOADS_PUBLIC_BASE_URL or BACKEND_PUBLIC_ORIGIN is required in production.");
+  }
   return "http://localhost:5000/uploads";
 }
 
 export const env = {
   port: Number(process.env.PORT ?? 5000),
   nodeEnv,
-  corsOrigin: process.env.CORS_ORIGIN ?? (isProduction
+  corsOrigin: corsOrigins[0] ?? (isProduction
     ? (() => { throw new Error("CORS_ORIGIN env var is required in production."); })()
     : "http://localhost:3000"),
+  corsOrigins,
+  trustProxy: parseTrustProxy(process.env.TRUST_PROXY),
   uploadsPublicBaseUrl: resolveUploadsPublicBaseUrl(),
   firebaseProjectId: requireInProduction(process.env.FIREBASE_PROJECT_ID, "FIREBASE_PROJECT_ID"),
   firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL ?? "",
@@ -96,4 +114,8 @@ export const env = {
   contactToEmail: process.env.CONTACT_TO_EMAIL ?? "info@sooqna.com",
   contactFromEmail: process.env.CONTACT_FROM_EMAIL ?? "onboarding@resend.dev",
 };
+
+if (isProduction && env.recaptchaEnabled && !env.recaptchaSecretKey) {
+  throw new Error("RECAPTCHA_SECRET_KEY is required in production when RECAPTCHA_ENABLED=true.");
+}
 

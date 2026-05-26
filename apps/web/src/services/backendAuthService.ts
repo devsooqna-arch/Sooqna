@@ -8,6 +8,10 @@ export type BackendProfile = {
   role: "ADMIN" | "BUYER" | "SELLER";
   accountStatus: "active";
   isEmailVerified: boolean;
+  avgRating?: number;
+  totalReviews?: number;
+  totalListings?: number;
+  totalSold?: number;
   createdAt: string;
   updatedAt: string;
 };

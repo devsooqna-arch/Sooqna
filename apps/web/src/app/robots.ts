@@ -10,6 +10,7 @@ export default function robots(): MetadataRoute.Robots {
         "/dev-tools",
         "/auth-test",
         "/listings-test",
+        "/admin",
         "/me",
         "/me/settings",
         "/messages",

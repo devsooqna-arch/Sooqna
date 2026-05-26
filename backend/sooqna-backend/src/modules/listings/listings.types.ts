@@ -57,3 +57,60 @@ export interface Listing {
   deletedAt: string | null;
 }
 
+export interface PublicListing {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  currency: ListingCurrency;
+  priceType: ListingPriceType;
+  categoryId: string;
+  ownerId: string;
+  ownerSnapshot: {
+    fullName: string;
+    photoURL: string;
+  };
+  location: {
+    country: string;
+    city: string;
+    area: string;
+  };
+  images: Array<Omit<ListingImage, "path">>;
+  status: ListingStatus;
+  condition: ListingCondition;
+  contactPreference: ListingContactPreference;
+  viewsCount: number;
+  favoritesCount: number;
+  messagesCount: number;
+  isFeatured: boolean;
+  imageCount: number;
+  publishedAt: string | null;
+  createdAt: string;
+}
+
+export function toPublicListing(listing: Listing): PublicListing {
+  return {
+    id: listing.id,
+    title: listing.title,
+    description: listing.description,
+    price: listing.price,
+    currency: listing.currency,
+    priceType: listing.priceType,
+    categoryId: listing.categoryId,
+    ownerId: listing.ownerId,
+    ownerSnapshot: listing.ownerSnapshot,
+    location: listing.location,
+    images: listing.images.map(({ url, isPrimary, order }) => ({ url, isPrimary, order })),
+    status: listing.status,
+    condition: listing.condition,
+    contactPreference: listing.contactPreference,
+    viewsCount: listing.viewsCount,
+    favoritesCount: listing.favoritesCount,
+    messagesCount: listing.messagesCount,
+    isFeatured: listing.isFeatured,
+    imageCount: listing.images.length,
+    publishedAt: listing.publishedAt,
+    createdAt: listing.createdAt,
+  };
+}
+

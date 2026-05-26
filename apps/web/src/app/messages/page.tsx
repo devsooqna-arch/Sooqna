@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { PublicShell } from "@/components/layout/PublicShell";
 import { MessagesWorkspace } from "@/components/messages/MessagesWorkspace";
+import { noIndexMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "الرسائل",
-  description: "إدارة محادثاتك ورسائلك داخل سوقنا.",
-};
+export const metadata: Metadata = noIndexMetadata("الرسائل", "إدارة محادثاتك ورسائلك داخل سوقنا.");
 
 type MessagesPageProps = {
   searchParams: Promise<{ conversation?: string }>;

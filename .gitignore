@@ -1,6 +1,8 @@
 .firebase/
 firebase-debug.log
 *-debug.log
+*.log
+*.zip
 
 # Web
 apps/web/.env.local

@@ -174,14 +174,13 @@ function SearchBarInner() {
 
     if (trimmedSearch) {
       nextParams.set("search", trimmedSearch);
-      nextParams.delete("category");
     } else {
       nextParams.delete("search");
-      if (trimmedCategory) {
-        nextParams.set("category", trimmedCategory);
-      } else {
-        nextParams.delete("category");
-      }
+    }
+    if (trimmedCategory) {
+      nextParams.set("category", trimmedCategory);
+    } else {
+      nextParams.delete("category");
     }
     if (trimmedCity) {
       nextParams.set("city", trimmedCity);
@@ -225,6 +224,8 @@ function SearchBarInner() {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           placeholder="ماذا تبحث؟"
+          aria-label="بحث في الإعلانات"
+          maxLength={200}
           className="ui-pill-input flex-1"
         />
         <ModernDropdown
@@ -250,6 +251,7 @@ function SearchBarInner() {
         />
         <button
           onClick={handleSearch}
+          aria-label="تنفيذ البحث"
           className="ui-btn-primary h-11 rounded-full px-8"
         >
           بحث
@@ -263,10 +265,13 @@ function SearchBarInner() {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           placeholder="بحث..."
+          aria-label="بحث في الإعلانات"
+          maxLength={200}
           className="ui-pill-input h-10 flex-1 px-4"
         />
         <button
           onClick={handleSearch}
+          aria-label="تنفيذ البحث"
           className="ui-btn-primary h-10 rounded-full px-4 text-xs"
         >
           بحث

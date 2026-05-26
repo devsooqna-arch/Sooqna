@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { PublicShell } from "@/components/layout/PublicShell";
+import { buildPublicPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPublicPageMetadata({
   title: "سياسة الخصوصية",
-  description: "كيف نجمع ونستخدم ونحمي بياناتك في سوقنا",
-};
+  description: "اقرأ سياسة خصوصية سوقنا لمعرفة كيفية جمع بيانات الحساب والإعلانات واستخدامها وحمايتها ضمن المنصة.",
+  pathname: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (

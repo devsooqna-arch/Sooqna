@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { PublicShell } from "@/components/layout/PublicShell";
+import { buildPublicPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPublicPageMetadata({
   title: "من نحن",
-  description: "تعرف على سوقنا وقصتنا",
-};
+  description: "تعرف على سوقنا، منصة الإعلانات المبوبة التي تساعد المستخدمين على البيع والشراء والتواصل بثقة وسهولة.",
+  pathname: "/about",
+});
 
 export default function AboutPage() {
   return (

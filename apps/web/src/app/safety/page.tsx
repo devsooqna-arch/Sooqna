@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { PublicShell } from "@/components/layout/PublicShell";
+import { buildPublicPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPublicPageMetadata({
   title: "نصائح الأمان",
-  description: "تسوّق وبيع بأمان على سوقنا",
-};
+  description: "نصائح أمان للمشترين والبائعين على سوقنا: التحقق من المنتجات، اللقاء في أماكن آمنة، وتجنب المدفوعات المسبقة المشبوهة.",
+  pathname: "/safety",
+});
 
 export default function SafetyPage() {
   return (

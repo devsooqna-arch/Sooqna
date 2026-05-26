@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { PublicShell } from "@/components/layout/PublicShell";
+import { buildPublicPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPublicPageMetadata({
   title: "شروط الاستخدام",
-  description: "شروط استخدام منصة سوقنا",
-};
+  description: "شروط استخدام سوقنا التي توضّح قواعد نشر الإعلانات، مسؤوليات المستخدمين، وسياسات الحساب والمحتوى.",
+  pathname: "/terms",
+});
 
 export default function TermsPage() {
   return (

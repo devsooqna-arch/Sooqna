@@ -36,7 +36,12 @@ export async function fetchPublicListings(limit = 200): Promise<Listing[]> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
-    const response = await fetch(`${apiBase()}/listings`, {
+    const params = new URLSearchParams({
+      limit: String(Math.min(Math.max(limit, 1), 100)),
+      offset: "0",
+      sort: "newest",
+    });
+    const response = await fetch(`${apiBase()}/listings?${params.toString()}`, {
       method: "GET",
       cache: "no-store",
       signal: controller.signal,

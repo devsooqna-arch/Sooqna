@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { PublicShell } from "@/components/layout/PublicShell";
 import { ContactForm } from "@/components/contact/ContactForm";
+import { buildPublicPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPublicPageMetadata({
   title: "اتصل بنا",
-  description: "قنوات التواصل مع فريق سوقنا",
-};
+  description: "تواصل مع فريق سوقنا للاستفسارات والدعم والشكاوى والشراكات عبر نموذج التواصل أو البريد الإلكتروني.",
+  pathname: "/contact",
+});
 
 export default function ContactPage() {
   return (

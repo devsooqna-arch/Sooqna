@@ -1,13 +1,14 @@
 import { Router } from "express";
 import { verifyFirebaseToken } from "../../middleware/verifyFirebaseToken";
 import { requireActiveUser, requireCurrentUser } from "../../middleware/authContext";
+import { requireVerifiedEmail } from "../../middleware/requireVerifiedEmail";
 import { validateRequest } from "../../middleware/validateRequest";
 import { engagementEventBodySchema, engagementRecentQuerySchema } from "../../shared/validation/schemas";
 import { trackEngagementEvent, listRecentEngagementEvents } from "./engagement.service";
 
 export const engagementRouter = Router();
 
-engagementRouter.post("/events", verifyFirebaseToken, requireCurrentUser, requireActiveUser, validateRequest({ body: engagementEventBodySchema }), async (req, res) => {
+engagementRouter.post("/events", verifyFirebaseToken, requireCurrentUser, requireActiveUser, requireVerifiedEmail, validateRequest({ body: engagementEventBodySchema }), async (req, res) => {
   await trackEngagementEvent({
     eventType: req.body.eventType,
     listingId: req.body.listingId,

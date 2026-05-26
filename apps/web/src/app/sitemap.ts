@@ -7,17 +7,11 @@ const staticRoutes = [
   "/listings",
   "/categories",
   "/about",
+  "/help",
+  "/safety",
   "/contact",
+  "/privacy",
   "/terms",
-  "/login",
-  "/register",
-  "/reset-password",
-  "/submit-listing",
-  "/favorites",
-  "/messages",
-  "/me",
-  "/me/settings",
-  "/my-listings",
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

@@ -4,8 +4,14 @@ import { ListingDetailsView } from "@/components/listings/ListingDetailsView";
 import { PublicShell } from "@/components/layout/PublicShell";
 import { JsonLdScript } from "@/components/seo/JsonLdScript";
 import { listingTitleForPageMetadata } from "@/lib/listingMetadata";
+import { arabicCity } from "@/lib/locationNames";
 import { resolvePublicMediaUrl } from "@/lib/mediaUrl";
-import { buildAbsoluteUrl } from "@/lib/seo";
+import {
+  buildAbsoluteUrl,
+  sanitizeMetadataText,
+  seoDefaults,
+  truncateMetadataText,
+} from "@/lib/seo";
 import { fetchPublicListingById } from "@/lib/server-listings";
 
 type ListingDetailsPageProps = {
@@ -17,9 +23,6 @@ export async function generateMetadata({
 }: ListingDetailsPageProps): Promise<Metadata> {
   const { listingId } = await params;
   const listing = await fetchPublicListingById(listingId);
-  const description =
-    listing?.description?.trim() ||
-    "تفاصيل الإعلان داخل سوقنا، مع بيانات البائع وطرق التواصل المباشر.";
 
   if (!listing) {
     const title = "إعلان غير موجود";
@@ -27,16 +30,35 @@ export async function generateMetadata({
       title,
       description: "لم يُعثر على هذا الإعلان في سوقنا.",
       alternates: { canonical: `/listings/${listingId}` },
+      robots: {
+        index: false,
+        follow: false,
+        googleBot: { index: false, follow: false },
+      },
       openGraph: {
         title,
         description: "لم يُعثر على هذا الإعلان في سوقنا.",
-        url: `/listings/${listingId}`,
+        url: buildAbsoluteUrl(`/listings/${listingId}`),
         type: "website",
       },
     };
   }
 
-  const title = listingTitleForPageMetadata(listing.title);
+  const city = arabicCity(listing.location.city);
+  const category = sanitizeMetadataText(listing.categoryId);
+  const titleParts = [
+    sanitizeMetadataText(listing.title),
+    category,
+    city,
+  ].filter(Boolean);
+  const title = listingTitleForPageMetadata(titleParts.join(" - "));
+  const description = truncateMetadataText(
+    listing.description ||
+      `${listing.title} على سوقنا${city ? ` في ${city}` : ""}. شاهد التفاصيل وتواصل مع البائع بأمان داخل المنصة.`
+  );
+  const image = listing.images?.[0]?.url
+    ? (resolvePublicMediaUrl(listing.images[0].url) ?? listing.images[0].url)
+    : seoDefaults.image;
 
   return {
     title,
@@ -47,11 +69,17 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      url: `/listings/${listingId}`,
-      images: listing.images?.[0]?.url
-        ? [(resolvePublicMediaUrl(listing.images[0].url) ?? listing.images[0].url)]
-        : undefined,
+      url: buildAbsoluteUrl(`/listings/${listingId}`),
+      siteName: seoDefaults.siteName,
+      locale: "ar_SY",
+      images: [{ url: image, alt: sanitizeMetadataText(listing.title) }],
       type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
     },
   };
 }
@@ -64,22 +92,39 @@ export default async function ListingDetailsPage({ params }: ListingDetailsPageP
   const firstListingImage = listing.images?.[0]?.url?.trim()
     ? (resolvePublicMediaUrl(listing.images[0].url) ?? listing.images[0].url)
     : undefined;
+  const firstListingImageAbsolute = firstListingImage?.startsWith("/")
+    ? buildAbsoluteUrl(firstListingImage)
+    : firstListingImage;
 
-  const jsonLd = {
+  const price = Number(listing.price);
+  const hasValidPrice = Number.isFinite(price) && price >= 0 && listing.priceType !== "contact";
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "الرئيسية", item: buildAbsoluteUrl("/") },
+      { "@type": "ListItem", position: 2, name: "الإعلانات", item: buildAbsoluteUrl("/listings") },
+      { "@type": "ListItem", position: 3, name: sanitizeMetadataText(listing.title), item: buildAbsoluteUrl(`/listings/${listingId}`) },
+    ],
+  };
+  const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: listing.title || `إعلان رقم ${listingId}`,
-    sku: listingId,
+    name: sanitizeMetadataText(listing.title) || `إعلان رقم ${listingId}`,
     url: buildAbsoluteUrl(`/listings/${listingId}`),
-    image: firstListingImage,
-    description: listing.description || undefined,
-    offers: {
-      "@type": "Offer",
-      priceCurrency: listing.currency || "SYP",
-      price: listing.price ?? undefined,
-      availability: "https://schema.org/InStock",
-      url: buildAbsoluteUrl(`/listings/${listingId}`),
-    },
+    image: firstListingImageAbsolute,
+    description: truncateMetadataText(listing.description || ""),
+    ...(hasValidPrice
+      ? {
+          offers: {
+            "@type": "Offer",
+            priceCurrency: listing.currency || "SYP",
+            price,
+            availability: "https://schema.org/InStock",
+            url: buildAbsoluteUrl(`/listings/${listingId}`),
+          },
+        }
+      : {}),
     brand: {
       "@type": "Brand",
       name: "سوقنا",
@@ -88,7 +133,8 @@ export default async function ListingDetailsPage({ params }: ListingDetailsPageP
 
   return (
     <PublicShell>
-      <JsonLdScript data={jsonLd} />
+      <JsonLdScript data={breadcrumbJsonLd} />
+      <JsonLdScript data={productJsonLd} />
       <ListingDetailsView listingId={listingId} />
     </PublicShell>
   );

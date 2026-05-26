@@ -12,7 +12,7 @@ export type ListingCurrency = "SYP" | "USD";
 
 export interface ListingImage {
   url: string;
-  path: string;
+  path?: string;
   isPrimary: boolean;
   order: number;
 }
@@ -31,7 +31,7 @@ export interface ListingOwnerSnapshot {
 export interface Listing {
   id: string;
   title: string;
-  titleLower: string;
+  titleLower?: string;
   description: string;
   price: number;
   currency: ListingCurrency;
@@ -50,19 +50,47 @@ export interface Listing {
   favoritesCount: number;
   messagesCount: number;
   isFeatured: boolean;
-  isApproved: boolean;
+  isApproved?: boolean;
+  imageCount?: number;
   publishedAt: string | null;
-  soldAt: string | null;
-  archivedAt: string | null;
-  expiresAt: string | null;
+  soldAt?: string | null;
+  archivedAt?: string | null;
+  expiresAt?: string | null;
   createdAt: string | null;
-  updatedAt: string | null;
-  deletedAt: string | null;
+  updatedAt?: string | null;
+  deletedAt?: string | null;
+}
+
+export interface ListingsPageResponse {
+  success: boolean;
+  listings: Listing[];
+  total: number;
+  limit: number;
+  offset: number;
+  currentPage: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  filters?: {
+    category: string | null;
+    city: string | null;
+    search: string | null;
+    sort: "newest" | "price_asc" | "price_desc";
+    priceMin: number | null;
+    priceMax: number | null;
+  };
 }
 
 /**
  * Milestone 1 input accepted by backend REST API.
  */
+export interface ListingDetailResponse {
+  success: boolean;
+  listing: Listing;
+  seller: import("./review").PublicSellerProfile | null;
+  reviews: import("./review").PublicReview[];
+}
+
 export interface CreateListingInput {
   title: string;
   price: number;

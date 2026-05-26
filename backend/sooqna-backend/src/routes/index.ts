@@ -9,11 +9,18 @@ import { messagesRouter } from "../modules/messages/messages.routes";
 import { categoriesRouter } from "../modules/categories/categories.routes";
 import { engagementRouter } from "../modules/engagement/engagement.routes";
 import { reportsRouter } from "../modules/reports/reports.routes";
+import { reviewsRouter } from "../modules/reviews/reviews.routes";
 import { auditRouter } from "../modules/audit/audit.routes";
+import { adminRouter } from "../modules/admin/admin.routes";
 import { contactRouter } from "../modules/contact/contact.routes";
+import { verifyFirebaseToken } from "../middleware/verifyFirebaseToken";
+import { requireActiveUser, requireCurrentUser } from "../middleware/authContext";
+import { checkRole } from "../middleware/checkRole";
 import { prisma } from "../config/prisma";
 import { env } from "../config/env";
 import { readJsonArrayFile } from "../utils/fileStore";
+import { Role } from "@prisma/client";
+import { shouldExposeDeveloperRoutes } from "./securityPolicy";
 
 export const apiRouter = Router();
 
@@ -21,8 +28,15 @@ apiRouter.get("/health", (_req, res) => {
   res.json({ success: true, data: { status: "ok", uptime: process.uptime() } });
 });
 
-apiRouter.get("/dev/seed-summary", async (_req, res) => {
-  try {
+if (shouldExposeDeveloperRoutes(env.nodeEnv)) {
+  apiRouter.get(
+    "/dev/seed-summary",
+    verifyFirebaseToken,
+    requireCurrentUser,
+    requireActiveUser,
+    checkRole([Role.ADMIN]),
+    async (_req, res) => {
+    try {
     const [users, categories, listings, favorites, conversations, messages] = await Promise.all([
       prisma.user.count(),
       prisma.category.count(),
@@ -77,7 +91,9 @@ apiRouter.get("/dev/seed-summary", async (_req, res) => {
       },
     });
   }
-});
+  }
+  );
+}
 
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/uploads", uploadRouter);
@@ -88,6 +104,8 @@ apiRouter.use("/messages", messagesRouter);
 apiRouter.use("/categories", categoriesRouter);
 apiRouter.use("/engagement", engagementRouter);
 apiRouter.use("/reports", reportsRouter);
+apiRouter.use("/reviews", reviewsRouter);
 apiRouter.use("/audit", auditRouter);
+apiRouter.use("/admin", adminRouter);
 apiRouter.use("/contact", contactRouter);
 

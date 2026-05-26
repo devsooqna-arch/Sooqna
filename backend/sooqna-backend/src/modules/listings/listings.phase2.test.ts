@@ -18,6 +18,7 @@ function createRepo(): jest.Mocked<ListingsRepository> {
     list: jest.fn().mockResolvedValue({ items: [], total: 0 }),
     listByOwner: jest.fn().mockResolvedValue([]),
     findById: jest.fn(),
+    findByIds: jest.fn(),
     findByIdIncludingDeleted: jest.fn(),
     findByClientRequestId: jest.fn(),
     update: jest.fn(async (_id: string, listing: Listing) => listing),
@@ -88,6 +89,22 @@ describe("Phase 2: Listing lifecycle and authorization", () => {
   });
 
   describe("getListingById visibility", () => {
+    it("filters batch listing lookup to published active listings", async () => {
+      const repo = createRepo();
+      const active = makePublishedListing({ id: "lst_active" });
+      const draft = makeDraftListing({ id: "lst_draft" });
+      const expired = makePublishedListing({
+        id: "lst_expired",
+        expiresAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      });
+      repo.findByIds.mockResolvedValue([active, draft, expired]);
+      const service = new ListingsService(repo);
+
+      const result = await service.findPublicByIds(["lst_active", "lst_draft", "lst_expired"]);
+
+      expect(result.map((listing) => listing.id)).toEqual(["lst_active"]);
+    });
+
     it("returns null for draft listing viewed by non-owner", async () => {
       const repo = createRepo();
       const draft = makeDraftListing();

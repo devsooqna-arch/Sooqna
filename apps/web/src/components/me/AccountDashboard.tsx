@@ -5,8 +5,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { RequireAuthGate } from "@/components/auth/RequireAuthGate";
 import { getBackendMe, type BackendProfile } from "@/services/backendAuthService";
+import { getUserFavoriteListingIds } from "@/services/favoriteService";
+import { getUnreadSummary } from "@/services/messageService";
 import { ModernAvatar } from "@/components/ui/ModernAvatar";
 import { getMotionStaggerStyle } from "@/lib/motion";
+import { DashboardStatsBar, type DashboardStats } from "@/components/me/DashboardStatsBar";
 
 type DashCard = {
   title: string;
@@ -27,29 +30,49 @@ const DASH_CARDS: DashCard[] = [
 ];
 
 const DEV_ONLY_CARD: DashCard = {
-  title: "لوحة المطور",
-  description: "أدوات الاختبار والتطوير",
-  href: "/dev-tools",
+  title: "لوحة الإدارة",
+  description: "إدارة الإعلانات والبلاغات والمستخدمين",
+  href: "/admin",
   icon: "🛠️",
 };
 
 export function AccountDashboard() {
   const { currentUser } = useAuth();
   const [profile, setProfile] = useState<BackendProfile | null>(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
+    if (!currentUser) return;
     let mounted = true;
-    void getBackendMe()
-      .then((data) => {
-        if (mounted) setProfile(data);
+    setStatsLoading(true);
+
+    Promise.all([
+      getBackendMe(),
+      getUserFavoriteListingIds(currentUser.uid).catch(() => [] as string[]),
+      getUnreadSummary().catch(() => ({ totalUnread: 0, byConversation: {} })),
+    ])
+      .then(([profileData, favIds, unread]) => {
+        if (!mounted) return;
+        setProfile(profileData);
+        setStats({
+          activeListings: profileData?.totalListings ?? 0,
+          favoritesCount: favIds.length,
+          unreadMessages: unread.totalUnread,
+          totalSold: profileData?.totalSold ?? 0,
+        });
       })
       .catch(() => {
         if (mounted) setProfile(null);
+      })
+      .finally(() => {
+        if (mounted) setStatsLoading(false);
       });
+
     return () => {
       mounted = false;
     };
-  }, [currentUser?.uid]);
+  }, [currentUser]);
 
   const displayName = useMemo(() => {
     if (profile?.fullName) return profile.fullName;
@@ -90,6 +113,9 @@ export function AccountDashboard() {
             </div>
           </div>
         </section>
+
+        {/* Stats overview */}
+        <DashboardStatsBar stats={stats} loading={statsLoading} />
 
         {/* Dashboard grid */}
         <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">

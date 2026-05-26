@@ -181,6 +181,32 @@ export const updateReportStatusBodySchema = z
   })
   .strict();
 
+export const createReviewBodySchema = z
+  .object({
+    sellerId: z.string().trim().min(1).max(120),
+    listingId: z.string().trim().min(1).max(120),
+    rating: z.number().int().min(1).max(5),
+    comment: z.string().trim().max(2000).optional().default(""),
+  })
+  .strict();
+
+export const sellerIdParamsSchema = z.object({
+  sellerId: z.string().min(1),
+});
+
+export const reviewsQuerySchema = z
+  .object({
+    limit: z.coerce.number().int().min(1).max(50).optional(),
+    offset: z.coerce.number().int().min(0).optional(),
+  })
+  .strict();
+
+export const batchListingIdsBodySchema = z
+  .object({
+    ids: z.array(z.string().min(1)).min(1).max(50),
+  })
+  .strict();
+
 export const idParamsSchema = idParamSchema;
 export const listingIdParamsSchema = listingIdParamSchema;
 export const conversationIdParamsSchema = conversationIdParamSchema;

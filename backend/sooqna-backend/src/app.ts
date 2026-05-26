@@ -10,11 +10,35 @@ import { apiRouter } from "./routes";
 import { errorHandler } from "./middleware/errorHandler";
 import { notFoundHandler } from "./middleware/notFound";
 import swaggerUi from "swagger-ui-express";
+import { shouldExposeApiDocs } from "./routes/securityPolicy";
 
 export const app = express();
 
-app.use(helmet());
-app.use(cors({ origin: env.corsOrigin, credentials: true }));
+if (env.trustProxy !== false) {
+  app.set("trust proxy", env.trustProxy);
+}
+
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      if (env.corsOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error("Origin is not allowed by CORS."));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json({ limit: "1mb" }));
 app.use(morgan(env.nodeEnv === "production" ? "combined" : "dev"));
 
@@ -77,6 +101,40 @@ app.use(
 );
 
 app.use(
+  "/api/listings",
+  rateLimit({
+    windowMs: 5 * 60 * 1000,
+    max: 240,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, code: "RATE_LIMITED", message: "طلبات كثيرة. انتظر قليلاً ثم حاول مرة أخرى." },
+  })
+);
+
+app.use(
+  ["/api/listings", "/api/uploads"],
+  rateLimit({
+    windowMs: 60 * 1000,
+    max: 60,
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: (req) => req.method === "GET" || req.method === "HEAD" || req.method === "OPTIONS",
+    message: { success: false, code: "RATE_LIMITED", message: "طلبات كثيرة. انتظر قليلاً ثم حاول مرة أخرى." },
+  })
+);
+
+app.use(
+  "/api/admin",
+  rateLimit({
+    windowMs: 5 * 60 * 1000,
+    max: 120,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, code: "RATE_LIMITED", message: "Too many admin requests." },
+  })
+);
+
+app.use(
   "/api/contact",
   rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -87,8 +145,20 @@ app.use(
   })
 );
 
-app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
-app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiSpec));
+app.use(
+  "/uploads",
+  express.static(path.resolve(process.cwd(), "uploads"), {
+    dotfiles: "deny",
+    index: false,
+    setHeaders(res) {
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.setHeader("Cache-Control", "public, max-age=86400");
+    },
+  })
+);
+if (shouldExposeApiDocs(env.nodeEnv)) {
+  app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiSpec));
+}
 app.use("/api", apiRouter);
 app.use(notFoundHandler);
 app.use(errorHandler);

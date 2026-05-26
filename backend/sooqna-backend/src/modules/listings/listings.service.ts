@@ -39,6 +39,8 @@ type AttachImageInput = {
   path: string;
 };
 
+const MAX_IMAGES_PER_LISTING = 10;
+
 export class ListingsService {
   private readonly usersRepo = new PrismaUsersRepository();
   private readonly cityAliases: Record<string, string> = {
@@ -187,6 +189,20 @@ export class ListingsService {
     return this.repo.findById(id);
   }
 
+  async findByIds(ids: string[]): Promise<Listing[]> {
+    return this.repo.findByIds(ids);
+  }
+
+  async findPublicByIds(ids: string[]): Promise<Listing[]> {
+    const listings = await this.repo.findByIds(ids);
+    return listings.filter((listing) => {
+      this.applyAutoExpiration(listing);
+      if (listing.status !== "published") return false;
+      if (listing.expiresAt && new Date(listing.expiresAt).getTime() <= Date.now()) return false;
+      return true;
+    });
+  }
+
   async getPublicById(id: string): Promise<Listing | null> {
     const listing = await this.repo.findById(id);
     if (!listing) return null;
@@ -285,6 +301,15 @@ export class ListingsService {
         "Listing images cannot be updated in current status.",
         "LISTING_STATE_INVALID"
       );
+    }
+    if (!input.path.replace(/\\/g, "/").startsWith(`uploads/listings/${input.ownerId}/`)) {
+      throw new AppError(400, "Image path is not owned by this user.", "VALIDATION_ERROR");
+    }
+    if (!input.url.startsWith(`${env.uploadsPublicBaseUrl.replace(/\/$/, "")}/listings/${input.ownerId}/`)) {
+      throw new AppError(400, "Image URL is not a trusted listing upload.", "VALIDATION_ERROR");
+    }
+    if (listing.images.length >= MAX_IMAGES_PER_LISTING) {
+      throw new AppError(400, "Maximum listing image count reached.", "VALIDATION_ERROR");
     }
 
     const isPrimary = listing.images.length === 0;

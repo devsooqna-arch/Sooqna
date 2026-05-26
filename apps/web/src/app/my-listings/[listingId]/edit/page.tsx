@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PublicShell } from "@/components/layout/PublicShell";
 import { EditListingPageView } from "@/components/listings/EditListingPageView";
+import { noIndexMetadata } from "@/lib/seo";
 
 type EditListingPageProps = {
   params: Promise<{ listingId: string }>;
@@ -8,10 +9,7 @@ type EditListingPageProps = {
 
 export async function generateMetadata({ params }: EditListingPageProps): Promise<Metadata> {
   const { listingId } = await params;
-  return {
-    title: `تعديل إعلان | ${listingId}`,
-    description: "تعديل بيانات الإعلان وإدارته.",
-  };
+  return noIndexMetadata(`تعديل إعلان | ${listingId}`, "تعديل بيانات الإعلان وإدارته.");
 }
 
 export default async function EditListingPage({ params }: EditListingPageProps) {

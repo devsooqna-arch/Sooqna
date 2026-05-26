@@ -6,6 +6,7 @@ import { contentFilter } from "../../middleware/contentFilter";
 import { validateRequest } from "../../middleware/validateRequest";
 import {
   attachListingImageBodySchema,
+  batchListingIdsBodySchema,
   createListingBodySchema,
   idParamsSchema,
   listingsQuerySchema,
@@ -20,6 +21,7 @@ import {
   expireListing,
   featureListing,
   getListingById,
+  getListingsByIds,
   listListings,
   listMyListings,
   markListingSold,
@@ -34,6 +36,7 @@ export const listingsRouter = Router();
 
 listingsRouter.get("/", validateRequest({ query: listingsQuerySchema }), listListings);
 listingsRouter.get("/mine", verifyFirebaseToken, requireCurrentUser, requireActiveUser, listMyListings);
+listingsRouter.post("/batch", validateRequest({ body: batchListingIdsBodySchema }), getListingsByIds);
 listingsRouter.get("/:id", validateRequest({ params: idParamsSchema }), getListingById);
 
 listingsRouter.post(

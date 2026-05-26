@@ -4,17 +4,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { getCategories } from "@/services/categoryService";
-import { getListings } from "@/services/listingService";
+import { getListings, getListingsByIds } from "@/services/listingService";
 import type { Category } from "@/types/category";
 import type { Listing } from "@/types/listing";
 import { ListingCard } from "@/components/listings/ListingCard";
 import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { CategoryIcon } from "@/lib/categoryIcons";
 import { SUBCATEGORIES } from "@/lib/categorySubcategories";
+import { getRecentlyViewedListingIds } from "@/lib/recentlyViewedListings";
 
 export function HomeMarketplace() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [listings, setListings] = useState<Listing[]>([]);
+  const [recentListings, setRecentListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeHeroIndex, setActiveHeroIndex] = useState(0);
@@ -36,6 +38,34 @@ export function HomeMarketplace() {
       .finally(() => {
         if (!mounted) return;
         setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const ids = getRecentlyViewedListingIds();
+    if (!ids.length) {
+      setRecentListings([]);
+      return;
+    }
+
+    let mounted = true;
+    void getListingsByIds(ids)
+      .then((items) => {
+        if (!mounted) return;
+        const order = new Map(ids.map((id, index) => [id, index]));
+        setRecentListings(
+          items
+            .filter((item) => item.status === "published")
+            .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0))
+            .slice(0, 6)
+        );
+      })
+      .catch(() => {
+        if (mounted) setRecentListings([]);
       });
 
     return () => {
@@ -222,6 +252,22 @@ export function HomeMarketplace() {
                         <ListingCard key={listing.id} listing={listing} featured motionIndex={index} />
                       ))}
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {recentListings.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-[var(--text)]">شوهدت مؤخراً</h3>
+                    <Link href="/listings" className="text-xs text-[var(--brand)] hover:underline">
+                      متابعة التصفح
+                    </Link>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    {recentListings.map((listing, index) => (
+                      <ListingCard key={listing.id} listing={listing} motionIndex={index} />
+                    ))}
                   </div>
                 </div>
               )}

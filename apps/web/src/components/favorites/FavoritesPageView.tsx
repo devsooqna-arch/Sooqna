@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { RequireAuthGate } from "@/components/auth/RequireAuthGate";
 import { getUserFavoriteListingIds } from "@/services/favoriteService";
-import { getListingById } from "@/services/listingService";
+import { getListingsByIds } from "@/services/listingService";
 import type { Listing } from "@/types/listing";
 import { ListingCard } from "@/components/listings/ListingCard";
 import { isEmailNotVerified } from "@/lib/apiError";
@@ -42,6 +42,7 @@ export function FavoritesPageView() {
   const [emailUnverified, setEmailUnverified] = useState(false);
   const [items, setItems] = useState<Listing[]>([]);
   const [sort, setSort] = useState<SortKey>("newest");
+  const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
 
   const sortedItems = useMemo(() => sortListings(items, sort), [items, sort]);
 
@@ -54,9 +55,11 @@ export function FavoritesPageView() {
 
     void getUserFavoriteListingIds(currentUser.uid)
       .then(async (listingIds) => {
-        const results = (
-          await Promise.all(listingIds.map((id) => getListingById(id).catch(() => null)))
-        ).filter((item): item is Listing => Boolean(item));
+        if (!mounted || !listingIds.length) {
+          if (mounted) setItems([]);
+          return;
+        }
+        const results = await getListingsByIds(listingIds);
         if (!mounted) return;
         setItems(results);
       })
@@ -75,6 +78,19 @@ export function FavoritesPageView() {
     };
   }, [currentUser]);
 
+  const handleFavoriteToggle = useCallback((listingId: string, isFav: boolean) => {
+    if (isFav) return;
+    setRemovingIds((prev) => new Set(prev).add(listingId));
+    setTimeout(() => {
+      setItems((prev) => prev.filter((item) => item.id !== listingId));
+      setRemovingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(listingId);
+        return next;
+      });
+    }, 300);
+  }, []);
+
   return (
     <RequireAuthGate fallbackMessage="يتم التحقق من الجلسة قبل تحميل المفضلة...">
       {emailUnverified && <EmailVerificationBanner />}
@@ -88,7 +104,10 @@ export function FavoritesPageView() {
         <p className="motion-alert text-sm text-[var(--danger)]">{error}</p>
       ) : items.length ? (
         <div className="space-y-4">
-          <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-end">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="rounded-full border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-1 text-xs font-semibold text-[var(--text-muted)]">
+              {items.length} إعلان محفوظ
+            </span>
             <label className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
               <span>ترتيب:</span>
               <select
@@ -106,7 +125,18 @@ export function FavoritesPageView() {
           </div>
           <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
             {sortedItems.map((item, index) => (
-              <ListingCard key={item.id} listing={item} motionIndex={index} />
+              <div
+                key={item.id}
+                className={`transition-all duration-300 ${
+                  removingIds.has(item.id) ? "scale-95 opacity-0" : "scale-100 opacity-100"
+                }`}
+              >
+                <ListingCard
+                  listing={item}
+                  motionIndex={index}
+                  onFavoriteToggle={handleFavoriteToggle}
+                />
+              </div>
             ))}
           </div>
         </div>

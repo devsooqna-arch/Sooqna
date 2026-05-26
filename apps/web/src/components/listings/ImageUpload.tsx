@@ -11,7 +11,7 @@ type ImageUploadProps = {
 };
 
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
-const ACCEPTED_IMAGE_TYPES = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp"]);
+const ACCEPTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export function ImageUpload({ listingId, onUploaded }: ImageUploadProps) {
   const [file, setFile] = useState<File | null>(null);
@@ -70,7 +70,7 @@ export function ImageUpload({ listingId, onUploaded }: ImageUploadProps) {
 
       <input
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp"
         onChange={(e) => setFile(e.target.files?.[0] ?? null)}
         disabled={submitting}
         className="block w-full text-sm"

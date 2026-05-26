@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { RequireAuthGate } from "@/components/auth/RequireAuthGate";
-import { getMyListings, featureListing, unfeatureListing } from "@/services/listingService";
+import { getMyListings } from "@/services/listingService";
 import type { Listing, ListingStatus } from "@/types/listing";
 import { arabicCity } from "@/lib/locationNames";
 import { isEmailNotVerified } from "@/lib/apiError";
@@ -52,7 +52,6 @@ export function MyListingsPageView() {
   const [emailUnverified, setEmailUnverified] = useState(false);
   const [myListings, setMyListings] = useState<Listing[]>([]);
   const [tab, setTab] = useState<MyTab>("all");
-  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const filteredListings = useMemo(
     () => myListings.filter((l) => matchesMyTab(l, tab)),
@@ -70,23 +69,6 @@ export function MyListingsPageView() {
       .finally(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
   }, [currentUser]);
-
-  async function handleFeatureToggle(listing: Listing) {
-    if (togglingId) return;
-    setTogglingId(listing.id);
-    try {
-      const updated = listing.isFeatured
-        ? await unfeatureListing(listing.id)
-        : await featureListing(listing.id);
-      setMyListings((prev) =>
-        prev.map((l) => (l.id === updated.id ? updated : l))
-      );
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "حدث خطأ، حاول مجدداً");
-    } finally {
-      setTogglingId(null);
-    }
-  }
 
   return (
     <RequireAuthGate fallbackMessage="يتم التحقق من الجلسة قبل تحميل إعلاناتك...">
@@ -131,7 +113,7 @@ export function MyListingsPageView() {
               className="ui-card ui-card-hover motion-card flex flex-col gap-3 rounded-xl p-4 sm:flex-row sm:items-center sm:justify-between"
               style={getMotionStaggerStyle(index)}
             >
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1 space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="text-sm font-bold text-[var(--text)]">{listing.title}</h3>
                   <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${STATUS_COLORS[listing.status]}`}>
@@ -149,25 +131,23 @@ export function MyListingsPageView() {
                   <span className="mx-1">•</span>
                   {listing.viewsCount} مشاهدة
                 </p>
+                <div className="grid grid-cols-2 gap-2 text-[11px] text-[var(--text-muted)] sm:grid-cols-3 lg:grid-cols-6">
+                  <StatPill label="المشاهدات" value={String(listing.viewsCount)} />
+                  <StatPill label="المفضلة" value={String(listing.favoritesCount)} />
+                  <StatPill label="الرسائل" value={String(listing.messagesCount)} />
+                  <StatPill label="النشر" value={formatDashboardDate(listing.publishedAt ?? listing.createdAt)} />
+                  <StatPill label="الانتهاء" value={formatDashboardDate(listing.expiresAt ?? null)} />
+                  <StatPill label="التمييز" value={listing.isFeatured ? "مميز" : "عادي"} />
+                </div>
               </div>
               <div className="flex shrink-0 flex-wrap items-center gap-2">
-                {listing.status === "published" && (
-                  <button
-                    type="button"
-                    onClick={() => void handleFeatureToggle(listing)}
-                    disabled={togglingId === listing.id}
-                    className={`rounded-full px-4 py-1.5 text-xs font-semibold transition disabled:opacity-50 ${
-                      listing.isFeatured
-                        ? "border border-[var(--featured)] bg-[var(--featured)]/10 text-[var(--featured)] hover:bg-[var(--featured)]/20"
-                        : "border border-[var(--border)] bg-[var(--chip)] text-[var(--text-muted)] hover:text-[var(--text)]"
-                    }`}
+                {listing.status === "published" && !listing.isFeatured && (
+                  <Link
+                    href="/packages"
+                    className="rounded-full border border-[var(--featured)]/50 bg-[var(--featured)]/10 px-4 py-1.5 text-xs font-semibold text-[var(--featured)] transition hover:bg-[var(--featured)]/20"
                   >
-                    {togglingId === listing.id
-                      ? "..."
-                      : listing.isFeatured
-                      ? "إلغاء التمييز"
-                      : "تمييز ★"}
-                  </button>
+                    خيارات التمييز
+                  </Link>
                 )}
                 <Link
                   href={`/listings/${listing.id}`}
@@ -203,4 +183,20 @@ export function MyListingsPageView() {
       )}
     </RequireAuthGate>
   );
+}
+
+function StatPill({ label, value }: { label: string; value: string }) {
+  return (
+    <span className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-2.5 py-2">
+      <span className="block text-[10px]">{label}</span>
+      <span className="block truncate font-bold text-[var(--text)]">{value}</span>
+    </span>
+  );
+}
+
+function formatDashboardDate(value: string | null | undefined): string {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleDateString("ar-SY", { year: "numeric", month: "short", day: "numeric" });
 }

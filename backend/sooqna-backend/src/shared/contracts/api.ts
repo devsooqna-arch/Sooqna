@@ -23,5 +23,8 @@ export function sendError(
   message: string,
   details?: unknown
 ): void {
-  res.status(status).json({ success: false, code, message, details } satisfies ApiError);
+  const includeDetails = process.env.NODE_ENV !== "production" && details !== undefined;
+  res
+    .status(status)
+    .json({ success: false, code, message, ...(includeDetails ? { details } : {}) } satisfies ApiError);
 }

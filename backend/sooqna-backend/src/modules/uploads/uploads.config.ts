@@ -5,10 +5,38 @@ import multer from "multer";
 
 const allowedMimeTypes = new Set([
   "image/jpeg",
-  "image/jpg",
   "image/png",
   "image/webp",
 ]);
+const allowedExtensions = new Set([".jpg", ".jpeg", ".png", ".webp"]);
+
+export function isAllowedImageMimeType(mimeType: string): boolean {
+  return allowedMimeTypes.has(mimeType);
+}
+
+export function hasAllowedImageExtension(fileName: string): boolean {
+  return allowedExtensions.has(path.extname(fileName || "").toLowerCase());
+}
+
+export function hasValidImageSignature(bytes: Buffer): boolean {
+  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+    return true;
+  }
+  if (
+    bytes.length >= 8 &&
+    bytes[0] === 0x89 &&
+    bytes[1] === 0x50 &&
+    bytes[2] === 0x4e &&
+    bytes[3] === 0x47 &&
+    bytes[4] === 0x0d &&
+    bytes[5] === 0x0a &&
+    bytes[6] === 0x1a &&
+    bytes[7] === 0x0a
+  ) {
+    return true;
+  }
+  return bytes.length >= 12 && bytes.subarray(0, 4).toString("ascii") === "RIFF" && bytes.subarray(8, 12).toString("ascii") === "WEBP";
+}
 
 function ensureDir(dir: string): void {
   if (!fs.existsSync(dir)) {
@@ -49,7 +77,7 @@ export function createImageUploader(folderType: "listings" | "profiles") {
     storage,
     limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (_req, file, cb) => {
-      if (!allowedMimeTypes.has(file.mimetype)) {
+      if (!isAllowedImageMimeType(file.mimetype) || !hasAllowedImageExtension(file.originalname)) {
         cb(new Error("Only jpg/jpeg/png/webp images are allowed."));
         return;
       }

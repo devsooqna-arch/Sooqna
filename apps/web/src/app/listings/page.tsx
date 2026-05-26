@@ -3,15 +3,13 @@ import { Suspense } from "react";
 import { PublicShell } from "@/components/layout/PublicShell";
 import { PublicListingsPage, ListingsPageSkeleton } from "@/components/listings/PublicListingsPage";
 import { JsonLdScript } from "@/components/seo/JsonLdScript";
-import { buildAbsoluteUrl } from "@/lib/seo";
+import { buildAbsoluteUrl, buildPublicPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPublicPageMetadata({
   title: "الإعلانات",
-  description: "تصفح جميع الإعلانات مع الفلترة حسب التصنيف.",
-  alternates: {
-    canonical: "/listings",
-  },
-};
+  description: "تصفح الإعلانات المنشورة على سوقنا حسب التصنيف والمدينة والسعر، واعثر على سيارات وعقارات وإلكترونيات وخدمات في سوريا.",
+  pathname: "/listings",
+});
 
 export default function ListingsPage() {
   const jsonLd = {

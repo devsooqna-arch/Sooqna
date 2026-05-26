@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { PublicShell } from "@/components/layout/PublicShell";
 import { MyListingsPageView } from "@/components/listings/MyListingsPageView";
+import { noIndexMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "إعلاناتي",
-  description: "إدارة الإعلانات التي قمت بنشرها.",
-};
+export const metadata: Metadata = noIndexMetadata("إعلاناتي", "إدارة الإعلانات التي قمت بنشرها.");
 
 export default function MyListingsPage() {
   return (

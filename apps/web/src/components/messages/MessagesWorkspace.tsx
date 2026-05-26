@@ -1,19 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-
-function formatDate(iso: string | null | undefined): string {
-  if (!iso) return "-";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleString("ar-JO", { dateStyle: "short", timeStyle: "short" });
-}
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { RequireAuthGate } from "@/components/auth/RequireAuthGate";
 import { isEmailNotVerified } from "@/lib/apiError";
 import { EmailVerificationBanner } from "@/components/ui/EmailVerificationBanner";
 import {
-  createConversation,
   createMessage,
   enqueuePendingMessage,
   flushPendingMessages,
@@ -24,24 +16,28 @@ import {
   markConversationRead,
 } from "@/services/messageService";
 import type { Conversation, Message } from "@/types/message";
-import { ModernAvatar } from "@/components/ui/ModernAvatar";
+import { ConversationList } from "./ConversationList";
+import { ChatPanel } from "./ChatPanel";
 
-const showDevTools = process.env.NODE_ENV !== "production";
+const POLL_INTERVAL_MS = 20_000;
 
 export function MessagesWorkspace({ initialConversationId = "" }: { initialConversationId?: string }) {
   const { currentUser } = useAuth();
+  const [mobileView, setMobileView] = useState<"list" | "chat">(
+    initialConversationId ? "chat" : "list"
+  );
   const [conversationId, setConversationId] = useState(initialConversationId);
-  const [listingId, setListingId] = useState("");
-  const [participantId, setParticipantId] = useState("");
-  const [messageText, setMessageText] = useState("");
-  const [inboxLoading, setInboxLoading] = useState(false);
   const [inbox, setInbox] = useState<Conversation[]>([]);
+  const [inboxLoading, setInboxLoading] = useState(false);
+  const [unreadTotal, setUnreadTotal] = useState(0);
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [unreadTotal, setUnreadTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [sendingMessage, setSendingMessage] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [emailUnverified, setEmailUnverified] = useState(false);
+
+  const lastMessageCountRef = useRef(0);
 
   const refreshInbox = useCallback(async () => {
     if (!currentUser) return;
@@ -60,9 +56,34 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
     }
   }, [currentUser]);
 
+  const refreshConversationData = useCallback(async (targetId: string, silent = false) => {
+    if (!silent) setChatLoading(true);
+    setError(null);
+    try {
+      const [convoData, messagesData] = await Promise.all([
+        getConversationById(targetId),
+        getConversationMessages(targetId),
+      ]);
+      setConversation(convoData);
+      if (messagesData.length !== lastMessageCountRef.current) {
+        setMessages(messagesData);
+        lastMessageCountRef.current = messagesData.length;
+      }
+      await markConversationRead(targetId);
+      await refreshInbox();
+    } catch (err) {
+      if (!silent) {
+        setError(err instanceof Error ? err.message : "فشل تحميل المحادثة.");
+      }
+    } finally {
+      if (!silent) setChatLoading(false);
+    }
+  }, [refreshInbox]);
+
   useEffect(() => {
     if (!initialConversationId) return;
     setConversationId(initialConversationId);
+    setMobileView("chat");
   }, [initialConversationId]);
 
   useEffect(() => {
@@ -76,81 +97,57 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
     });
   }, [refreshInbox]);
 
-  const refreshConversationData = useCallback(async (targetConversationId: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [conversationData, messagesData] = await Promise.all([
-        getConversationById(targetConversationId),
-        getConversationMessages(targetConversationId),
-      ]);
-      setConversation(conversationData);
-      setMessages(messagesData);
-      await markConversationRead(targetConversationId);
-      await refreshInbox();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load conversation.");
-    } finally {
-      setLoading(false);
-    }
-  }, [refreshInbox]);
-
   useEffect(() => {
     if (!conversationId) return;
+    lastMessageCountRef.current = 0;
     void refreshConversationData(conversationId);
   }, [conversationId, refreshConversationData]);
 
-  async function handleCreateConversation() {
+  // Polling
+  useEffect(() => {
     if (!currentUser) return;
-    if (!listingId.trim()) {
-      setError("معرّف الإعلان مطلوب لإنشاء محادثة.");
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const participantIds = [currentUser.uid];
-      if (participantId.trim() && participantId.trim() !== currentUser.uid) {
-        participantIds.push(participantId.trim());
+    const interval = setInterval(() => {
+      void refreshInbox();
+      if (conversationId) {
+        void refreshConversationData(conversationId, true);
       }
-      const result = await createConversation({
-        participantIds,
-        participants: {
-          [currentUser.uid]: {
-            fullName: currentUser.displayName ?? "",
-            photoURL: currentUser.photoURL ?? "",
-          },
-          ...(participantId.trim() && participantId.trim() !== currentUser.uid
-            ? {
-                [participantId.trim()]: { fullName: "", photoURL: "" },
-              }
-            : {}),
-        },
-        listingId: listingId.trim(),
-        listingSnapshot: {
-          title: "Listing conversation",
-          primaryImageURL: "",
-        },
-        createdBy: currentUser.uid,
-      });
-      setConversationId(result.conversationId);
-      await refreshInbox();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create conversation.");
-    } finally {
-      setLoading(false);
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [currentUser, conversationId, refreshInbox, refreshConversationData]);
+
+  // Mobile back button support
+  useEffect(() => {
+    if (mobileView !== "chat") return;
+    function handlePopState() {
+      setMobileView("list");
     }
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [mobileView]);
+
+  function handleSelectConversation(id: string) {
+    setConversationId(id);
+    setMobileView("chat");
+    window.history.pushState({ messagesView: "chat" }, "");
   }
 
-  async function handleSendMessage() {
-    if (!currentUser || !conversationId.trim() || !messageText.trim()) return;
-    setLoading(true);
+  function handleBack() {
+    setMobileView("list");
+    setConversationId("");
+    setConversation(null);
+    setMessages([]);
+  }
+
+  async function handleSendMessage(text: string) {
+    if (!currentUser || !conversationId.trim()) return;
+    setSendingMessage(true);
     setError(null);
+
     const optimisticMessage: Message = {
       id: `tmp-${Date.now()}`,
       senderId: currentUser.uid,
       type: "text",
-      text: messageText.trim(),
+      text,
       attachments: [],
       isRead: false,
       readAt: null,
@@ -158,226 +155,92 @@ export function MessagesWorkspace({ initialConversationId = "" }: { initialConve
       deletedAt: null,
     };
     setMessages((prev) => [...prev, optimisticMessage]);
+
     try {
       await createMessage(conversationId.trim(), {
         senderId: currentUser.uid,
         type: "text",
-        text: messageText.trim(),
+        text,
       });
-      setMessageText("");
-      await refreshConversationData(conversationId.trim());
-      await refreshInbox();
+      lastMessageCountRef.current = 0;
+      await refreshConversationData(conversationId.trim(), true);
     } catch (err) {
       if (typeof navigator !== "undefined" && !navigator.onLine) {
         enqueuePendingMessage(conversationId.trim(), {
           senderId: currentUser.uid,
           type: "text",
-          text: messageText.trim(),
+          text,
         });
-        setMessageText("");
         setError("أنت غير متصل الآن. تم حفظ الرسالة محلياً وسيتم إرسالها عند عودة الاتصال.");
       } else {
-        setError(err instanceof Error ? err.message : "Failed to send message.");
+        setError(err instanceof Error ? err.message : "فشل إرسال الرسالة.");
         setMessages((prev) => prev.filter((item) => item.id !== optimisticMessage.id));
       }
     } finally {
-      setLoading(false);
+      setSendingMessage(false);
     }
   }
 
   return (
     <RequireAuthGate fallbackMessage="يتم التحقق من الجلسة قبل فتح الرسائل...">
-      <div className="space-y-5">
-        {emailUnverified && <EmailVerificationBanner />}
-        <section className="ui-card motion-section rounded-2xl p-5 sm:p-6">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-base font-semibold">صندوق المحادثات</h2>
-            <div className="flex items-center gap-2">
-              <span className="rounded-full border border-[var(--border)] bg-[var(--surface-muted)] px-2.5 py-1 text-xs font-semibold">
-                غير مقروء: {unreadTotal}
-              </span>
-              <button
-                type="button"
-                onClick={() => void refreshInbox()}
-                disabled={inboxLoading}
-                className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-1.5 text-xs font-semibold"
-              >
-                {inboxLoading ? "..." : "تحديث"}
-              </button>
-            </div>
+      {emailUnverified && <EmailVerificationBanner />}
+
+      {error && (
+        <p className="mb-3 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-950/30 dark:text-red-200">
+          {error}
+        </p>
+      )}
+
+      <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow)]" style={{ height: "calc(100vh - 260px)", minHeight: "480px" }}>
+        {/* Desktop: side-by-side */}
+        <div className="hidden h-full md:flex">
+          <div className="w-80 shrink-0 border-e border-[var(--border)] bg-[var(--bg)]">
+            <ConversationList
+              conversations={inbox}
+              activeConversationId={conversationId || null}
+              currentUserId={currentUser?.uid ?? ""}
+              totalUnread={unreadTotal}
+              loading={inboxLoading}
+              onSelectConversation={handleSelectConversation}
+              onRefresh={() => void refreshInbox()}
+            />
           </div>
-
-          {inbox.length ? (
-            <div className="space-y-2">
-              {inbox.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setConversationId(item.id)}
-                className="ui-card ui-card-hover motion-card block w-full rounded-xl bg-[var(--surface-muted)] px-3 py-2 text-start text-sm"
-                >
-                  <div className="flex items-center gap-2">
-                    <ModernAvatar
-                      src={
-                        item.participants[
-                          item.participantIds.find((id) => id !== currentUser?.uid) || item.participantIds[0]
-                        ]?.photoURL
-                      }
-                      name={
-                        item.participants[
-                          item.participantIds.find((id) => id !== currentUser?.uid) || item.participantIds[0]
-                        ]?.fullName || "مستخدم"
-                      }
-                      size="sm"
-                      status="online"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium">{item.listingSnapshot.title || "بدون عنوان"}</p>
-                      <p className="truncate text-xs text-[var(--text-muted)]">
-                        {item.lastMessageText || "لا يوجد رسائل بعد"} • {formatDate(item.updatedAt)}
-                      </p>
-                    </div>
-                    {(item.unreadCount ?? 0) > 0 ? (
-                      <span className="inline-block rounded-full bg-[var(--brand)] px-2 py-0.5 text-[10px] font-bold text-[var(--brand-contrast)]">
-                        {item.unreadCount}
-                      </span>
-                    ) : null}
-                  </div>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <p className="motion-alert text-sm text-[var(--text-muted)]">لا توجد محادثات حتى الآن.</p>
-          )}
-        </section>
-
-        {showDevTools ? (
-          <section className="motion-section grid gap-4 rounded-2xl border border-dashed border-amber-400/60 bg-amber-50/40 p-5 shadow-sm dark:bg-amber-950/20 sm:grid-cols-2 sm:p-6">
-            <p className="sm:col-span-2 text-xs font-semibold text-amber-800 dark:text-amber-200">
-              وضع المطوّر فقط — إنشاء محادثة يدوياً
-            </p>
-            <label className="space-y-1">
-              <span className="text-sm font-medium">معرّف الإعلان (لإنشاء محادثة)</span>
-              <input
-                value={listingId}
-                onChange={(e) => setListingId(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]"
-                placeholder="listing id"
-              />
-            </label>
-
-            <label className="space-y-1">
-              <span className="text-sm font-medium">معرّف الطرف الآخر (اختياري)</span>
-              <input
-                value={participantId}
-                onChange={(e) => setParticipantId(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]"
-                placeholder="uid"
-              />
-            </label>
-
-            <button
-              type="button"
-              onClick={() => void handleCreateConversation()}
-              disabled={loading}
-              className="rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-semibold text-[var(--brand-contrast)] transition hover:opacity-90 disabled:opacity-60"
-            >
-              إنشاء محادثة جديدة
-            </button>
-
-            <label className="space-y-1">
-              <span className="text-sm font-medium">معرّف المحادثة</span>
-              <input
-                value={conversationId}
-                onChange={(e) => setConversationId(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]"
-                placeholder="conversation id"
-              />
-            </label>
-          </section>
-        ) : null}
-
-        <section className="ui-card motion-section rounded-2xl p-5 sm:p-6">
-          {error ? (
-            <p className="motion-alert mb-3 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">
-              {error}
-            </p>
-          ) : null}
-
-          {conversation ? (
-            showDevTools ? (
-              <div className="mb-4 rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm text-[var(--text-muted)]">
-                <p>المحادثة: {conversation.id}</p>
-                <p>الإعلان: {conversation.listingId}</p>
-                <p>عدد المشاركين: {conversation.participantIds.length}</p>
-              </div>
-            ) : (
-              <div className="mb-4 rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm">
-                <p className="font-semibold text-[var(--text)]">{conversation.listingSnapshot.title || "محادثة"}</p>
-                <p className="mt-1 text-xs text-[var(--text-muted)]">آخر تحديث: {formatDate(conversation.updatedAt)}</p>
-              </div>
-            )
-          ) : (
-            <p className="mb-3 text-sm text-[var(--text-muted)]">
-              {showDevTools
-                ? "أدخل معرّف محادثة أو أنشئ محادثة جديدة للبدء."
-                : "اختر محادثة من الصندوق أعلاه، أو افتح محادثة من صفحة إعلان عبر «راسل البائع»."}
-            </p>
-          )}
-
-          <div className="space-y-3">
-            <label className="space-y-1">
-              <span className="text-sm font-medium">رسالة جديدة</span>
-              <textarea
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                rows={3}
-                className="ui-input h-auto w-full rounded-lg py-2"
-                placeholder="اكتب رسالتك..."
-              />
-            </label>
-            <button
-              type="button"
-              onClick={() => void handleSendMessage()}
-              disabled={loading || !conversationId.trim() || !messageText.trim()}
-              className="ui-btn-ghost rounded-lg px-4 py-2 text-sm"
-            >
-              إرسال الرسالة
-            </button>
+          <div className="flex-1">
+            <ChatPanel
+              conversation={conversation}
+              messages={messages}
+              currentUserId={currentUser?.uid ?? ""}
+              loading={chatLoading}
+              onSendMessage={(t) => void handleSendMessage(t)}
+              sendingMessage={sendingMessage}
+            />
           </div>
-        </section>
+        </div>
 
-        <section className="ui-card motion-section rounded-2xl p-5 sm:p-6">
-          <h2 className="mb-3 text-base font-semibold">سجل الرسائل</h2>
-          {loading ? (
-            <p className="text-sm text-[var(--text-muted)]">جاري التحميل...</p>
-          ) : messages.length ? (
-            <div className="space-y-2">
-              {messages.map((message) => (
-                <article
-                  key={message.id}
-                className="motion-alert rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm shadow-[var(--shadow-sm)]"
-                >
-                  <div className="flex items-start gap-2">
-                    <ModernAvatar
-                      src={conversation?.participants[message.senderId]?.photoURL}
-                      name={conversation?.participants[message.senderId]?.fullName || "مستخدم"}
-                      size="sm"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-[var(--text-muted)]">
-                        {conversation?.participants[message.senderId]?.fullName?.trim() || "مستخدم"} • {formatDate(message.createdAt)}
-                      </p>
-                      <p className="mt-1">{message.text || "(بدون نص)"}</p>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+        {/* Mobile: toggle between list and chat */}
+        <div className="flex h-full flex-col md:hidden">
+          {mobileView === "list" ? (
+            <ConversationList
+              conversations={inbox}
+              activeConversationId={conversationId || null}
+              currentUserId={currentUser?.uid ?? ""}
+              totalUnread={unreadTotal}
+              loading={inboxLoading}
+              onSelectConversation={handleSelectConversation}
+              onRefresh={() => void refreshInbox()}
+            />
           ) : (
-            <p className="text-sm text-[var(--text-muted)]">لا توجد رسائل بعد.</p>
+            <ChatPanel
+              conversation={conversation}
+              messages={messages}
+              currentUserId={currentUser?.uid ?? ""}
+              loading={chatLoading}
+              onSendMessage={(t) => void handleSendMessage(t)}
+              sendingMessage={sendingMessage}
+              onBack={handleBack}
+            />
           )}
-        </section>
+        </div>
       </div>
     </RequireAuthGate>
   );

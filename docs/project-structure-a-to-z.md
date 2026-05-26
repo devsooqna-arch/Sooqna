@@ -75,7 +75,8 @@ backend/sooqna-backend/
 |   |   |-- favorites/
 |   |   |-- messages/
 |   |   |-- uploads/
-|   |   `-- categories/
+|   |   |-- categories/
+|   |   `-- reviews/
 |   |-- routes/                          # Shared/aggregate route files
 |   |-- shared/
 |   |-- types/
@@ -105,6 +106,7 @@ Current module inventory:
 - `messages`: routes, controller, service, types, repositories
 - `uploads`: routes, controller, config, repository
 - `categories`: repository + route export (main implementation in `src/routes/categories.ts`)
+- `reviews`: routes, controller, service, types, repositories
 
 ---
 
@@ -159,6 +161,7 @@ Defined in `src/routes/index.ts`:
 - `/favorites`
 - `/messages`
 - `/categories`
+- `/reviews`
 
 ### 4.2 Endpoints by Module
 
@@ -240,6 +243,23 @@ Note: Route-level protection for the two `GET` endpoints should be reviewed to e
   - Multipart upload (`image` field).
   - Stores file metadata and returns uploaded asset information.
 
+#### Reviews
+
+- `POST /api/reviews`
+  - Protected.
+  - Create a review for a seller on a specific listing.
+  - Body: `{ sellerId, listingId, rating (1-5), comment }`.
+  - One review per user per listing.
+- `GET /api/reviews/seller/:sellerId`
+  - Public.
+  - List seller reviews with pagination (`limit`, `offset`).
+- `GET /api/reviews/seller/:sellerId/profile`
+  - Public.
+  - Returns public seller profile with trust stats (avgRating, totalReviews, verification badges, etc.).
+- `GET /api/reviews/listing/:listingId`
+  - Public.
+  - Returns reviews for a specific listing.
+
 #### Categories
 
 - `GET /api/categories`
@@ -315,6 +335,21 @@ Note: Route-level protection for the two `GET` endpoints should be reviewed to e
 - Messages inside a conversation.
 - FK: `conversationId -> Conversation.id` (`ON DELETE CASCADE`).
 - `attachments` stored as JSON.
+
+#### `Review`
+
+- Buyer reviews of sellers, linked to a specific listing.
+- Key fields:
+  - `id` (PK)
+  - `sellerId` references `User.firebaseUid`
+  - `reviewerId` references `User.firebaseUid`
+  - `listingId`
+  - `rating` (1-5)
+  - `comment`
+- Unique constraint on (`reviewerId`, `listingId`).
+- Relations:
+  - belongs to `User` (seller)
+  - belongs to `User` (reviewer)
 
 #### `Category`
 

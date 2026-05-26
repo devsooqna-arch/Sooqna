@@ -37,6 +37,7 @@ describe("message conversation identity", () => {
     mockFindListingById.mockResolvedValue({
       id: "listing-1",
       ownerId: "seller-1",
+      status: "published",
       title: "Camera",
       images: [{ url: "https://cdn.example.com/camera.jpg", path: "uploads/listings/camera.jpg", isPrimary: true, order: 0 }],
       ownerSnapshot: { fullName: "Seller One", photoURL: "https://cdn.example.com/seller.jpg" },
@@ -98,6 +99,58 @@ describe("message conversation identity", () => {
         },
         createdBy: "buyer-1",
       })
+    );
+  });
+
+  it("blocks users from messaging their own listing", async () => {
+    mockFindListingById.mockResolvedValue({
+      id: "listing-1",
+      ownerId: "buyer-1",
+      status: "published",
+      title: "Camera",
+      images: [],
+      ownerSnapshot: { fullName: "Buyer One", photoURL: "" },
+    });
+
+    const req = {
+      currentUser: {
+        firebaseUid: "buyer-1",
+        displayName: "Buyer One",
+        photoURL: "",
+      },
+      body: { listingId: "listing-1" },
+    } as unknown as Request;
+    const res = createResponse();
+
+    const { createConversation } = await import("./messages.controller");
+    await expect(createConversation(req, res as unknown as Response)).rejects.toThrow(
+      "You cannot message your own listing."
+    );
+  });
+
+  it("blocks conversations for listings that are not published", async () => {
+    mockFindListingById.mockResolvedValue({
+      id: "listing-1",
+      ownerId: "seller-1",
+      status: "draft",
+      title: "Camera",
+      images: [],
+      ownerSnapshot: { fullName: "Seller One", photoURL: "" },
+    });
+
+    const req = {
+      currentUser: {
+        firebaseUid: "buyer-1",
+        displayName: "Buyer One",
+        photoURL: "",
+      },
+      body: { listingId: "listing-1" },
+    } as unknown as Request;
+    const res = createResponse();
+
+    const { createConversation } = await import("./messages.controller");
+    await expect(createConversation(req, res as unknown as Response)).rejects.toThrow(
+      "Listing is not available for messaging."
     );
   });
 });

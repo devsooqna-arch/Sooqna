@@ -4,6 +4,8 @@ import { wpExactRedirects, wpPatternRedirects } from "./wp-redirects.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isDevelopment = process.env.NODE_ENV === "development";
+const backendApiBase = process.env.NEXT_PUBLIC_BACKEND_API_BASE_URL ?? "http://localhost:5000/api";
+const uploadsRewriteTarget = `${backendApiBase.replace(/\/api\/?$/, "").replace(/\/$/, "")}/uploads/:path*`;
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -60,7 +62,7 @@ const nextConfig = {
     return [
       {
         source: "/uploads/:path*",
-        destination: "http://localhost:5000/uploads/:path*",
+        destination: uploadsRewriteTarget,
       },
     ];
   },

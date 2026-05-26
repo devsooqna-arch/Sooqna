@@ -1,6 +1,8 @@
 import { auth } from "@/lib/firebase";
 
 const DEFAULT_API_BASE = "http://localhost:5000/api";
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+const ACCEPTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 function apiBase(): string {
   return process.env.NEXT_PUBLIC_BACKEND_API_BASE_URL ?? DEFAULT_API_BASE;
@@ -25,6 +27,7 @@ export type UploadProfileAvatarResult = {
 export async function uploadBackendListingImage(
   file: File
 ): Promise<UploadListingImageResult> {
+  validateImageBeforeUpload(file);
   const user = auth.currentUser;
   if (!user) {
     throw new Error("User must be authenticated.");
@@ -42,8 +45,7 @@ export async function uploadBackendListingImage(
     body: formData,
   });
   if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || `Upload failed with ${response.status}`);
+    throw new Error(await uploadErrorMessage(response));
   }
   return (await response.json()) as UploadListingImageResult;
 }
@@ -51,6 +53,7 @@ export async function uploadBackendListingImage(
 export async function uploadBackendProfileAvatar(
   file: File
 ): Promise<UploadProfileAvatarResult> {
+  validateImageBeforeUpload(file);
   const user = auth.currentUser;
   if (!user) {
     throw new Error("User must be authenticated.");
@@ -68,11 +71,32 @@ export async function uploadBackendProfileAvatar(
     body: formData,
   });
   if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || `Upload failed with ${response.status}`);
+    throw new Error(await uploadErrorMessage(response));
   }
   return (await response.json()) as UploadProfileAvatarResult;
 }
 
 export { uploadBackendListingImage as uploadImage };
+
+function validateImageBeforeUpload(file: File): void {
+  if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
+    throw new Error("نوع الصورة غير مدعوم. استخدم JPG/PNG/WEBP.");
+  }
+  if (file.size > MAX_IMAGE_SIZE_BYTES) {
+    throw new Error("الصورة تتجاوز 5MB.");
+  }
+}
+
+async function uploadErrorMessage(response: Response): Promise<string> {
+  const text = await response.text();
+  try {
+    const parsed = JSON.parse(text) as { code?: string; message?: string; error?: string };
+    if (response.status === 429) return "طلبات كثيرة. انتظر قليلاً ثم حاول مرة أخرى.";
+    if (parsed.code === "EMAIL_NOT_VERIFIED") return "يجب تأكيد البريد الإلكتروني قبل رفع الصور.";
+    if (parsed.code === "ACCOUNT_NOT_ACTIVE") return "الحساب غير نشط ولا يمكنه رفع الصور.";
+    return parsed.message || parsed.error || `Upload failed with ${response.status}`;
+  } catch {
+    return response.status === 429 ? "طلبات كثيرة. انتظر قليلاً ثم حاول مرة أخرى." : `Upload failed with ${response.status}`;
+  }
+}
 
