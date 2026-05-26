@@ -12,6 +12,8 @@ export type PaginationOptions = {
   city?: string;
   search?: string;
   sort?: "newest" | "price_asc" | "price_desc";
+  priceMin?: number;
+  priceMax?: number;
 };
 
 export interface ListingsRepository {
@@ -19,8 +21,13 @@ export interface ListingsRepository {
   list(pagination?: PaginationOptions): Promise<{ items: Listing[]; total: number }>;
   listByOwner(ownerId: string): Promise<Listing[]>;
   findById(id: string): Promise<Listing | null>;
+  findByIdIncludingDeleted(id: string): Promise<Listing | null>;
   findByClientRequestId(ownerId: string, clientRequestId: string): Promise<Listing | null>;
   update(id: string, listing: Listing): Promise<Listing>;
+  updateFields(id: string, fields: Partial<Record<string, unknown>>): Promise<Listing>;
+  addImage(listingId: string, image: { url: string; path: string; isPrimary: boolean; order: number }): Promise<void>;
+  removeImage(listingId: string, imageId: string): Promise<void>;
+  countImages(listingId: string): Promise<number>;
 }
 
 const listingsDataPath = path.resolve(
@@ -33,7 +40,7 @@ function useJsonFallback(): boolean {
 }
 
 type ListingWithImages = Awaited<ReturnType<typeof prisma.listing.findFirst>> & {
-  listingImages?: Array<{ url: string; path: string; isPrimary: boolean; order: number }>;
+  listingImages?: Array<{ id: string; url: string; path: string; isPrimary: boolean; order: number }>;
 };
 
 function mapListing(record: ListingWithImages): Listing {
@@ -76,12 +83,16 @@ function mapListing(record: ListingWithImages): Listing {
     isFeatured: listing.isFeatured,
     isApproved: listing.isApproved,
     publishedAt: toIso(listing.publishedAt),
+    soldAt: toIso(listing.soldAt),
+    archivedAt: toIso(listing.archivedAt),
     expiresAt: toIso(listing.expiresAt),
     createdAt: listing.createdAt.toISOString(),
     updatedAt: listing.updatedAt.toISOString(),
     deletedAt: toIso(listing.deletedAt),
   };
 }
+
+const INCLUDE_IMAGES = { listingImages: { orderBy: { order: "asc" as const } } };
 
 export class PrismaListingsRepository implements ListingsRepository {
   async create(listing: Listing): Promise<Listing> {
@@ -112,6 +123,8 @@ export class PrismaListingsRepository implements ListingsRepository {
           isFeatured: listing.isFeatured,
           isApproved: listing.isApproved,
           publishedAt: parseIso(listing.publishedAt),
+          soldAt: parseIso(listing.soldAt),
+          archivedAt: parseIso(listing.archivedAt),
           expiresAt: parseIso(listing.expiresAt),
           createdAt: new Date(listing.createdAt),
           updatedAt: new Date(listing.updatedAt),
@@ -125,7 +138,7 @@ export class PrismaListingsRepository implements ListingsRepository {
             })),
           },
         },
-        include: { listingImages: { orderBy: { order: "asc" } } },
+        include: INCLUDE_IMAGES,
       });
       return mapListing(created);
     } catch (error) {
@@ -146,12 +159,19 @@ export class PrismaListingsRepository implements ListingsRepository {
     const city = pagination?.city?.trim().toLowerCase() ?? "";
     const search = pagination?.search?.trim().toLowerCase() ?? "";
     const sort = pagination?.sort ?? "newest";
+    const priceMin = pagination?.priceMin;
+    const priceMax = pagination?.priceMax;
+
+    const priceFilter: Record<string, unknown> = {};
+    if (typeof priceMin === "number" && Number.isFinite(priceMin)) priceFilter.gte = priceMin;
+    if (typeof priceMax === "number" && Number.isFinite(priceMax)) priceFilter.lte = priceMax;
 
     const where = {
       deletedAt: null,
       status: "published",
       ...(category ? { categoryId: { equals: category } } : {}),
       ...(city ? { locationCity: { equals: city, mode: "insensitive" as const } } : {}),
+      ...(Object.keys(priceFilter).length > 0 ? { price: priceFilter } : {}),
       AND: [
         {
           OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
@@ -180,7 +200,7 @@ export class PrismaListingsRepository implements ListingsRepository {
         prisma.listing.findMany({
           where,
           orderBy,
-          include: { listingImages: { orderBy: { order: "asc" } } },
+          include: INCLUDE_IMAGES,
           take: limit,
           skip: offset,
         }),
@@ -210,6 +230,12 @@ export class PrismaListingsRepository implements ListingsRepository {
               listing.description.toLowerCase().includes(search)
           );
         }
+        if (typeof priceMin === "number") {
+          filtered = filtered.filter((listing) => listing.price >= priceMin);
+        }
+        if (typeof priceMax === "number") {
+          filtered = filtered.filter((listing) => listing.price <= priceMax);
+        }
         if (sort === "price_asc") {
           filtered = [...filtered].sort((a, b) => Number(b.isFeatured) - Number(a.isFeatured) || a.price - b.price);
         } else if (sort === "price_desc") {
@@ -228,7 +254,7 @@ export class PrismaListingsRepository implements ListingsRepository {
       const listings = await prisma.listing.findMany({
         where: { deletedAt: null, ownerId },
         orderBy: { createdAt: "desc" },
-        include: { listingImages: { orderBy: { order: "asc" } } },
+        include: INCLUDE_IMAGES,
       });
       return listings.map(mapListing);
     } catch (error) {
@@ -246,7 +272,7 @@ export class PrismaListingsRepository implements ListingsRepository {
     try {
       const listing = await prisma.listing.findFirst({
         where: { id, deletedAt: null },
-        include: { listingImages: { orderBy: { order: "asc" } } },
+        include: INCLUDE_IMAGES,
       });
       return listing ? mapListing(listing) : null;
     } catch (error) {
@@ -259,11 +285,27 @@ export class PrismaListingsRepository implements ListingsRepository {
     }
   }
 
+  async findByIdIncludingDeleted(id: string): Promise<Listing | null> {
+    try {
+      const listing = await prisma.listing.findFirst({
+        where: { id },
+        include: INCLUDE_IMAGES,
+      });
+      return listing ? mapListing(listing) : null;
+    } catch (error) {
+      if (useJsonFallback()) {
+        const listings = readJsonArrayFile<Listing>(listingsDataPath);
+        return listings.find((item) => item.id === id) ?? null;
+      }
+      throw new Error("Failed to fetch listing.", { cause: error });
+    }
+  }
+
   async findByClientRequestId(ownerId: string, clientRequestId: string): Promise<Listing | null> {
     try {
       const listing = await prisma.listing.findFirst({
         where: { ownerId, clientRequestId, deletedAt: null },
-        include: { listingImages: { orderBy: { order: "asc" } } },
+        include: INCLUDE_IMAGES,
       });
       return listing ? mapListing(listing) : null;
     } catch (error) {
@@ -279,6 +321,27 @@ export class PrismaListingsRepository implements ListingsRepository {
         );
       }
       throw new Error("Failed to fetch listing by client request id.", { cause: error });
+    }
+  }
+
+  async updateFields(id: string, fields: Partial<Record<string, unknown>>): Promise<Listing> {
+    try {
+      const updated = await prisma.listing.update({
+        where: { id },
+        data: fields as Record<string, unknown>,
+        include: INCLUDE_IMAGES,
+      });
+      return mapListing(updated);
+    } catch (error) {
+      if (useJsonFallback()) {
+        const listings = readJsonArrayFile<Listing>(listingsDataPath);
+        const idx = listings.findIndex((item) => item.id === id);
+        if (idx < 0) throw new Error("Listing not found.");
+        Object.assign(listings[idx], fields);
+        writeJsonArrayFile(listingsDataPath, listings);
+        return listings[idx];
+      }
+      throw new Error("Listing not found.", { cause: error });
     }
   }
 
@@ -311,6 +374,8 @@ export class PrismaListingsRepository implements ListingsRepository {
           isFeatured: listing.isFeatured,
           isApproved: listing.isApproved,
           publishedAt: parseIso(listing.publishedAt),
+          soldAt: parseIso(listing.soldAt),
+          archivedAt: parseIso(listing.archivedAt),
           expiresAt: parseIso(listing.expiresAt),
           createdAt: new Date(listing.createdAt),
           updatedAt: new Date(listing.updatedAt),
@@ -324,7 +389,7 @@ export class PrismaListingsRepository implements ListingsRepository {
             })),
           },
         },
-        include: { listingImages: { orderBy: { order: "asc" } } },
+        include: INCLUDE_IMAGES,
       });
       return mapListing(updated);
     } catch (error) {
@@ -337,6 +402,40 @@ export class PrismaListingsRepository implements ListingsRepository {
         return listing;
       }
       throw new Error("Listing not found.", { cause: error });
+    }
+  }
+
+  async addImage(listingId: string, image: { url: string; path: string; isPrimary: boolean; order: number }): Promise<void> {
+    try {
+      await prisma.listingImage.create({
+        data: {
+          listingId,
+          url: image.url,
+          path: image.path,
+          isPrimary: image.isPrimary,
+          order: image.order,
+        },
+      });
+    } catch (error) {
+      throw new Error("Failed to add image.", { cause: error });
+    }
+  }
+
+  async removeImage(listingId: string, imageId: string): Promise<void> {
+    try {
+      await prisma.listingImage.deleteMany({
+        where: { id: imageId, listingId },
+      });
+    } catch (error) {
+      throw new Error("Failed to remove image.", { cause: error });
+    }
+  }
+
+  async countImages(listingId: string): Promise<number> {
+    try {
+      return await prisma.listingImage.count({ where: { listingId } });
+    } catch {
+      return 0;
     }
   }
 }

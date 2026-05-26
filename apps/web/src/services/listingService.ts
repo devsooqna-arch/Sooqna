@@ -37,6 +37,8 @@ export type ListingsFilterParams = {
   city?: string;
   search?: string;
   sort?: "newest" | "price_asc" | "price_desc";
+  priceMin?: number;
+  priceMax?: number;
 };
 
 export async function getListingsFiltered(params: ListingsFilterParams): Promise<{
@@ -58,6 +60,8 @@ export async function getListingsFiltered(params: ListingsFilterParams): Promise
   if (params.city?.trim()) query.set("city", params.city.trim());
   if (params.search?.trim()) query.set("search", params.search.trim());
   if (params.sort) query.set("sort", params.sort);
+  if (typeof params.priceMin === "number") query.set("priceMin", String(params.priceMin));
+  if (typeof params.priceMax === "number") query.set("priceMax", String(params.priceMax));
 
   const suffix = query.toString() ? `?${query.toString()}` : "";
   return apiFetch<{
@@ -146,6 +150,22 @@ export async function renewListing(listingId: string, durationDays?: number): Pr
 
 export async function expireListing(listingId: string): Promise<Listing> {
   const response = await apiFetch<{ success: true; listing: Listing }>(`/listings/${listingId}/expire`, {
+    method: "POST",
+    authenticated: true,
+  });
+  return response.listing;
+}
+
+export async function markListingSold(listingId: string): Promise<Listing> {
+  const response = await apiFetch<{ success: true; listing: Listing }>(`/listings/${listingId}/sold`, {
+    method: "POST",
+    authenticated: true,
+  });
+  return response.listing;
+}
+
+export async function archiveListing(listingId: string): Promise<Listing> {
+  const response = await apiFetch<{ success: true; listing: Listing }>(`/listings/${listingId}/archive`, {
     method: "POST",
     authenticated: true,
   });

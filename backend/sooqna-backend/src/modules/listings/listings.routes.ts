@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { verifyFirebaseToken } from "../../middleware/verifyFirebaseToken";
+import { requireActiveUser, requireCurrentUser } from "../../middleware/authContext";
 import { requireVerifiedEmail } from "../../middleware/requireVerifiedEmail";
 import { contentFilter } from "../../middleware/contentFilter";
 import { validateRequest } from "../../middleware/validateRequest";
@@ -12,6 +13,7 @@ import {
   renewListingBodySchema,
 } from "../../shared/validation/schemas";
 import {
+  archiveListing,
   attachListingImage,
   createListing,
   deleteListing,
@@ -20,6 +22,7 @@ import {
   getListingById,
   listListings,
   listMyListings,
+  markListingSold,
   patchListing,
   publishListing,
   renewListing,
@@ -30,12 +33,14 @@ import {
 export const listingsRouter = Router();
 
 listingsRouter.get("/", validateRequest({ query: listingsQuerySchema }), listListings);
-listingsRouter.get("/mine", verifyFirebaseToken, listMyListings);
+listingsRouter.get("/mine", verifyFirebaseToken, requireCurrentUser, requireActiveUser, listMyListings);
 listingsRouter.get("/:id", validateRequest({ params: idParamsSchema }), getListingById);
 
 listingsRouter.post(
   "/",
   verifyFirebaseToken,
+  requireCurrentUser,
+  requireActiveUser,
   requireVerifiedEmail,
   contentFilter,
   validateRequest({ body: createListingBodySchema }),
@@ -44,6 +49,8 @@ listingsRouter.post(
 listingsRouter.patch(
   "/:id",
   verifyFirebaseToken,
+  requireCurrentUser,
+  requireActiveUser,
   requireVerifiedEmail,
   contentFilter,
   validateRequest({ params: idParamsSchema, body: patchListingBodySchema }),
@@ -52,6 +59,8 @@ listingsRouter.patch(
 listingsRouter.post(
   "/:id/publish",
   verifyFirebaseToken,
+  requireCurrentUser,
+  requireActiveUser,
   requireVerifiedEmail,
   validateRequest({ params: idParamsSchema }),
   publishListing
@@ -59,13 +68,35 @@ listingsRouter.post(
 listingsRouter.post(
   "/:id/unpublish",
   verifyFirebaseToken,
+  requireCurrentUser,
+  requireActiveUser,
   requireVerifiedEmail,
   validateRequest({ params: idParamsSchema }),
   unpublishListing
 );
 listingsRouter.post(
+  "/:id/archive",
+  verifyFirebaseToken,
+  requireCurrentUser,
+  requireActiveUser,
+  requireVerifiedEmail,
+  validateRequest({ params: idParamsSchema }),
+  archiveListing
+);
+listingsRouter.post(
+  "/:id/sold",
+  verifyFirebaseToken,
+  requireCurrentUser,
+  requireActiveUser,
+  requireVerifiedEmail,
+  validateRequest({ params: idParamsSchema }),
+  markListingSold
+);
+listingsRouter.post(
   "/:id/renew",
   verifyFirebaseToken,
+  requireCurrentUser,
+  requireActiveUser,
   requireVerifiedEmail,
   validateRequest({ params: idParamsSchema, body: renewListingBodySchema }),
   renewListing
@@ -73,6 +104,8 @@ listingsRouter.post(
 listingsRouter.post(
   "/:id/expire",
   verifyFirebaseToken,
+  requireCurrentUser,
+  requireActiveUser,
   requireVerifiedEmail,
   validateRequest({ params: idParamsSchema }),
   expireListing
@@ -80,6 +113,8 @@ listingsRouter.post(
 listingsRouter.delete(
   "/:id",
   verifyFirebaseToken,
+  requireCurrentUser,
+  requireActiveUser,
   requireVerifiedEmail,
   validateRequest({ params: idParamsSchema }),
   deleteListing
@@ -87,22 +122,25 @@ listingsRouter.delete(
 listingsRouter.post(
   "/:id/feature",
   verifyFirebaseToken,
-  requireVerifiedEmail,
+  requireCurrentUser,
+  requireActiveUser,
   validateRequest({ params: idParamsSchema }),
   featureListing
 );
 listingsRouter.post(
   "/:id/unfeature",
   verifyFirebaseToken,
-  requireVerifiedEmail,
+  requireCurrentUser,
+  requireActiveUser,
   validateRequest({ params: idParamsSchema }),
   unfeatureListing
 );
 listingsRouter.post(
   "/:id/images",
   verifyFirebaseToken,
+  requireCurrentUser,
+  requireActiveUser,
   requireVerifiedEmail,
   validateRequest({ params: idParamsSchema, body: attachListingImageBodySchema }),
   attachListingImage
 );
-

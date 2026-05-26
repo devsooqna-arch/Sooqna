@@ -59,6 +59,8 @@ model Listing {
   isFeatured            Boolean
   isApproved            Boolean
   publishedAt           DateTime?
+  soldAt                DateTime?
+  archivedAt            DateTime?
   expiresAt             DateTime?
   createdAt             DateTime
   updatedAt             DateTime
@@ -72,6 +74,14 @@ model Listing {
   @@index([ownerId])
   @@index([status, deletedAt])
   @@index([categoryId])
+  @@index([locationCity])
+  @@index([isFeatured])
+  @@index([createdAt])
+  @@index([price])
+  @@index([expiresAt])
+  @@index([categoryId, status, createdAt])
+  @@index([locationCity, status, createdAt])
+  @@index([isFeatured, status, createdAt])
   @@unique([ownerId, clientRequestId], map: "listings_owner_client_request_unique")
 }
 
@@ -85,7 +95,7 @@ model ListingImage {
 
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
-  @@index([listingId])
+  @@index([listingId, order])
 }
 
 model Favorite {
@@ -153,7 +163,7 @@ model Category {
   id        String    @id
   nameAr    String
   nameEn    String
-  slug      String
+  slug      String    @unique
   isActive  Boolean
   sortOrder Int
   createdAt DateTime?

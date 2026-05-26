@@ -121,6 +121,8 @@ export const listingsQuerySchema = z
     city: z.string().trim().min(1).max(120).optional(),
     search: z.string().trim().max(200).optional(),
     sort: z.enum(["price_asc", "price_desc", "newest"]).optional(),
+    priceMin: z.coerce.number().nonnegative().optional(),
+    priceMax: z.coerce.number().nonnegative().optional(),
   })
   .strict();
 

@@ -36,6 +36,8 @@ export type BackendListing = {
   isFeatured: boolean;
   isApproved: boolean;
   publishedAt: string | null;
+  soldAt: string | null;
+  archivedAt: string | null;
   expiresAt: string | null;
   createdAt: string;
   updatedAt: string;

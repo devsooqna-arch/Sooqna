@@ -7,14 +7,20 @@ import type { ListingCurrency } from "./listings.types";
 
 const service = new ListingsService(new PrismaListingsRepository());
 
-export async function createListing(req: Request, res: Response): Promise<void> {
-  if (!req.authUser) {
+function requireTrustedUid(req: Request): string {
+  const uid = req.currentUser?.firebaseUid;
+  if (!uid) {
     throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
   }
+  return uid;
+}
+
+export async function createListing(req: Request, res: Response): Promise<void> {
+  const uid = requireTrustedUid(req);
   const listing = await service.create({
-    ownerId: req.authUser.uid,
-    ownerFullName: req.authUser.name ?? "",
-    ownerPhotoURL: req.authUser.picture ?? "",
+    ownerId: uid,
+    ownerFullName: req.currentUser?.displayName ?? "",
+    ownerPhotoURL: req.currentUser?.photoURL ?? "",
     title: String(req.body?.title ?? ""),
     price: Number(req.body?.price),
     currency: req.body?.currency as ListingCurrency | undefined,
@@ -29,7 +35,7 @@ export async function createListing(req: Request, res: Response): Promise<void> 
     },
   });
   await logAuditEvent({
-    actorId: req.authUser.uid,
+    actorId: uid,
     action: "listing.create",
     targetType: "listing",
     targetId: listing.id,
@@ -56,7 +62,12 @@ export async function listListings(req: Request, res: Response): Promise<void> {
       ? sortRaw
       : undefined;
 
-  const normalizedFilters = service.normalizeFilters({ limit, offset, category, city, search, sort });
+  const priceMinRaw = Number(req.query.priceMin);
+  const priceMaxRaw = Number(req.query.priceMax);
+  const priceMin = Number.isFinite(priceMinRaw) && priceMinRaw >= 0 ? priceMinRaw : undefined;
+  const priceMax = Number.isFinite(priceMaxRaw) && priceMaxRaw >= 0 ? priceMaxRaw : undefined;
+
+  const normalizedFilters = service.normalizeFilters({ limit, offset, category, city, search, sort, priceMin, priceMax });
   const { items, total } = await service.list(normalizedFilters);
   res.json({
     success: true,
@@ -69,15 +80,15 @@ export async function listListings(req: Request, res: Response): Promise<void> {
       city: normalizedFilters.city ?? null,
       search: normalizedFilters.search ?? null,
       sort: normalizedFilters.sort ?? "newest",
+      priceMin: normalizedFilters.priceMin ?? null,
+      priceMax: normalizedFilters.priceMax ?? null,
     },
   });
 }
 
 export async function listMyListings(req: Request, res: Response): Promise<void> {
-  if (!req.authUser) {
-    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
-  }
-  const listings = await service.listForOwner(req.authUser.uid);
+  const uid = requireTrustedUid(req);
+  const listings = await service.listForOwner(uid);
   res.json({ success: true, listings });
 }
 
@@ -92,16 +103,14 @@ export async function getListingById(req: Request, res: Response): Promise<void>
 }
 
 export async function patchListing(req: Request, res: Response): Promise<void> {
-  if (!req.authUser) {
-    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
-  }
-  const listing = await service.patch(req.params.id, req.authUser.uid, {
+  const uid = requireTrustedUid(req);
+  const listing = await service.patch(req.params.id, uid, {
     title: req.body?.title,
     description: req.body?.description,
     price: req.body?.price,
   });
   await logAuditEvent({
-    actorId: req.authUser.uid,
+    actorId: uid,
     action: "listing.update",
     targetType: "listing",
     targetId: listing.id,
@@ -110,12 +119,10 @@ export async function patchListing(req: Request, res: Response): Promise<void> {
 }
 
 export async function publishListing(req: Request, res: Response): Promise<void> {
-  if (!req.authUser) {
-    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
-  }
-  const listing = await service.publish(req.params.id, req.authUser.uid);
+  const uid = requireTrustedUid(req);
+  const listing = await service.publish(req.params.id, uid);
   await logAuditEvent({
-    actorId: req.authUser.uid,
+    actorId: uid,
     action: "listing.publish",
     targetType: "listing",
     targetId: listing.id,
@@ -124,12 +131,10 @@ export async function publishListing(req: Request, res: Response): Promise<void>
 }
 
 export async function unpublishListing(req: Request, res: Response): Promise<void> {
-  if (!req.authUser) {
-    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
-  }
-  const listing = await service.unpublish(req.params.id, req.authUser.uid);
+  const uid = requireTrustedUid(req);
+  const listing = await service.unpublish(req.params.id, uid);
   await logAuditEvent({
-    actorId: req.authUser.uid,
+    actorId: uid,
     action: "listing.unpublish",
     targetType: "listing",
     targetId: listing.id,
@@ -137,17 +142,39 @@ export async function unpublishListing(req: Request, res: Response): Promise<voi
   res.json({ success: true, listing });
 }
 
+export async function archiveListing(req: Request, res: Response): Promise<void> {
+  const uid = requireTrustedUid(req);
+  const listing = await service.archive(req.params.id, uid);
+  await logAuditEvent({
+    actorId: uid,
+    action: "listing.archive",
+    targetType: "listing",
+    targetId: listing.id,
+  });
+  res.json({ success: true, listing });
+}
+
+export async function markListingSold(req: Request, res: Response): Promise<void> {
+  const uid = requireTrustedUid(req);
+  const listing = await service.markSold(req.params.id, uid);
+  await logAuditEvent({
+    actorId: uid,
+    action: "listing.sold",
+    targetType: "listing",
+    targetId: listing.id,
+  });
+  res.json({ success: true, listing });
+}
+
 export async function renewListing(req: Request, res: Response): Promise<void> {
-  if (!req.authUser) {
-    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
-  }
+  const uid = requireTrustedUid(req);
   const durationDays =
     typeof req.body?.durationDays === "number" && Number.isInteger(req.body.durationDays)
       ? req.body.durationDays
       : undefined;
-  const listing = await service.renew(req.params.id, req.authUser.uid, durationDays);
+  const listing = await service.renew(req.params.id, uid, durationDays);
   await logAuditEvent({
-    actorId: req.authUser.uid,
+    actorId: uid,
     action: "listing.renew",
     targetType: "listing",
     targetId: listing.id,
@@ -157,12 +184,10 @@ export async function renewListing(req: Request, res: Response): Promise<void> {
 }
 
 export async function expireListing(req: Request, res: Response): Promise<void> {
-  if (!req.authUser) {
-    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
-  }
-  const listing = await service.expire(req.params.id, req.authUser.uid);
+  const uid = requireTrustedUid(req);
+  const listing = await service.expire(req.params.id, uid);
   await logAuditEvent({
-    actorId: req.authUser.uid,
+    actorId: uid,
     action: "listing.expire",
     targetType: "listing",
     targetId: listing.id,
@@ -171,12 +196,10 @@ export async function expireListing(req: Request, res: Response): Promise<void> 
 }
 
 export async function deleteListing(req: Request, res: Response): Promise<void> {
-  if (!req.authUser) {
-    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
-  }
-  const listing = await service.softDelete(req.params.id, req.authUser.uid);
+  const uid = requireTrustedUid(req);
+  const listing = await service.softDelete(req.params.id, uid);
   await logAuditEvent({
-    actorId: req.authUser.uid,
+    actorId: uid,
     action: "listing.delete",
     targetType: "listing",
     targetId: listing.id,
@@ -185,10 +208,11 @@ export async function deleteListing(req: Request, res: Response): Promise<void> 
 }
 
 export async function featureListing(req: Request, res: Response): Promise<void> {
-  if (!req.authUser) throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
-  const listing = await service.feature(req.params.id, req.authUser.uid);
+  const uid = requireTrustedUid(req);
+  const role = req.currentUser?.role ?? "BUYER";
+  const listing = await service.feature(req.params.id, uid, role);
   await logAuditEvent({
-    actorId: req.authUser.uid,
+    actorId: uid,
     action: "listing.feature",
     targetType: "listing",
     targetId: listing.id,
@@ -197,10 +221,11 @@ export async function featureListing(req: Request, res: Response): Promise<void>
 }
 
 export async function unfeatureListing(req: Request, res: Response): Promise<void> {
-  if (!req.authUser) throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
-  const listing = await service.unfeature(req.params.id, req.authUser.uid);
+  const uid = requireTrustedUid(req);
+  const role = req.currentUser?.role ?? "BUYER";
+  const listing = await service.unfeature(req.params.id, uid, role);
   await logAuditEvent({
-    actorId: req.authUser.uid,
+    actorId: uid,
     action: "listing.unfeature",
     targetType: "listing",
     targetId: listing.id,
@@ -209,9 +234,7 @@ export async function unfeatureListing(req: Request, res: Response): Promise<voi
 }
 
 export async function attachListingImage(req: Request, res: Response): Promise<void> {
-  if (!req.authUser) {
-    throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
-  }
+  const uid = requireTrustedUid(req);
 
   const url = String(req.body?.url ?? "");
   const imagePath = String(req.body?.path ?? "");
@@ -221,7 +244,7 @@ export async function attachListingImage(req: Request, res: Response): Promise<v
 
   const listing = await service.attachImage({
     listingId: req.params.id,
-    ownerId: req.authUser.uid,
+    ownerId: uid,
     url,
     path: imagePath,
   });

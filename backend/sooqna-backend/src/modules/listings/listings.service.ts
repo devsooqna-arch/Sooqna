@@ -150,6 +150,8 @@ export class ListingsService {
       isFeatured: false,
       isApproved: false,
       publishedAt: null,
+      soldAt: null,
+      archivedAt: null,
       expiresAt: null,
       createdAt: now,
       updatedAt: now,
@@ -185,21 +187,53 @@ export class ListingsService {
     return this.repo.findById(id);
   }
 
+  async getPublicById(id: string): Promise<Listing | null> {
+    const listing = await this.repo.findById(id);
+    if (!listing) return null;
+    this.applyAutoExpiration(listing);
+    if (listing.status !== "published") return null;
+    if (listing.expiresAt && new Date(listing.expiresAt).getTime() <= Date.now()) return null;
+    return listing;
+  }
+
+  async getByIdForOwner(id: string, ownerId: string): Promise<Listing | null> {
+    const listing = await this.repo.findById(id);
+    if (!listing) return null;
+    if (listing.ownerId !== ownerId) return null;
+    return listing;
+  }
+
   async recordView(listingId: string, viewerId?: string): Promise<Listing | null> {
     const listing = await this.repo.findById(listingId);
     if (!listing) return null;
-    const next: Listing = {
-      ...listing,
-      viewsCount: Math.max(0, listing.viewsCount) + 1,
-      updatedAt: nowIso(),
-    };
-    const updated = await this.repo.update(listingId, next);
-    await trackEngagementEvent({
-      eventType: "view",
-      listingId,
-      actorId: viewerId,
-    });
-    return updated;
+
+    this.applyAutoExpiration(listing);
+
+    if (listing.status !== "published") {
+      if (viewerId && listing.ownerId === viewerId) return listing;
+      return null;
+    }
+
+    if (listing.expiresAt && new Date(listing.expiresAt).getTime() <= Date.now()) {
+      if (viewerId && listing.ownerId === viewerId) return listing;
+      return null;
+    }
+
+    const isOwnerView = viewerId === listing.ownerId;
+    if (!isOwnerView) {
+      const updated = await this.repo.updateFields(listingId, {
+        viewsCount: listing.viewsCount + 1,
+        updatedAt: new Date(),
+      });
+      await trackEngagementEvent({
+        eventType: "view",
+        listingId,
+        actorId: viewerId,
+      });
+      return updated;
+    }
+
+    return listing;
   }
 
   async patch(
@@ -215,18 +249,18 @@ export class ListingsService {
       throw new AppError(400, "Listing cannot be edited in current status.", "LISTING_STATE_INVALID");
     }
 
-    const next: Listing = {
-      ...existing,
-      title: patch.title?.trim() || existing.title,
-      titleLower: (patch.title?.trim() || existing.title).toLowerCase(),
-      description: patch.description ?? existing.description,
-      price:
-        patch.price !== undefined && Number.isFinite(patch.price) && patch.price >= 0
-          ? patch.price
-          : existing.price,
-      updatedAt: nowIso(),
-    };
-    return this.repo.update(existing.id, next);
+    const fields: Record<string, unknown> = { updatedAt: new Date() };
+    if (patch.title?.trim()) {
+      fields.title = patch.title.trim();
+      fields.titleLower = patch.title.trim().toLowerCase();
+    }
+    if (patch.description !== undefined) {
+      fields.description = patch.description;
+    }
+    if (patch.price !== undefined && Number.isFinite(patch.price) && patch.price >= 0) {
+      fields.price = patch.price;
+    }
+    return this.repo.updateFields(existing.id, fields);
   }
 
   async softDelete(listingId: string, userId: string): Promise<Listing> {
@@ -234,12 +268,10 @@ export class ListingsService {
     if (!existing) throw new AppError(404, "Listing not found", "NOT_FOUND");
     if (existing.ownerId !== userId) throw new AppError(403, "Forbidden", "FORBIDDEN");
 
-    const next: Listing = {
-      ...existing,
-      deletedAt: nowIso(),
-      updatedAt: nowIso(),
-    };
-    return this.repo.update(existing.id, next);
+    return this.repo.updateFields(existing.id, {
+      deletedAt: new Date(),
+      updatedAt: new Date(),
+    });
   }
 
   async attachImage(input: AttachImageInput): Promise<Listing> {
@@ -255,27 +287,18 @@ export class ListingsService {
       );
     }
 
-    const nextImages = [
-      ...listing.images,
-      {
-        url: input.url,
-        path: input.path,
-        isPrimary: listing.images.length === 0,
-        order: listing.images.length + 1,
-      },
-    ].map((img, idx) => ({
-      ...img,
-      order: idx + 1,
-      isPrimary: idx === 0,
-    }));
+    const isPrimary = listing.images.length === 0;
+    const order = listing.images.length + 1;
 
-    const next: Listing = {
-      ...listing,
-      images: nextImages,
-      updatedAt: nowIso(),
-    };
+    await this.repo.addImage(input.listingId, {
+      url: input.url,
+      path: input.path,
+      isPrimary,
+      order,
+    });
 
-    return this.repo.update(listing.id, next);
+    const updated = await this.repo.findById(input.listingId);
+    return updated!;
   }
 
   async publish(listingId: string, ownerId: string): Promise<Listing> {
@@ -295,15 +318,13 @@ export class ListingsService {
     const expiresAt = new Date(now);
     expiresAt.setDate(expiresAt.getDate() + env.listingDefaultExpiryDays);
 
-    const next: Listing = {
-      ...listing,
+    return this.repo.updateFields(listing.id, {
       status: "published",
       isApproved: true,
-      publishedAt: now.toISOString(),
-      expiresAt: expiresAt.toISOString(),
-      updatedAt: now.toISOString(),
-    };
-    return this.repo.update(listing.id, next);
+      publishedAt: now,
+      expiresAt,
+      updatedAt: now,
+    });
   }
 
   async unpublish(listingId: string, ownerId: string): Promise<Listing> {
@@ -312,12 +333,41 @@ export class ListingsService {
     if (listing.status !== "published") {
       throw new AppError(400, "Only published listings can be unpublished.", "LISTING_STATE_INVALID");
     }
-    const next: Listing = {
-      ...listing,
+    const now = new Date();
+    return this.repo.updateFields(listing.id, {
       status: "archived",
-      updatedAt: nowIso(),
-    };
-    return this.repo.update(listing.id, next);
+      archivedAt: now,
+      updatedAt: now,
+    });
+  }
+
+  async archive(listingId: string, ownerId: string): Promise<Listing> {
+    const listing = await this.getOwnerListingOrThrow(listingId, ownerId);
+    this.applyAutoExpiration(listing);
+    if (listing.status !== "published" && listing.status !== "draft") {
+      throw new AppError(400, "Only published or draft listings can be archived.", "LISTING_STATE_INVALID");
+    }
+    const now = new Date();
+    return this.repo.updateFields(listing.id, {
+      status: "archived",
+      archivedAt: now,
+      updatedAt: now,
+    });
+  }
+
+  async markSold(listingId: string, ownerId: string): Promise<Listing> {
+    const listing = await this.getOwnerListingOrThrow(listingId, ownerId);
+    this.applyAutoExpiration(listing);
+    if (listing.status !== "published") {
+      throw new AppError(400, "Only published listings can be marked as sold.", "LISTING_STATE_INVALID");
+    }
+    const now = new Date();
+    return this.repo.updateFields(listing.id, {
+      status: "sold",
+      soldAt: now,
+      isFeatured: false,
+      updatedAt: now,
+    });
   }
 
   async renew(listingId: string, ownerId: string, durationDays?: number): Promise<Listing> {
@@ -325,6 +375,9 @@ export class ListingsService {
     this.applyAutoExpiration(listing);
     if (listing.status !== "archived") {
       throw new AppError(400, "Only archived listings can be renewed.", "LISTING_STATE_INVALID");
+    }
+    if (listing.images.length === 0) {
+      throw new AppError(400, "At least one image is required before publishing.", "VALIDATION_ERROR");
     }
     const effectiveDays =
       typeof durationDays === "number" && durationDays >= 1 && durationDays <= 365
@@ -334,29 +387,40 @@ export class ListingsService {
     const expiresAt = new Date(now);
     expiresAt.setDate(expiresAt.getDate() + effectiveDays);
 
-    const next: Listing = {
-      ...listing,
+    return this.repo.updateFields(listing.id, {
       status: "published",
-      publishedAt: now.toISOString(),
-      expiresAt: expiresAt.toISOString(),
-      updatedAt: now.toISOString(),
-    };
-    return this.repo.update(listing.id, next);
+      publishedAt: now,
+      expiresAt,
+      archivedAt: null,
+      updatedAt: now,
+    });
   }
 
-  async feature(listingId: string, ownerId: string): Promise<Listing> {
-    const listing = await this.getOwnerListingOrThrow(listingId, ownerId);
+  async feature(listingId: string, adminId: string, role: string): Promise<Listing> {
+    if (role !== "ADMIN") {
+      throw new AppError(403, "Only admins can feature listings.", "FORBIDDEN");
+    }
+    const listing = await this.repo.findById(listingId);
+    if (!listing) throw new AppError(404, "Listing not found", "NOT_FOUND");
     if (listing.status !== "published") {
       throw new AppError(400, "Only published listings can be featured.", "LISTING_STATE_INVALID");
     }
-    const next: Listing = { ...listing, isFeatured: true, updatedAt: nowIso() };
-    return this.repo.update(listing.id, next);
+    return this.repo.updateFields(listing.id, {
+      isFeatured: true,
+      updatedAt: new Date(),
+    });
   }
 
-  async unfeature(listingId: string, ownerId: string): Promise<Listing> {
-    const listing = await this.getOwnerListingOrThrow(listingId, ownerId);
-    const next: Listing = { ...listing, isFeatured: false, updatedAt: nowIso() };
-    return this.repo.update(listing.id, next);
+  async unfeature(listingId: string, adminId: string, role: string): Promise<Listing> {
+    if (role !== "ADMIN") {
+      throw new AppError(403, "Only admins can unfeature listings.", "FORBIDDEN");
+    }
+    const listing = await this.repo.findById(listingId);
+    if (!listing) throw new AppError(404, "Listing not found", "NOT_FOUND");
+    return this.repo.updateFields(listing.id, {
+      isFeatured: false,
+      updatedAt: new Date(),
+    });
   }
 
   async expire(listingId: string, ownerId: string): Promise<Listing> {
@@ -365,14 +429,13 @@ export class ListingsService {
     if (listing.status !== "published") {
       throw new AppError(400, "Only published listings can be expired.", "LISTING_STATE_INVALID");
     }
-    const now = nowIso();
-    const next: Listing = {
-      ...listing,
+    const now = new Date();
+    return this.repo.updateFields(listing.id, {
       status: "archived",
       expiresAt: now,
+      archivedAt: now,
       updatedAt: now,
-    };
-    return this.repo.update(listing.id, next);
+    });
   }
 
   private async getOwnerListingOrThrow(listingId: string, ownerId: string): Promise<Listing> {
@@ -386,6 +449,7 @@ export class ListingsService {
     if (listing.status !== "published" || !listing.expiresAt) return;
     if (new Date(listing.expiresAt).getTime() > Date.now()) return;
     listing.status = "archived";
+    listing.archivedAt = listing.expiresAt;
     listing.updatedAt = nowIso();
   }
 
@@ -409,6 +473,8 @@ export class ListingsService {
       city,
       search: pagination?.search?.trim() || undefined,
       sort,
+      priceMin: pagination?.priceMin,
+      priceMax: pagination?.priceMax,
     };
   }
 }

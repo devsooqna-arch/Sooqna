@@ -6,6 +6,8 @@ export type AuditAction =
   | "listing.renew"
   | "listing.expire"
   | "listing.delete"
+  | "listing.sold"
+  | "listing.archive"
   | "listing.feature"
   | "listing.unfeature"
   | "favorite.add"
