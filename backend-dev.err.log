@@ -1,0 +1,23 @@
+UsersService.safeUpsert fallback: Error: Failed to save user profile.
+    at PrismaUsersRepository.upsert (E:\Projects\Sooqna-2026\Sooqna\backend\sooqna-backend\src\modules\users\repositories\users.repository.ts:97:13)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at UsersService.safeUpsert (E:\Projects\Sooqna-2026\Sooqna\backend\sooqna-backend\src\modules\users\users.service.ts:93:14)
+    at upsertProfile (E:\Projects\Sooqna-2026\Sooqna\backend\sooqna-backend\src\modules\users\users.controller.ts:20:21) {
+  [cause]: PrismaClientKnownRequestError: 
+  Invalid `prisma.user.upsert()` invocation:
+  
+  
+  Unique constraint failed on the fields: (`id`)
+      at Gr.handleRequestError (E:\Projects\Sooqna-2026\Sooqna\backend\sooqna-backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)
+      at Gr.handleAndLogRequestError (E:\Projects\Sooqna-2026\Sooqna\backend\sooqna-backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)
+      at Gr.request (E:\Projects\Sooqna-2026\Sooqna\backend\sooqna-backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)
+      at processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at a (E:\Projects\Sooqna-2026\Sooqna\backend\sooqna-backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:938:24)
+      at PrismaUsersRepository.upsert (E:\Projects\Sooqna-2026\Sooqna\backend\sooqna-backend\src\modules\users\repositories\users.repository.ts:50:20)
+      at UsersService.safeUpsert (E:\Projects\Sooqna-2026\Sooqna\backend\sooqna-backend\src\modules\users\users.service.ts:93:14)
+      at upsertProfile (E:\Projects\Sooqna-2026\Sooqna\backend\sooqna-backend\src\modules\users\users.controller.ts:20:21) {
+    code: 'P2002',
+    meta: { modelName: 'User', driverAdapterError: [DriverAdapterError] },
+    clientVersion: '7.7.0'
+  }
+}

@@ -10,13 +10,61 @@
      ⨯ devtoolSegmentExplorer
 
  ✓ Starting...
- ✓ Ready in 1894ms
+ ✓ Ready in 2.2s
  ○ Compiling / ...
- ✓ Compiled / in 9.4s (744 modules)
- ✓ Compiled in 1357ms (296 modules)
- ✓ Compiled in 149ms (282 modules)
- GET / 200 in 11038ms
+ ✓ Compiled / in 2.1s (754 modules)
+ ✓ Compiled in 667ms (301 modules)
+ GET / 200 in 2874ms
+ GET / 200 in 450ms
+ GET / 200 in 176ms
+ ○ Compiling /register ...
+ ✓ Compiled /register in 1323ms (759 modules)
+ GET /register 200 in 1615ms
  ○ Compiling /login ...
- ✓ Compiled /login in 923ms (743 modules)
- GET /login 200 in 1668ms
- GET /login 200 in 186ms
+ ✓ Compiled /login in 799ms (761 modules)
+ GET /login 200 in 1676ms
+ ○ Compiling /me ...
+ ✓ Compiled /me in 741ms (773 modules)
+ GET /me 200 in 1139ms
+ GET /me 200 in 124ms
+ GET /login?next=%2Fme 200 in 195ms
+ GET / 200 in 203ms
+ GET /login 200 in 67ms
+ GET /me 200 in 231ms
+ GET /me 200 in 121ms
+ GET /login?next=%2Fme 200 in 89ms
+ GET / 200 in 146ms
+ GET /login 200 in 602ms
+ ○ Compiling /reset-password ...
+ ✓ Compiled /reset-password in 1018ms (781 modules)
+ GET /reset-password 200 in 1251ms
+ GET / 200 in 814ms
+ ○ Compiling /listings ...
+ ✓ Compiled /listings in 1407ms (803 modules)
+ ○ Compiling /_error ...
+ GET /reset-password 200 in 1251ms
+ GET /listings 200 in 3441ms
+ ✓ Compiled /_error in 2.1s (1141 modules)
+ GET /reset-password 200 in 202ms
+ GET /me 500 in 2254ms
+ GET /reset-password 200 in 305ms
+ GET /reset-password 200 in 76ms
+ GET /me 200 in 173ms
+ GET /me 200 in 110ms
+ GET /me 200 in 257ms
+ GET /me 200 in 457ms
+ ○ Compiling /submit-listing ...
+ ✓ Compiled /submit-listing in 1170ms (1167 modules)
+ GET /reset-password 200 in 313ms
+ GET /login?next=%2Fme 200 in 83ms
+ GET /submit-listing 200 in 2234ms
+ GET /login 200 in 170ms
+ GET /reset-password 200 in 174ms
+ GET / 200 in 232ms
+ GET /listings 200 in 214ms
+ GET /listings?sort=newest&page=1 200 in 51ms
+ GET /login 200 in 146ms
+ GET /reset-password 200 in 146ms
+ GET / 200 in 73ms
+ GET /login 200 in 32ms
+ GET /me 200 in 89ms

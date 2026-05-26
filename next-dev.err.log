@@ -1,3 +1,7 @@
 Warning: Reverting webpack devtool to 'false'.
 Changing the webpack devtool in development mode will cause severe performance regressions.
 Read more: https://nextjs.org/docs/messages/improper-devtool
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/me'
+}
