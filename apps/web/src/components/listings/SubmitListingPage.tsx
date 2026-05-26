@@ -46,6 +46,7 @@ export function SubmitListingPage() {
   const [activeStep, setActiveStep] = useState(0);
   const [busy, setBusy] = useState(false);
   const submittingRef = useRef(false);
+  const clientRequestIdRef = useRef<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [createdListingId, setCreatedListingId] = useState<string | null>(null);
   const [optimisticNote, setOptimisticNote] = useState<string | null>(null);
@@ -177,8 +178,7 @@ export function SubmitListingPage() {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (submittingRef.current) return;
-    submittingRef.current = true;
+    if (submittingRef.current || busy) return;
     setError(null);
     const validationError = validate();
     if (validationError) {
@@ -191,6 +191,8 @@ export function SubmitListingPage() {
       return;
     }
 
+    submittingRef.current = true;
+    clientRequestIdRef.current ??= crypto.randomUUID();
     setBusy(true);
     setOptimisticNote("جارٍ إنشاء الإعلان...");
     try {
@@ -205,7 +207,7 @@ export function SubmitListingPage() {
           city: city.trim(),
           area: area.trim() || city.trim(),
         },
-      });
+      }, clientRequestIdRef.current);
       setOptimisticNote("تم إنشاء الإعلان. جارٍ رفع الصور...");
       await uploadImagesForListing(result.listingId);
       setOptimisticNote("جارٍ نشر الإعلان...");
@@ -220,6 +222,7 @@ export function SubmitListingPage() {
           : "تم نشر الإعلان وهو الآن يظهر في البحث والصفحة الرئيسية."
       );
       setCreatedListingId(result.listingId);
+      clientRequestIdRef.current = null;
     } catch (err) {
       setError(err instanceof Error ? err.message : "تعذر إنشاء الإعلان.");
       setOptimisticNote(null);

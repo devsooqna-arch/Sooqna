@@ -10,6 +10,7 @@ import { uploadBackendProfileAvatar } from "@/services/backendUploadService";
 import { getAuthErrorMessage, sendPasswordResetLink } from "@/services/authService";
 import { ModernAvatar } from "@/components/ui/ModernAvatar";
 import { getAccountSettingsActionState } from "@/components/me/accountSettingsActions";
+import { getResendVerificationState } from "@/components/auth/resendVerificationState";
 
 export function AccountSettingsForm() {
   const router = useRouter();
@@ -25,6 +26,7 @@ export function AccountSettingsForm() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [resetSending, setResetSending] = useState(false);
   const [verificationSending, setVerificationSending] = useState(false);
+  const [verificationCooldown, setVerificationCooldown] = useState(0);
 
   const previewUrl = useMemo(() => {
     if (!avatarFile) return null;
@@ -48,6 +50,18 @@ export function AccountSettingsForm() {
     hasEmailPasswordProvider,
     emailVerified,
   });
+  const resendState = getResendVerificationState({
+    sending: verificationSending,
+    cooldownRemainingSeconds: verificationCooldown,
+  });
+
+  useEffect(() => {
+    if (verificationCooldown <= 0) return undefined;
+    const timer = window.setTimeout(() => {
+      setVerificationCooldown((value) => Math.max(0, value - 1));
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [verificationCooldown]);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -97,12 +111,13 @@ export function AccountSettingsForm() {
   }
 
   async function handleResendVerification() {
-    if (!currentUser?.email || emailVerified) return;
+    if (!currentUser?.email || emailVerified || resendState.disabled) return;
     setVerificationSending(true);
     setError(null);
     setSuccess(null);
     try {
       await resendEmailVerification();
+      setVerificationCooldown(60);
       setSuccess("تم إرسال رابط تأكيد البريد. افحص البريد الوارد أو البريد غير الهام.");
     } catch (err) {
       setError(getAuthErrorMessage(err));
@@ -273,10 +288,10 @@ export function AccountSettingsForm() {
                   <button
                     type="button"
                     onClick={() => void handleResendVerification()}
-                    disabled={verificationSending}
+                    disabled={resendState.disabled}
                     className="rounded-full bg-amber-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-amber-800 disabled:opacity-50"
                   >
-                    {verificationSending ? "جاري الإرسال..." : "إعادة إرسال رابط التحقق"}
+                    {resendState.label}
                   </button>
                   <Link
                     href="/reset-password"
@@ -285,6 +300,9 @@ export function AccountSettingsForm() {
                     استعادة كلمة المرور
                   </Link>
                 </div>
+                {resendState.helpText ? (
+                  <p className="mt-2 text-xs text-amber-900/80">{resendState.helpText}</p>
+                ) : null}
               </div>
             ) : null}
           </section>

@@ -19,6 +19,7 @@ export interface ListingsRepository {
   list(pagination?: PaginationOptions): Promise<{ items: Listing[]; total: number }>;
   listByOwner(ownerId: string): Promise<Listing[]>;
   findById(id: string): Promise<Listing | null>;
+  findByClientRequestId(ownerId: string, clientRequestId: string): Promise<Listing | null>;
   update(id: string, listing: Listing): Promise<Listing>;
 }
 
@@ -44,6 +45,7 @@ function mapListing(record: ListingWithImages): Listing {
     id: listing.id,
     title: listing.title,
     titleLower: listing.titleLower,
+    clientRequestId: listing.clientRequestId ?? null,
     description: listing.description,
     price: listing.price,
     currency: listing.currency as Listing["currency"],
@@ -89,6 +91,7 @@ export class PrismaListingsRepository implements ListingsRepository {
           id: listing.id,
           title: listing.title,
           titleLower: listing.titleLower,
+          clientRequestId: listing.clientRequestId ?? null,
           description: listing.description,
           price: listing.price,
           currency: listing.currency,
@@ -256,6 +259,29 @@ export class PrismaListingsRepository implements ListingsRepository {
     }
   }
 
+  async findByClientRequestId(ownerId: string, clientRequestId: string): Promise<Listing | null> {
+    try {
+      const listing = await prisma.listing.findFirst({
+        where: { ownerId, clientRequestId, deletedAt: null },
+        include: { listingImages: { orderBy: { order: "asc" } } },
+      });
+      return listing ? mapListing(listing) : null;
+    } catch (error) {
+      if (useJsonFallback()) {
+        const listings = readJsonArrayFile<Listing>(listingsDataPath);
+        return (
+          listings.find(
+            (item) =>
+              item.ownerId === ownerId &&
+              item.clientRequestId === clientRequestId &&
+              item.deletedAt === null
+          ) ?? null
+        );
+      }
+      throw new Error("Failed to fetch listing by client request id.", { cause: error });
+    }
+  }
+
   async update(id: string, listing: Listing): Promise<Listing> {
     try {
       await prisma.listingImage.deleteMany({ where: { listingId: id } });
@@ -264,6 +290,7 @@ export class PrismaListingsRepository implements ListingsRepository {
         data: {
           title: listing.title,
           titleLower: listing.titleLower,
+          clientRequestId: listing.clientRequestId ?? null,
           description: listing.description,
           price: listing.price,
           currency: listing.currency,

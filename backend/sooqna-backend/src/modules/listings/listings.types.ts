@@ -23,6 +23,7 @@ export interface Listing {
   id: string;
   title: string;
   titleLower: string;
+  clientRequestId?: string | null;
   description: string;
   price: number;
   currency: ListingCurrency;

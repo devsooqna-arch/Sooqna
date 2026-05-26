@@ -14,6 +14,12 @@ const resendVerificationLimiter = rateLimit({
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  skipFailedRequests: true,
+  message: {
+    success: false,
+    code: "RATE_LIMITED",
+    message: "Too many verification resend requests. Please try again later.",
+  },
 });
 
 const recaptchaLimiter = rateLimit({

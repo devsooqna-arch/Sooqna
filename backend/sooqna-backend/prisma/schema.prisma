@@ -38,6 +38,7 @@ model Listing {
   id                    String    @id
   title                 String
   titleLower            String
+  clientRequestId       String?
   description           String
   price                 Float
   currency              String
@@ -71,6 +72,7 @@ model Listing {
   @@index([ownerId])
   @@index([status, deletedAt])
   @@index([categoryId])
+  @@unique([ownerId, clientRequestId], map: "listings_owner_client_request_unique")
 }
 
 model ListingImage {

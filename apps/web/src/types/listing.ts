@@ -67,6 +67,7 @@ export interface CreateListingInput {
   currency?: ListingCurrency;
   categoryId: string;
   description?: string;
+  clientRequestId?: string;
   location?: {
     country?: string;
     city?: string;

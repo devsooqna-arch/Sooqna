@@ -1,34 +1,26 @@
 import { apiFetch } from "@/services/apiClient";
 import type { CreateListingInput, CreateListingResult, Listing } from "@/types/listing";
+import { buildCreateListingPayload } from "./listingCreatePayload";
 
 /**
  * Create listing through existing callable cloud function.
  */
 export async function createListing(
-  input: CreateListingInput
+  input: CreateListingInput,
+  clientRequestId = crypto.randomUUID()
 ): Promise<CreateListingResult> {
-  const location = {
-    country: input.location?.country?.trim() || "Syria",
-    city: input.location?.city?.trim() || "",
-    area: input.location?.area?.trim() || "Aleppo",
-  };
   const response = await apiFetch<{ success: true; listing: Listing }>("/listings", {
     method: "POST",
     authenticated: true,
-    body: JSON.stringify({
-      title: input.title,
-      price: input.price,
-      currency: input.currency ?? "SYP",
-      categoryId: input.categoryId,
-      description: input.description ?? "",
-      location,
-    }),
+    body: JSON.stringify(buildCreateListingPayload(input, clientRequestId)),
   });
   return {
     success: true,
     listingId: response.listing.id,
   };
 }
+
+export { buildCreateListingPayload };
 
 /**
  * Fetch non-deleted listings.
@@ -192,4 +184,3 @@ export async function attachListingImage(
   );
   return response.listing;
 }
-

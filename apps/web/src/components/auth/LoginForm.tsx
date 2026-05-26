@@ -11,6 +11,7 @@ import {
   shouldShowUnverifiedRecovery,
 } from "./authRecovery";
 import { completeSignupVerification } from "./signupVerification";
+import { getResendVerificationState } from "./resendVerificationState";
 import {
   getDuplicateSignupRecoveryMessage,
   isEmailAlreadyInUseError,
@@ -56,6 +57,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [verificationSending, setVerificationSending] = useState(false);
+  const [verificationCooldown, setVerificationCooldown] = useState(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [authInitTimedOut, setAuthInitTimedOut] = useState(false);
 
@@ -69,6 +71,14 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
     }, 8500);
     return () => window.clearTimeout(timeout);
   }, [authLoading]);
+
+  useEffect(() => {
+    if (verificationCooldown <= 0) return undefined;
+    const timer = window.setTimeout(() => {
+      setVerificationCooldown((value) => Math.max(0, value - 1));
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [verificationCooldown]);
 
   const shouldRedirectSignedIn = shouldRedirectSignedInFromAuthPage({
     hasUser: Boolean(currentUser),
@@ -124,6 +134,9 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
           emailVerified: result.emailVerified,
           resendEmailVerification,
         });
+        if (!result.emailVerified) {
+          setVerificationCooldown(60);
+        }
         setSuccessMessage(verification.message);
         if (verification.shouldRedirect) {
           router.replace(nextPath);
@@ -142,6 +155,7 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
               emailVerified: result.emailVerified,
               resendEmailVerification,
             });
+            setVerificationCooldown(60);
             setSuccessMessage(
               `هذا البريد لديه حساب غير مؤكد. ${verification.message}`
             );
@@ -161,12 +175,14 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
   }
 
   async function handleResendVerification() {
+    if (verificationSending || verificationCooldown > 0) return;
     setSubmitError(null);
     setSuccessMessage(null);
     setVerificationSending(true);
     try {
       await resendEmailVerification();
-      setSuccessMessage("تم إرسال رابط التحقق إلى بريدك الإلكتروني.");
+      setVerificationCooldown(60);
+      setSuccessMessage("تم إرسال رابط التحقق إلى بريدك الإلكتروني. افحص البريد الوارد والبريد غير الهام.");
     } catch (err) {
       setSubmitError(getAuthErrorMessage(err));
     } finally {
@@ -199,6 +215,10 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
     authLoading,
     authInitTimedOut,
   });
+  const resendState = getResendVerificationState({
+    sending: verificationSending,
+    cooldownRemainingSeconds: verificationCooldown,
+  });
   /** Do not block the whole UI on auth init — avoids infinite "جاري التحميل" if Auth stalls. */
   const showForm = !currentUser || showUnverifiedRecovery;
 
@@ -229,11 +249,14 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
         <button
           type="button"
           onClick={() => void handleResendVerification()}
-          disabled={verificationSending}
+          disabled={resendState.disabled}
           className="ui-btn-primary w-full rounded-full py-2.5"
         >
-          {verificationSending ? "جاري الإرسال..." : "إعادة إرسال رابط التحقق"}
+          {resendState.label}
         </button>
+        {resendState.helpText ? (
+          <p className="text-xs text-[var(--text-muted)]">{resendState.helpText}</p>
+        ) : null}
 
         <button
           type="button"

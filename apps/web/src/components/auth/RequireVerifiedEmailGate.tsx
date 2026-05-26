@@ -1,14 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getAuthErrorMessage } from "@/services/authService";
 import { shouldBlockVerifiedAction } from "./authRecovery";
+import { getResendVerificationState } from "./resendVerificationState";
 
 export function RequireVerifiedEmailGate({ children }: { children: ReactNode }) {
   const { currentUser, loading, resendEmailVerification } = useAuth();
   const [sending, setSending] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,13 +19,27 @@ export function RequireVerifiedEmailGate({ children }: { children: ReactNode }) 
     emailVerified: Boolean(currentUser?.emailVerified),
     authLoading: loading,
   });
+  const resendState = getResendVerificationState({
+    sending,
+    cooldownRemainingSeconds: cooldown,
+  });
+
+  useEffect(() => {
+    if (cooldown <= 0) return undefined;
+    const timer = window.setTimeout(() => {
+      setCooldown((value) => Math.max(0, value - 1));
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [cooldown]);
 
   async function handleResend() {
+    if (resendState.disabled) return;
     setSending(true);
     setMessage(null);
     setError(null);
     try {
       await resendEmailVerification();
+      setCooldown(60);
       setMessage("تم إرسال رابط التفعيل. افحص البريد الوارد أو البريد غير الهام.");
     } catch (err) {
       setError(getAuthErrorMessage(err));
@@ -59,10 +75,10 @@ export function RequireVerifiedEmailGate({ children }: { children: ReactNode }) 
         <button
           type="button"
           onClick={() => void handleResend()}
-          disabled={sending}
+          disabled={resendState.disabled}
           className="rounded-full bg-amber-900 px-5 py-2 text-sm font-semibold text-white transition hover:bg-amber-800 disabled:opacity-50"
         >
-          {sending ? "جاري الإرسال..." : "إرسال رابط التفعيل"}
+          {sending ? resendState.label : resendState.label.replace("التحقق", "التفعيل")}
         </button>
         <Link
           href="/me/settings"
@@ -77,6 +93,9 @@ export function RequireVerifiedEmailGate({ children }: { children: ReactNode }) 
           تصفح الإعلانات
         </Link>
       </div>
+      {resendState.helpText ? (
+        <p className="mt-2 text-xs text-amber-900/80">{resendState.helpText}</p>
+      ) : null}
     </section>
   );
 }

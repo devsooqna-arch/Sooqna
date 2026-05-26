@@ -26,6 +26,7 @@ app.use(
     max: 500,
     standardHeaders: true,
     legacyHeaders: false,
+    message: { success: false, code: "RATE_LIMITED", message: "Too many requests. Please try again later." },
   })
 );
 
@@ -37,7 +38,7 @@ app.use(
     max: 20,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { success: false, message: "Too many requests, please try again later." },
+    message: { success: false, code: "RATE_LIMITED", message: "Too many auth requests. Please try again later." },
   })
 );
 

@@ -167,17 +167,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const resendEmailVerification = useCallback(async () => {
-    // Apply backend policy + rate limit when available, but do not block the
-    // Firebase client email if local Admin credentials are incomplete.
+    let policyBlocked = false;
     try {
-      await apiFetch<{ success: true; data: { allowed: boolean; alreadyVerified: boolean } }>(
+      const policy = await apiFetch<{ success: true; data: { allowed: boolean; alreadyVerified: boolean } }>(
         "/auth/resend-verification",
         {
           method: "POST",
           authenticated: true,
         }
       );
+      if (policy.data.alreadyVerified || !policy.data.allowed) {
+        policyBlocked = true;
+        throw new Error("هذا البريد مؤكد بالفعل أو لا يمكن إرسال رابط تحقق جديد حالياً.");
+      }
     } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes("429") || message.includes("RATE_LIMIT")) {
+        debugAuth("resendEmailVerification policy rate limited", error);
+        throw error;
+      }
+      if (policyBlocked) {
+        throw error;
+      }
       debugAuth("resendEmailVerification policy check skipped", error);
     }
     await authService.sendVerificationEmailToCurrentUser();

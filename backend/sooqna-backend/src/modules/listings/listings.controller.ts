@@ -20,6 +20,8 @@ export async function createListing(req: Request, res: Response): Promise<void> 
     currency: req.body?.currency as ListingCurrency | undefined,
     categoryId: String(req.body?.categoryId ?? ""),
     description: typeof req.body?.description === "string" ? req.body.description : "",
+    clientRequestId:
+      typeof req.body?.clientRequestId === "string" ? req.body.clientRequestId : undefined,
     location: {
       country: String(req.body?.location?.country ?? ""),
       city: String(req.body?.location?.city ?? ""),

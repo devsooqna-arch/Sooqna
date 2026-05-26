@@ -17,6 +17,7 @@ type CreateListingInput = {
   currency?: ListingCurrency;
   categoryId: string;
   description?: string;
+  clientRequestId?: string;
   location?: {
     country?: string;
     city?: string;
@@ -110,12 +111,20 @@ export class ListingsService {
       fullName: input.ownerFullName,
       photoURL: input.ownerPhotoURL,
     });
+    const clientRequestId = input.clientRequestId?.trim() || null;
+    if (clientRequestId) {
+      const existing = await this.repo.findByClientRequestId(input.ownerId, clientRequestId);
+      if (existing) {
+        return existing;
+      }
+    }
 
     const now = nowIso();
     const listing: Listing = {
       id: generateId("lst"),
       title: input.title.trim(),
       titleLower: input.title.trim().toLowerCase(),
+      clientRequestId,
       description: input.description?.trim() ?? "",
       price: input.price,
       currency: input.currency ?? "SYP",
@@ -146,7 +155,17 @@ export class ListingsService {
       updatedAt: now,
       deletedAt: null,
     };
-    return this.repo.create(listing);
+    try {
+      return await this.repo.create(listing);
+    } catch (error) {
+      if (clientRequestId) {
+        const existing = await this.repo.findByClientRequestId(input.ownerId, clientRequestId);
+        if (existing) {
+          return existing;
+        }
+      }
+      throw error;
+    }
   }
 
   async list(pagination?: PaginationOptions): Promise<{ items: Listing[]; total: number }> {

@@ -15,6 +15,7 @@ function createRepo(): jest.Mocked<ListingsRepository> {
     list: jest.fn(),
     listByOwner: jest.fn(),
     findById: jest.fn(),
+    findByClientRequestId: jest.fn(),
     update: jest.fn(),
   };
 }

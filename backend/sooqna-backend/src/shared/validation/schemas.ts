@@ -47,6 +47,7 @@ export const createListingBodySchema = z
     currency: z.enum(LISTING_CURRENCIES).optional().default("SYP"),
     categoryId: z.string().trim().min(1).max(120),
     description: z.string().trim().max(10000).optional(),
+    clientRequestId: z.string().trim().min(8).max(120).optional(),
     location: listingLocationSchema,
   })
   .strict();

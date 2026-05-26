@@ -44,7 +44,23 @@ export async function apiFetch<T>(
     });
     if (!response.ok) {
       const text = await response.text();
-      throw new Error(text || `API request failed with ${response.status}`);
+      let message = text || `API request failed with ${response.status}`;
+      try {
+        const parsed = JSON.parse(text) as { message?: string; code?: string };
+        if (response.status === 429) {
+          const retryAfter = response.headers.get("Retry-After");
+          message = retryAfter
+            ? `طلبات كثيرة. يمكنك المحاولة بعد ${retryAfter} ثانية.`
+            : "طلبات كثيرة. انتظر قليلاً ثم حاول مرة أخرى.";
+        } else {
+          message = parsed.message || parsed.code || message;
+        }
+      } catch {
+        if (response.status === 429) {
+          message = "طلبات كثيرة. انتظر قليلاً ثم حاول مرة أخرى.";
+        }
+      }
+      throw new Error(message);
     }
     return (await response.json()) as T;
   } catch (err) {
