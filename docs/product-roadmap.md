@@ -1,5 +1,21 @@
 # Product Roadmap
 
+## Recently Added
+
+- Admin operational analytics:
+  - Moderation SLA.
+  - Top listing performance.
+  - User activity analytics.
+- Public market insights:
+  - Active cities.
+  - Active categories.
+  - Average prices by category.
+- Saved searches:
+  - Save filtered listing searches.
+  - Reopen/delete from account dashboard.
+- Price insights:
+  - Comparable price guidance during listing creation.
+
 ## Highest Value Next Steps
 
 1. City relation migration
@@ -19,11 +35,12 @@
    - Seller rating and completed sales.
    - Trust badges on listing cards and profiles.
 
-4. Analytics filters
+4. Analytics filters and exports
    - Date range.
    - City.
    - Category.
    - Status.
+   - CSV/export support for admin reports.
 
 5. Auth sync operations
    - Add Firebase Admin credentials in production.
@@ -35,6 +52,7 @@
    - Better image ordering.
    - Duplicate listing detection.
    - Renewal/expiry reminders.
+   - Stronger pre-submit quality score.
 
 7. Buyer/seller communication
    - Message read states.

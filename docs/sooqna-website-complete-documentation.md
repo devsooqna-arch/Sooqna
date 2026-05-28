@@ -4,7 +4,7 @@ This document is the single canonical reference for the Sooqna website and its s
 
 ## 1. Product Summary
 
-Sooqna is a classifieds marketplace focused on browsing, publishing, managing, and moderating listings. The web app supports public discovery, user accounts, listing submission, favorites, messaging, reviews, reports, and an admin dashboard.
+Sooqna is a classifieds marketplace focused on browsing, publishing, managing, and moderating listings. The web app supports public discovery, user accounts, listing submission, favorites, messaging, reviews, reports, public market insights, saved searches, price guidance, and an admin dashboard.
 
 The active product contains:
 
@@ -75,6 +75,7 @@ Main frontend routes:
 - `/my-listings`: current user's listings.
 - `/my-listings/[listingId]/edit`: edit listing.
 - `/favorites`: saved listings.
+- `/market-insights`: public market activity and average price insights.
 - `/messages`: conversations and chat.
 - `/me`: account dashboard.
 - `/me/settings`: profile/account settings.
@@ -178,6 +179,7 @@ Key Prisma models:
 - `City`: admin-managed city catalog.
 - `Report`: user-submitted abuse/moderation report.
 - `Review`: seller reviews and ratings.
+- `SavedSearch`: user-owned saved listing search filters.
 - `EngagementEvent`: analytics/event tracking.
 - `ListingModerationLog`: traceable admin moderation history.
 - `AuditLog`: admin and system audit trail.
@@ -238,6 +240,7 @@ User area:
 - Profile/settings.
 - My listings.
 - Favorites.
+- Saved searches.
 - Messages.
 
 Engagement:
@@ -271,7 +274,7 @@ The public header shows the dashboard link only after backend-confirmed admin st
 Admin sections:
 
 - Overview: counts and recent audit actions.
-- Analytics: KPIs, daily/weekly growth, listing status distribution, top cities, top categories, latest activity.
+- Analytics: KPIs, daily/weekly growth, listing status distribution, top cities, top categories, moderation SLA, top listing performance, user activity, latest activity.
 - Moderation: pending/rejected queue, filters, single actions, bulk actions, history.
 - Listings: listing lifecycle and feature controls.
 - Users: role/status filtering, promote/demote, suspend/activate, details.
@@ -344,8 +347,50 @@ Current analytics include:
 - City/category bar chart.
 - Listing status donut chart.
 - Latest activities table.
+- Moderation SLA: pending queue size, oldest pending listing, average decision time, and pending-age buckets.
+- Top listing performance by views, favorites, or messages.
+- User activity: active users, users with listings, users with messages, users with favorites.
 
 Backend analytics should continue using aggregate queries, grouped counts, and limited result sets to avoid database overload.
+
+### Public Market Insights
+
+Public route:
+
+- `/market-insights`
+
+Public API:
+
+- `GET /api/market/insights`
+
+Market insights use only published, non-deleted listings and show new listings in the last 7 days, most active cities, most active categories, and average prices by category.
+
+### Saved Searches
+
+Saved searches let signed-in active users store listing filters and reopen them from the account dashboard.
+
+API endpoints:
+
+- `GET /api/saved-searches`
+- `POST /api/saved-searches`
+- `DELETE /api/saved-searches/:id`
+
+Rules:
+
+- Users can list and delete only their own saved searches.
+- Query keys are sanitized server-side.
+- Saved search names are limited to 80 characters.
+- Supported query fields include category, city, text search, price range, condition, and sort.
+
+### Price Insights
+
+Price insights help sellers understand comparable pricing while creating a listing.
+
+API endpoint:
+
+- `GET /api/listings/price-insights?categoryId=...&city=...&condition=...`
+
+The backend calculates sample size, average price, minimum price, maximum price, and confidence level. The submit-listing UI shows soft guidance when the entered price is outside the comparable range.
 
 ## 13. System Health
 
@@ -529,14 +574,13 @@ Recommended next phase:
 
 1. Complete `Listing.cityId` migration and move city filters to relational data.
 2. Add richer listing quality checks before submission.
-3. Improve search ranking with recency, location, category, and engagement signals.
-4. Add saved searches and alerts.
+3. Improve search ranking with recency, location, category, saved searches, and engagement signals.
+4. Add saved-search alerts and notification preferences.
 5. Add stronger seller profiles with trust badges and listing history.
 6. Add admin dashboard export/reporting tools.
-7. Add structured notification preferences.
-8. Add stronger upload storage lifecycle cleanup.
-9. Add observability: request IDs, structured production logs, and error dashboards.
-10. Add more end-to-end tests for critical user journeys.
+7. Add stronger upload storage lifecycle cleanup.
+8. Add observability: request IDs, structured production logs, and error dashboards.
+9. Add more end-to-end tests for critical user journeys.
 
 ## 22. Engineering Standards
 
