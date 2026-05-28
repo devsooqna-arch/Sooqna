@@ -3,6 +3,17 @@ firebase-debug.log
 *-debug.log
 *.log
 *.zip
+*.docx
+*.xlsx
+
+# Local generated reports and screenshots
+/output/
+/apps/web/output/
+/apps/web/test-results/
+/submit-listing-local.png
+
+# External design exports are source artifacts, not runtime code
+/Design System/
 
 # Web
 apps/web/.env.local
