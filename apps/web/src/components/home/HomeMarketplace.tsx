@@ -169,6 +169,16 @@ export function HomeMarketplace() {
         </div>
       </section>
 
+      <section className="ui-card flex flex-col gap-3 rounded-xl p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h3 className="text-base font-bold text-[var(--text)]">إحصائيات السوق</h3>
+          <p className="mt-1 text-sm text-[var(--text-muted)]">تابع أكثر المدن والتصنيفات نشاطاً ومتوسطات الأسعار من الإعلانات المنشورة.</p>
+        </div>
+        <Link href="/market-insights" className="ui-btn-primary inline-flex justify-center rounded-full px-5 text-sm">
+          عرض الإحصائيات
+        </Link>
+      </section>
+
       <section className="grid gap-4 lg:grid-cols-[270px_1fr]">
         <aside className="ui-card overflow-hidden">
           <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
