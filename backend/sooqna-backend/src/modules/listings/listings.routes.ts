@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { prisma } from "../../config/prisma";
 import { verifyFirebaseToken } from "../../middleware/verifyFirebaseToken";
 import { requireActiveUser, requireCurrentUser } from "../../middleware/authContext";
 import { requireVerifiedEmail } from "../../middleware/requireVerifiedEmail";
@@ -37,6 +38,43 @@ export const listingsRouter = Router();
 listingsRouter.get("/", validateRequest({ query: listingsQuerySchema }), listListings);
 listingsRouter.get("/mine", verifyFirebaseToken, requireCurrentUser, requireActiveUser, listMyListings);
 listingsRouter.post("/batch", validateRequest({ body: batchListingIdsBodySchema }), getListingsByIds);
+listingsRouter.get("/price-insights", async (req, res) => {
+  const categoryId = typeof req.query.categoryId === "string" ? req.query.categoryId.trim() : "";
+  const city = typeof req.query.city === "string" ? req.query.city.trim() : "";
+  const condition = typeof req.query.condition === "string" ? req.query.condition.trim() : "";
+
+  if (!categoryId) {
+    res.status(400).json({ success: false, code: "VALIDATION_ERROR", message: "categoryId is required." });
+    return;
+  }
+
+  const stats = await prisma.listing.aggregate({
+    where: {
+      deletedAt: null,
+      status: "published",
+      categoryId,
+      ...(city ? { locationCity: city } : {}),
+      ...(condition ? { condition } : {}),
+    },
+    _count: { _all: true },
+    _avg: { price: true },
+    _min: { price: true },
+    _max: { price: true },
+  });
+  const sampleSize = stats._count._all;
+  const confidence = sampleSize >= 20 ? "high" : sampleSize >= 5 ? "medium" : "low";
+
+  res.json({
+    success: true,
+    data: {
+      sampleSize,
+      averagePrice: stats._avg.price === null ? null : Math.round(stats._avg.price),
+      minPrice: stats._min.price ?? null,
+      maxPrice: stats._max.price ?? null,
+      confidence,
+    },
+  });
+});
 listingsRouter.get("/:id", validateRequest({ params: idParamsSchema }), getListingById);
 
 listingsRouter.post(

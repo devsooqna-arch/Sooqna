@@ -41,6 +41,29 @@ export type ListingsFilterParams = {
   priceMax?: number;
 };
 
+export type ListingPriceInsights = {
+  sampleSize: number;
+  averagePrice: number | null;
+  minPrice: number | null;
+  maxPrice: number | null;
+  confidence: "low" | "medium" | "high";
+};
+
+export async function getListingPriceInsights(params: {
+  categoryId: string;
+  city?: string;
+  condition?: string;
+}): Promise<ListingPriceInsights> {
+  const query = new URLSearchParams();
+  query.set("categoryId", params.categoryId);
+  if (params.city?.trim()) query.set("city", params.city.trim());
+  if (params.condition?.trim()) query.set("condition", params.condition.trim());
+  const response = await apiFetch<{ success: true; data: ListingPriceInsights }>(
+    `/listings/price-insights?${query.toString()}`
+  );
+  return response.data;
+}
+
 export async function getListingsFiltered(params: ListingsFilterParams): Promise<ListingsPageResponse> {
   const query = new URLSearchParams();
   if (typeof params.limit === "number") query.set("limit", String(params.limit));

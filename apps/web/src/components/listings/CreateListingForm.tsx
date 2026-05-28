@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type {
   CreateListingInput,
   ListingCondition,
   ListingContactPreference,
 } from "@/types/listing";
-import { createListing } from "@/services/listingService";
+import { createListing, getListingPriceInsights, type ListingPriceInsights } from "@/services/listingService";
 import { useAuth } from "@/hooks/useAuth";
 import { ImageUpload } from "./ImageUpload";
 import { isEmailNotVerified } from "@/lib/apiError";
@@ -44,6 +44,36 @@ export function CreateListingForm() {
   const [emailUnverified, setEmailUnverified] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [createdListingId, setCreatedListingId] = useState<string | null>(null);
+  const [priceInsights, setPriceInsights] = useState<ListingPriceInsights | null>(null);
+  const [priceInsightsLoading, setPriceInsightsLoading] = useState(false);
+  const [priceInsightsError, setPriceInsightsError] = useState("");
+
+  useEffect(() => {
+    const categoryId = form.categoryId.trim();
+    if (!categoryId) {
+      setPriceInsights(null);
+      setPriceInsightsError("");
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setPriceInsightsLoading(true);
+      setPriceInsightsError("");
+      void getListingPriceInsights({
+        categoryId,
+        city: form.city,
+        condition: form.condition,
+      })
+        .then(setPriceInsights)
+        .catch((err) => {
+          setPriceInsights(null);
+          setPriceInsightsError(err instanceof Error ? err.message : "تعذر تحميل مؤشر السعر.");
+        })
+        .finally(() => setPriceInsightsLoading(false));
+    }, 400);
+
+    return () => window.clearTimeout(timer);
+  }, [form.categoryId, form.city, form.condition]);
 
   function updateField<K extends keyof ListingFormState>(
     key: K,
@@ -152,6 +182,13 @@ export function CreateListingForm() {
         />
       </div>
 
+      <PriceInsightsCard
+        insights={priceInsights}
+        loading={priceInsightsLoading}
+        error={priceInsightsError}
+        enteredPrice={Number(form.price)}
+      />
+
       <div className="grid gap-3 md:grid-cols-2">
         <LabeledInput
           label="City"
@@ -206,6 +243,60 @@ export function CreateListingForm() {
       {createdListingId && currentUser ? <ImageUpload listingId={createdListingId} /> : null}
     </form>
   );
+}
+
+function PriceInsightsCard({
+  insights,
+  loading,
+  error,
+  enteredPrice,
+}: {
+  insights: ListingPriceInsights | null;
+  loading: boolean;
+  error: string;
+  enteredPrice: number;
+}) {
+  if (loading) {
+    return <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">جاري تحميل مؤشر السعر...</p>;
+  }
+  if (error) {
+    return <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">{error}</p>;
+  }
+  if (!insights) return null;
+
+  const hasPrice = Number.isFinite(enteredPrice) && enteredPrice > 0;
+  const high = hasPrice && insights.maxPrice !== null && enteredPrice > insights.maxPrice;
+  const low = hasPrice && insights.minPrice !== null && enteredPrice < insights.minPrice;
+  const confidenceLabel = {
+    low: "بيانات محدودة",
+    medium: "ثقة متوسطة",
+    high: "ثقة عالية",
+  }[insights.confidence];
+
+  return (
+    <div className="rounded-lg border border-lime-200 bg-lime-50 px-3 py-3 text-sm text-lime-900">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <strong>مؤشر السعر</strong>
+        <span className="rounded-full bg-white/80 px-2 py-1 text-xs font-bold">{confidenceLabel} · {insights.sampleSize} إعلان</span>
+      </div>
+      {insights.sampleSize > 0 ? (
+        <div className="mt-2 grid gap-2 sm:grid-cols-3">
+          <span>المتوسط: <strong>{formatNumber(insights.averagePrice)}</strong></span>
+          <span>الأقل: <strong>{formatNumber(insights.minPrice)}</strong></span>
+          <span>الأعلى: <strong>{formatNumber(insights.maxPrice)}</strong></span>
+        </div>
+      ) : (
+        <p className="mt-2">لا توجد إعلانات مشابهة كافية للمقارنة.</p>
+      )}
+      {high ? <p className="mt-2 text-amber-800">السعر أعلى من النطاق الحالي للإعلانات المشابهة.</p> : null}
+      {low ? <p className="mt-2 text-amber-800">السعر أقل من النطاق الحالي للإعلانات المشابهة.</p> : null}
+    </div>
+  );
+}
+
+function formatNumber(value: number | null) {
+  if (value === null) return "-";
+  return new Intl.NumberFormat("ar", { maximumFractionDigits: 0 }).format(value);
 }
 
 function LabeledInput({
