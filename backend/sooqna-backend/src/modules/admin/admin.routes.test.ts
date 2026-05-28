@@ -23,6 +23,12 @@ const mockPrisma = {
     createMany: jest.fn(),
     findMany: jest.fn(),
   },
+  message: {
+    groupBy: jest.fn(),
+  },
+  favorite: {
+    groupBy: jest.fn(),
+  },
   report: {
     count: jest.fn(),
     findMany: jest.fn(),
@@ -150,6 +156,107 @@ describe("admin routes", () => {
     expect(response.body.data.listings.published).toBe(12);
     expect(response.body.data.reports.open).toBe(5);
     expect(response.body.data.topCities[0]).toEqual({ city: "amman", listingCount: 7 });
+  });
+
+  it("allows admins to read moderation SLA analytics", async () => {
+    mockUser(Role.ADMIN);
+    const now = new Date();
+    mockPrisma.listing.findMany
+      .mockResolvedValueOnce([
+        { id: "pending-1", createdAt: new Date(now.getTime() - 2 * 36e5) },
+        { id: "pending-2", createdAt: new Date(now.getTime() - 10 * 36e5) },
+        { id: "pending-3", createdAt: new Date(now.getTime() - 30 * 36e5) },
+      ])
+      .mockResolvedValueOnce([
+        { id: "decided-1", createdAt: new Date(now.getTime() - 12 * 36e5) },
+        { id: "decided-2", createdAt: new Date(now.getTime() - 8 * 36e5) },
+      ]);
+    mockPrisma.listingModerationLog.findMany.mockResolvedValueOnce([
+      { listingId: "decided-1", createdAt: new Date(now.getTime() - 6 * 36e5) },
+      { listingId: "decided-2", createdAt: new Date(now.getTime() - 2 * 36e5) },
+    ]);
+
+    const response = await request(app)
+      .get("/api/admin/analytics/moderation-sla")
+      .set("Authorization", "Bearer admin-token");
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.pendingCount).toBe(3);
+    expect(response.body.data.oldestPendingAgeHours).toBeGreaterThanOrEqual(29);
+    expect(response.body.data.averageDecisionHours).toBe(6);
+    expect(response.body.data.pendingAgeBuckets).toEqual([
+      { label: "0-6h", count: 1 },
+      { label: "6-24h", count: 1 },
+      { label: "24h+", count: 1 },
+    ]);
+  });
+
+  it("allows admins to read top listing performance analytics", async () => {
+    mockUser(Role.ADMIN);
+    mockPrisma.listing.findMany.mockResolvedValueOnce([
+      {
+        id: "lst-views",
+        title: "Popular listing",
+        status: "published",
+        categoryId: "cars",
+        locationCity: "amman",
+        viewsCount: 120,
+        favoritesCount: 8,
+        messagesCount: 3,
+        createdAt: new Date("2026-05-01T00:00:00.000Z"),
+      },
+    ]);
+
+    const response = await request(app)
+      .get("/api/admin/analytics/top-listings?metric=views&limit=50")
+      .set("Authorization", "Bearer admin-token");
+
+    expect(response.status).toBe(200);
+    expect(response.body.data[0]).toEqual(
+      expect.objectContaining({
+        id: "lst-views",
+        title: "Popular listing",
+        viewsCount: 120,
+        createdAt: "2026-05-01T00:00:00.000Z",
+      })
+    );
+    expect(mockPrisma.listing.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { deletedAt: null },
+        take: 25,
+      })
+    );
+  });
+
+  it("allows admins to read user activity analytics", async () => {
+    mockUser(Role.ADMIN);
+    mockPrisma.user.count
+      .mockResolvedValueOnce(4)
+      .mockResolvedValueOnce(9)
+      .mockResolvedValueOnce(2);
+    mockPrisma.listing.groupBy.mockResolvedValueOnce([{ ownerId: "seller-1" }, { ownerId: "seller-2" }]);
+    mockPrisma.message.groupBy.mockResolvedValueOnce([{ senderId: "buyer-1" }]);
+    mockPrisma.favorite.groupBy.mockResolvedValueOnce([{ userId: "buyer-1" }, { userId: "buyer-2" }]);
+
+    const response = await request(app)
+      .get("/api/admin/analytics/user-activity")
+      .set("Authorization", "Bearer admin-token");
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toEqual(
+      expect.objectContaining({
+        activeUsers7d: 4,
+        activeUsers30d: 9,
+        usersWithListings7d: 2,
+        usersWithMessages7d: 1,
+        usersWithFavorites7d: 2,
+      })
+    );
+    expect(response.body.data.newVsActive).toEqual([
+      { label: "New users", count: 2 },
+      { label: "Active users", count: 4 },
+    ]);
   });
 
   it("audits admin listing rejection through explicit moderation endpoint", async () => {

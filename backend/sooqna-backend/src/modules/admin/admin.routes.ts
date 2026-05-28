@@ -21,6 +21,7 @@ type PageParams = {
 const LISTING_STATUSES = ["draft", "pending", "published", "rejected", "sold", "archived"] as const;
 const REPORT_STATUSES = ["open", "in_review", "resolved", "rejected"] as const;
 const ACCOUNT_STATUSES = ["active", "suspended", "deleted"] as const;
+const TOP_LISTING_METRICS = ["views", "favorites", "messages"] as const;
 
 export const adminRouter = Router();
 
@@ -131,6 +132,10 @@ function addDays(date: Date, days: number): Date {
 
 function isoDay(date: Date): string {
   return date.toISOString().slice(0, 10);
+}
+
+function hoursBetween(start: Date, end: Date): number {
+  return Math.max(0, Math.round((end.getTime() - start.getTime()) / 36e5));
 }
 
 function serializeListing(listing: {
@@ -380,6 +385,141 @@ adminRouter.get("/analytics", async (_req, res) => {
         ...item,
         createdAt: item.createdAt.toISOString(),
       })),
+    },
+  });
+});
+
+adminRouter.get("/analytics/moderation-sla", async (_req, res) => {
+  const now = new Date();
+  const decisionActions = ["publish", "reject", "archive"];
+
+  const [pendingListings, decisions] = await Promise.all([
+    prisma.listing.findMany({
+      where: { deletedAt: null, status: "pending" },
+      select: { id: true, createdAt: true },
+      orderBy: { createdAt: "asc" },
+      take: 500,
+    }),
+    prisma.listingModerationLog.findMany({
+      where: { action: { in: decisionActions } },
+      select: { createdAt: true, listingId: true },
+      orderBy: { createdAt: "desc" },
+      take: 500,
+    }),
+  ]);
+
+  const decisionListingIds = [...new Set(decisions.map((decision) => decision.listingId))];
+  const decisionListings = decisionListingIds.length
+    ? await prisma.listing.findMany({
+        where: { id: { in: decisionListingIds } },
+        select: { id: true, createdAt: true },
+      })
+    : [];
+  const listingCreatedAt = new Map(decisionListings.map((listing) => [listing.id, listing.createdAt]));
+  const decisionHours = decisions
+    .map((decision) => {
+      const createdAt = listingCreatedAt.get(decision.listingId);
+      return createdAt ? hoursBetween(createdAt, decision.createdAt) : null;
+    })
+    .filter((hours): hours is number => typeof hours === "number");
+  const pendingAges = pendingListings.map((listing) => hoursBetween(listing.createdAt, now));
+
+  res.json({
+    success: true,
+    data: {
+      pendingCount: pendingListings.length,
+      oldestPendingAgeHours: pendingAges.length ? Math.max(...pendingAges) : 0,
+      averageDecisionHours: decisionHours.length
+        ? Math.round(decisionHours.reduce((sum, hours) => sum + hours, 0) / decisionHours.length)
+        : null,
+      pendingAgeBuckets: [
+        { label: "0-6h", count: pendingAges.filter((hours) => hours <= 6).length },
+        { label: "6-24h", count: pendingAges.filter((hours) => hours > 6 && hours <= 24).length },
+        { label: "24h+", count: pendingAges.filter((hours) => hours > 24).length },
+      ],
+    },
+  });
+});
+
+adminRouter.get("/analytics/top-listings", async (req, res) => {
+  const requestedMetric = oneOf(req.query.metric, TOP_LISTING_METRICS) ?? "views";
+  const metricField = {
+    views: "viewsCount",
+    favorites: "favoritesCount",
+    messages: "messagesCount",
+  } satisfies Record<(typeof TOP_LISTING_METRICS)[number], keyof Prisma.ListingOrderByWithRelationInput>;
+  const limit = Math.max(1, Math.min(Number(req.query.limit) || 10, 25));
+  const orderField = metricField[requestedMetric];
+
+  const listings = await prisma.listing.findMany({
+    where: { deletedAt: null },
+    orderBy: [{ [orderField]: "desc" }, { createdAt: "desc" }] as Prisma.ListingOrderByWithRelationInput[],
+    take: limit,
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      categoryId: true,
+      locationCity: true,
+      viewsCount: true,
+      favoritesCount: true,
+      messagesCount: true,
+      createdAt: true,
+    },
+  });
+
+  res.json({
+    success: true,
+    data: listings.map((listing) => ({
+      ...listing,
+      createdAt: listing.createdAt.toISOString(),
+    })),
+  });
+});
+
+adminRouter.get("/analytics/user-activity", async (_req, res) => {
+  const today = startOfDay();
+  const sevenDaysAgo = addDays(today, -6);
+  const thirtyDaysAgo = addDays(today, -29);
+  const tomorrow = addDays(today, 1);
+
+  const [
+    activeUsers7d,
+    activeUsers30d,
+    newUsers7d,
+    usersWithListings7d,
+    usersWithMessages7d,
+    usersWithFavorites7d,
+  ] = await Promise.all([
+    prisma.user.count({ where: { lastLoginAt: { gte: sevenDaysAgo, lt: tomorrow } } }),
+    prisma.user.count({ where: { lastLoginAt: { gte: thirtyDaysAgo, lt: tomorrow } } }),
+    prisma.user.count({ where: { createdAt: { gte: sevenDaysAgo, lt: tomorrow } } }),
+    prisma.listing.groupBy({
+      by: ["ownerId"],
+      where: { deletedAt: null, ownerId: { not: null }, createdAt: { gte: sevenDaysAgo, lt: tomorrow } },
+    }),
+    prisma.message.groupBy({
+      by: ["senderId"],
+      where: { deletedAt: null, createdAt: { gte: sevenDaysAgo, lt: tomorrow } },
+    }),
+    prisma.favorite.groupBy({
+      by: ["userId"],
+      where: { createdAt: { gte: sevenDaysAgo, lt: tomorrow } },
+    }),
+  ]);
+
+  res.json({
+    success: true,
+    data: {
+      activeUsers7d,
+      activeUsers30d,
+      usersWithListings7d: usersWithListings7d.length,
+      usersWithMessages7d: usersWithMessages7d.length,
+      usersWithFavorites7d: usersWithFavorites7d.length,
+      newVsActive: [
+        { label: "New users", count: newUsers7d },
+        { label: "Active users", count: activeUsers7d },
+      ],
     },
   });
 });
