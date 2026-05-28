@@ -56,6 +56,7 @@ npm test
 
 Current docs live in `docs/`:
 
+- `docs/sooqna-website-complete-documentation.md` - single complete website reference
 - `docs/architecture.md`
 - `docs/local-development.md`
 - `docs/api-reference.md`

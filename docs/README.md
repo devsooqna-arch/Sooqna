@@ -4,13 +4,14 @@ This folder is the current source of project documentation. It replaces old phas
 
 ## Reading Order
 
-1. `architecture.md` - system boundaries and data ownership.
-2. `local-development.md` - local setup and daily commands.
-3. `api-reference.md` - backend modules and route map.
-4. `admin-dashboard.md` - admin features, roles, and moderation.
-5. `deployment-operations.md` - CI/CD, deployment, database, and runtime operations.
-6. `security.md` - auth, authorization, rate limits, uploads, and secrets.
-7. `product-roadmap.md` - recommended product improvements.
+1. `sooqna-website-complete-documentation.md` - single complete website reference.
+2. `architecture.md` - system boundaries and data ownership.
+3. `local-development.md` - local setup and daily commands.
+4. `api-reference.md` - backend modules and route map.
+5. `admin-dashboard.md` - admin features, roles, and moderation.
+6. `deployment-operations.md` - CI/CD, deployment, database, and runtime operations.
+7. `security.md` - auth, authorization, rate limits, uploads, and secrets.
+8. `product-roadmap.md` - recommended product improvements.
 
 ## Documentation Rules
 
