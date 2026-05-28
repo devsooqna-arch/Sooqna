@@ -112,6 +112,7 @@ export type AdminAnalytics = {
   topCities: Array<{ city: string; listingCount: number }>;
   growth: {
     daily: Array<{ date: string; listings: number; users: number }>;
+    weekly: Array<{ weekStart: string; weekEnd: string; listings: number; users: number }>;
   };
   latestActivities: Array<Pick<AdminAuditLog, "id" | "actorId" | "action" | "targetType" | "targetId" | "createdAt">>;
 };

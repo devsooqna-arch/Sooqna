@@ -199,6 +199,7 @@ adminRouter.get("/analytics", async (_req, res) => {
   const weekStart = addDays(today, -6);
   const statusValues = [...LISTING_STATUSES];
   const dayBuckets = Array.from({ length: 14 }, (_, idx) => addDays(today, idx - 13));
+  const weekBuckets = Array.from({ length: 8 }, (_, idx) => addDays(today, (idx - 7) * 7));
 
   const [
     totalListings,
@@ -214,6 +215,8 @@ adminRouter.get("/analytics", async (_req, res) => {
     latestActivities,
     dailyListings,
     dailyUsers,
+    weeklyListings,
+    weeklyUsers,
   ] = await Promise.all([
     prisma.listing.count({ where: { deletedAt: null } }),
     prisma.listing.count({ where: { deletedAt: null, status: "published" } }),
@@ -257,6 +260,20 @@ adminRouter.get("/analytics", async (_req, res) => {
       dayBuckets.map((day) =>
         prisma.user.count({
           where: { createdAt: { gte: day, lt: addDays(day, 1) } },
+        })
+      )
+    ),
+    Promise.all(
+      weekBuckets.map((week) =>
+        prisma.listing.count({
+          where: { deletedAt: null, createdAt: { gte: week, lt: addDays(week, 7) } },
+        })
+      )
+    ),
+    Promise.all(
+      weekBuckets.map((week) =>
+        prisma.user.count({
+          where: { createdAt: { gte: week, lt: addDays(week, 7) } },
         })
       )
     ),
@@ -307,6 +324,12 @@ adminRouter.get("/analytics", async (_req, res) => {
           date: isoDay(day),
           listings: dailyListings[idx] ?? 0,
           users: dailyUsers[idx] ?? 0,
+        })),
+        weekly: weekBuckets.map((week, idx) => ({
+          weekStart: isoDay(week),
+          weekEnd: isoDay(addDays(week, 6)),
+          listings: weeklyListings[idx] ?? 0,
+          users: weeklyUsers[idx] ?? 0,
         })),
       },
       latestActivities: latestActivities.map((item) => ({

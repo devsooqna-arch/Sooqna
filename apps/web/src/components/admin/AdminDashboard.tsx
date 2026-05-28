@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   createAdminCategory,
   createAdminCity,
@@ -40,9 +40,25 @@ import type {
   AdminUserDetails,
 } from "@/types/admin";
 import type { ListingStatus } from "@/types/listing";
+import { BarChart, DonutChart, LineChart } from "./charts";
+import {
+  DataSection,
+  EmptyState,
+  Filters,
+  HealthCard,
+  MetricCard,
+  SimpleTable,
+  StateBox,
+  StatusBadge,
+  Td,
+  Th,
+  actionLabel,
+  formatDate,
+  statusLabel,
+  type LoadState,
+} from "./shared";
 
 type Tab = "overview" | "analytics" | "moderation" | "listings" | "users" | "reports" | "categories" | "cities" | "health" | "audit";
-type LoadState = "idle" | "loading" | "ready" | "error";
 
 const TABS: Array<{ id: Tab; label: string }> = [
   { id: "overview", label: "نظرة عامة" },
@@ -234,14 +250,26 @@ function AnalyticsPanel() {
             <span><span className="inline-block h-2 w-2 rounded-full bg-emerald-600" /> المستخدمون</span>
           </div>
         </DataSection>
-        <DataSection title="حالات الإعلانات">
-          <DonutChart items={analytics.listingStatuses.map((item) => ({ label: statusLabel(item.status), value: item.count }))} />
+        <DataSection title="النمو الأسبوعي">
+          <LineChart
+            points={analytics.growth.weekly.map((item) => ({ label: item.weekStart.slice(5), value: item.listings }))}
+            secondaryPoints={analytics.growth.weekly.map((item) => ({ label: item.weekStart.slice(5), value: item.users }))}
+          />
+          <div className="mt-3 flex gap-4 text-xs text-[var(--text-muted)]">
+            <span><span className="inline-block h-2 w-2 rounded-full bg-[var(--brand)]" /> الإعلانات</span>
+            <span><span className="inline-block h-2 w-2 rounded-full bg-emerald-600" /> المستخدمون</span>
+          </div>
         </DataSection>
       </div>
       <div className="grid gap-4 xl:grid-cols-2">
+        <DataSection title="حالات الإعلانات">
+          <DonutChart items={analytics.listingStatuses.map((item) => ({ label: statusLabel(item.status), value: item.count }))} />
+        </DataSection>
         <DataSection title="أكثر المدن نشاطاً">
           <BarChart items={analytics.topCities.map((item) => ({ label: item.city, value: item.listingCount }))} />
         </DataSection>
+      </div>
+      <div className="grid gap-4 xl:grid-cols-2">
         <DataSection title="أكثر التصنيفات نشاطاً">
           <BarChart items={analytics.topCategories.map((item) => ({ label: item.nameAr, value: item.listingCount }))} />
         </DataSection>
@@ -292,8 +320,11 @@ function ModerationPanel() {
   }
 
   async function singleAction(id: string, action: "publish" | "reject" | "archive") {
-    const reason = action === "reject" ? window.prompt("سبب الرفض مطلوب:") ?? "" : undefined;
-    if (action === "reject" && !reason.trim()) return;
+    let reason: string | undefined;
+    if (action === "reject") {
+      reason = window.prompt("سبب الرفض مطلوب:")?.trim() ?? "";
+      if (!reason) return;
+    }
     try {
       await runAdminListingAction(id, action, reason);
       load();
@@ -305,8 +336,11 @@ function ModerationPanel() {
 
   async function bulk(action: "publish" | "reject" | "archive") {
     if (!selected.length) return;
-    const reason = action === "reject" ? window.prompt("سبب الرفض مطلوب لكل العناصر المحددة:") ?? "" : undefined;
-    if (action === "reject" && !reason.trim()) return;
+    let reason: string | undefined;
+    if (action === "reject") {
+      reason = window.prompt("سبب الرفض مطلوب لكل العناصر المحددة:")?.trim() ?? "";
+      if (!reason) return;
+    }
     try {
       await runAdminBulkListingAction({ ids: selected, action, reason });
       load();
@@ -809,189 +843,4 @@ function AuditPanel() {
       ) : <EmptyState message="لا توجد سجلات مطابقة." />}
     </DataSection>
   );
-}
-
-function MetricCard({ label, value }: { label: string; value: ReactNode }) {
-  return (
-    <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4">
-      <p className="text-xs text-[var(--text-muted)]">{label}</p>
-      <p className="mt-2 text-2xl font-extrabold text-[var(--text)]">{value}</p>
-    </div>
-  );
-}
-
-function StatusBadge({ active }: { active: boolean }) {
-  return (
-    <span className={`inline-flex rounded-full px-2 py-1 text-xs font-bold ${active ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>
-      {active ? "نشطة" : "غير نشطة"}
-    </span>
-  );
-}
-
-function HealthCard({ title, status, message }: { title: string; status: AdminHealth["api"]["status"]; message: string }) {
-  const styles: Record<AdminHealth["api"]["status"], string> = {
-    healthy: "border-emerald-200 bg-emerald-50 text-emerald-800",
-    warning: "border-amber-200 bg-amber-50 text-amber-800",
-    error: "border-red-200 bg-red-50 text-red-800",
-    not_configured: "border-slate-200 bg-slate-50 text-slate-700",
-  };
-  return (
-    <div className={`rounded-lg border p-4 ${styles[status]}`}>
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="text-sm font-extrabold">{title}</h3>
-        <span className="rounded-full bg-white/70 px-2 py-1 text-xs font-bold">{healthLabel(status)}</span>
-      </div>
-      <p className="mt-2 text-sm">{message}</p>
-    </div>
-  );
-}
-
-function LineChart({ points, secondaryPoints = [] }: { points: Array<{ label: string; value: number }>; secondaryPoints?: Array<{ label: string; value: number }> }) {
-  const width = 640;
-  const height = 220;
-  const padding = 28;
-  const maxValue = Math.max(1, ...points.map((item) => item.value), ...secondaryPoints.map((item) => item.value));
-  const toPath = (items: Array<{ value: number }>) =>
-    items
-      .map((item, idx) => {
-        const x = padding + (idx / Math.max(items.length - 1, 1)) * (width - padding * 2);
-        const y = height - padding - (item.value / maxValue) * (height - padding * 2);
-        return `${idx === 0 ? "M" : "L"} ${x} ${y}`;
-      })
-      .join(" ");
-  return (
-    <div className="overflow-x-auto">
-      <svg viewBox={`0 0 ${width} ${height}`} className="min-h-[220px] w-full min-w-[520px]" role="img" aria-label="growth chart">
-        <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="var(--border)" />
-        <line x1={padding} y1={padding} x2={padding} y2={height - padding} stroke="var(--border)" />
-        <path d={toPath(points)} fill="none" stroke="var(--brand)" strokeWidth="3" />
-        {secondaryPoints.length ? <path d={toPath(secondaryPoints)} fill="none" stroke="#059669" strokeWidth="3" /> : null}
-        {points.map((item, idx) => (
-          <text key={item.label} x={padding + (idx / Math.max(points.length - 1, 1)) * (width - padding * 2)} y={height - 6} textAnchor="middle" className="fill-[var(--text-muted)] text-[10px]">
-            {idx % 2 === 0 ? item.label : ""}
-          </text>
-        ))}
-      </svg>
-    </div>
-  );
-}
-
-function BarChart({ items }: { items: Array<{ label: string; value: number }> }) {
-  if (!items.length) return <EmptyState message="لا توجد بيانات كافية." />;
-  const max = Math.max(...items.map((item) => item.value), 1);
-  return (
-    <div className="space-y-2">
-      {items.map((item) => (
-        <div key={item.label} className="grid grid-cols-[120px_1fr_48px] items-center gap-3 text-sm">
-          <span className="truncate text-[var(--text)]">{item.label}</span>
-          <span className="h-3 overflow-hidden rounded-full bg-[var(--surface-muted)]">
-            <span className="block h-full rounded-full bg-[var(--brand)]" style={{ width: `${Math.max(6, (item.value / max) * 100)}%` }} />
-          </span>
-          <span className="text-end font-bold text-[var(--text)]">{item.value}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function DonutChart({ items }: { items: Array<{ label: string; value: number }> }) {
-  const total = items.reduce((sum, item) => sum + item.value, 0);
-  if (!total) return <EmptyState message="لا توجد بيانات كافية." />;
-  const colors = ["#166534", "#84cc16", "#f59e0b", "#dc2626", "#2563eb", "#64748b"];
-  let offset = 25;
-  const segments = items.map((item, idx) => {
-    const dash = (item.value / total) * 100;
-    const segment = <circle key={item.label} cx="70" cy="70" r="45" fill="none" stroke={colors[idx % colors.length]} strokeWidth="22" strokeDasharray={`${dash} ${100 - dash}`} strokeDashoffset={offset} />;
-    offset -= dash;
-    return segment;
-  });
-  return (
-    <div className="grid gap-4 sm:grid-cols-[160px_1fr]">
-      <svg viewBox="0 0 140 140" className="h-40 w-40 -rotate-90">{segments}</svg>
-      <div className="space-y-2">
-        {items.map((item, idx) => (
-          <div key={item.label} className="flex items-center justify-between gap-3 text-sm">
-            <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full" style={{ backgroundColor: colors[idx % colors.length] }} />{item.label}</span>
-            <strong>{item.value}</strong>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function DataSection({ title, children }: { title: string; children: ReactNode }) {
-  return <section className="space-y-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4"><h2 className="text-lg font-bold text-[var(--text)]">{title}</h2>{children}</section>;
-}
-
-function Filters({ children }: { children: ReactNode }) {
-  return <div className="flex flex-wrap gap-2 [&_.admin-button]:rounded-md [&_.admin-button]:bg-[var(--brand)] [&_.admin-button]:px-3 [&_.admin-button]:py-2 [&_.admin-button]:text-sm [&_.admin-button]:font-semibold [&_.admin-button]:text-[var(--brand-contrast)] [&_.admin-input]:rounded-md [&_.admin-input]:border [&_.admin-input]:border-[var(--border)] [&_.admin-input]:bg-white [&_.admin-input]:px-3 [&_.admin-input]:py-2 [&_.admin-input]:text-sm">{children}</div>;
-}
-
-function StateBox({ state, error, empty }: { state: LoadState; error?: string; empty: string }) {
-  if (state === "loading") return <p className="rounded-md border border-[var(--border)] p-4 text-sm text-[var(--text-muted)]">جاري التحميل...</p>;
-  if (state === "error") return <p className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error || "حدث خطأ."}</p>;
-  return <EmptyState message={empty} />;
-}
-
-function EmptyState({ message }: { message: string }) {
-  return <p className="rounded-md border border-dashed border-[var(--border)] p-4 text-sm text-[var(--text-muted)]">{message}</p>;
-}
-
-function SimpleTable({ headers, rows }: { headers: string[]; rows: Array<Array<ReactNode>> }) {
-  return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full text-sm">
-        <thead><tr className="border-b border-[var(--border)] text-[var(--text-muted)]">{headers.map((header) => <Th key={header}>{header}</Th>)}</tr></thead>
-        <tbody>{rows.map((row, idx) => <tr key={idx} className="border-b border-[var(--border)]">{row.map((cell, cellIdx) => <Td key={cellIdx}>{cell}</Td>)}</tr>)}</tbody>
-      </table>
-    </div>
-  );
-}
-
-function Th({ children }: { children: ReactNode }) {
-  return <th className="px-3 py-2 text-start text-xs font-semibold">{children}</th>;
-}
-
-function Td({ children }: { children: ReactNode }) {
-  return <td className="max-w-64 px-3 py-2 align-top text-[var(--text)]">{children}</td>;
-}
-
-function formatDate(value: string | null | undefined) {
-  if (!value) return "-";
-  return new Intl.DateTimeFormat("ar", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
-}
-
-function statusLabel(status: string) {
-  const labels: Record<string, string> = {
-    draft: "مسودة",
-    pending: "بانتظار المراجعة",
-    published: "منشور",
-    rejected: "مرفوض",
-    sold: "مباع",
-    archived: "مؤرشف",
-  };
-  return labels[status] ?? status;
-}
-
-function actionLabel(action: string) {
-  const labels: Record<string, string> = {
-    publish: "نشر",
-    reject: "رفض",
-    archive: "أرشفة",
-    sold: "بيع",
-    feature: "تمييز",
-    unfeature: "إلغاء التمييز",
-  };
-  return labels[action] ?? action;
-}
-
-function healthLabel(status: string) {
-  const labels: Record<string, string> = {
-    healthy: "سليم",
-    warning: "تحذير",
-    error: "خطأ",
-    not_configured: "غير مفعّل",
-  };
-  return labels[status] ?? status;
 }
