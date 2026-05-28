@@ -42,6 +42,7 @@ export class PrismaUsersRepository implements UsersRepository {
         totalReviews: user.totalReviews,
         totalListings: user.totalListings,
         totalSold: user.totalSold,
+        lastLoginAt: user.lastLoginAt?.toISOString(),
         createdAt: user.createdAt.toISOString(),
         updatedAt: user.updatedAt.toISOString(),
       };
@@ -65,6 +66,7 @@ export class PrismaUsersRepository implements UsersRepository {
           role: profile.role,
           accountStatus: profile.accountStatus,
           isEmailVerified: profile.isEmailVerified,
+          lastLoginAt: profile.lastLoginAt ? new Date(profile.lastLoginAt) : undefined,
           updatedAt: new Date(profile.updatedAt),
         },
         create: {
@@ -76,6 +78,7 @@ export class PrismaUsersRepository implements UsersRepository {
           role: profile.role,
           accountStatus: profile.accountStatus,
           isEmailVerified: profile.isEmailVerified,
+          lastLoginAt: profile.lastLoginAt ? new Date(profile.lastLoginAt) : undefined,
           createdAt: new Date(profile.createdAt),
           updatedAt: new Date(profile.updatedAt),
         },
@@ -97,6 +100,7 @@ export class PrismaUsersRepository implements UsersRepository {
         totalReviews: user.totalReviews,
         totalListings: user.totalListings,
         totalSold: user.totalSold,
+        lastLoginAt: user.lastLoginAt?.toISOString(),
         createdAt: user.createdAt.toISOString(),
         updatedAt: user.updatedAt.toISOString(),
       };

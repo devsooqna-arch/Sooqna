@@ -35,6 +35,7 @@ model User {
   totalReviews    Int       @default(0)
   totalListings   Int       @default(0)
   totalSold       Int       @default(0)
+  lastLoginAt     DateTime?
   createdAt       DateTime
   updatedAt       DateTime
 
@@ -93,6 +94,21 @@ model Listing {
   @@index([locationCity, status, createdAt])
   @@index([isFeatured, status, createdAt])
   @@unique([ownerId, clientRequestId], map: "listings_owner_client_request_unique")
+}
+
+model ListingModerationLog {
+  id             String   @id
+  listingId      String
+  adminUserId    String
+  action         String
+  reason         String?
+  previousStatus String?
+  newStatus      String?
+  createdAt      DateTime
+
+  @@index([listingId, createdAt])
+  @@index([adminUserId, createdAt])
+  @@index([action, createdAt])
 }
 
 model ListingImage {
@@ -178,6 +194,20 @@ model Category {
   sortOrder Int
   createdAt DateTime?
   updatedAt DateTime?
+}
+
+model City {
+  id        String    @id
+  nameAr    String
+  nameEn    String
+  slug      String    @unique
+  isActive  Boolean   @default(true)
+  sortOrder Int       @default(0)
+  createdAt DateTime?
+  updatedAt DateTime?
+
+  @@index([isActive, sortOrder])
+  @@index([slug])
 }
 
 model Upload {

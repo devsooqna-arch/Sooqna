@@ -21,8 +21,10 @@ export type AdminUser = {
   role: AdminRole;
   accountStatus: AdminAccountStatus;
   isEmailVerified: boolean;
+  listingCount?: number;
   totalListings?: number;
   totalSold?: number;
+  lastLoginAt?: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -72,6 +74,18 @@ export type AdminCategory = {
   };
 };
 
+export type AdminCity = {
+  id: string;
+  nameAr: string;
+  nameEn: string;
+  slug: string;
+  isActive: boolean;
+  sortOrder: number;
+  listingCount: number;
+  createdAt: string | null;
+  updatedAt: string | null;
+};
+
 export type AdminAuditLog = {
   id: string;
   actorId: string | null;
@@ -80,6 +94,60 @@ export type AdminAuditLog = {
   targetId: string | null;
   metadata: Record<string, unknown>;
   createdAt: string;
+};
+
+export type AdminAnalytics = {
+  kpis: {
+    totalListings: number;
+    publishedListings: number;
+    totalUsers: number;
+    newListingsToday: number;
+    newListingsThisWeek: number;
+    newUsersToday: number;
+    newUsersThisWeek: number;
+    conversionRate: number;
+  };
+  listingStatuses: Array<{ status: ListingStatus; count: number }>;
+  topCategories: Array<{ categoryId: string; nameAr: string; nameEn: string; listingCount: number }>;
+  topCities: Array<{ city: string; listingCount: number }>;
+  growth: {
+    daily: Array<{ date: string; listings: number; users: number }>;
+  };
+  latestActivities: Array<Pick<AdminAuditLog, "id" | "actorId" | "action" | "targetType" | "targetId" | "createdAt">>;
+};
+
+export type AdminModerationLog = {
+  id: string;
+  listingId: string;
+  adminUserId: string;
+  action: string;
+  reason: string | null;
+  previousStatus: string | null;
+  newStatus: string | null;
+  createdAt: string;
+};
+
+export type AdminUserDetails = {
+  user: AdminUser;
+  recentListings: AdminListing[];
+  recentActivity: AdminAuditLog[];
+};
+
+export type AdminHealthStatus = "healthy" | "warning" | "error" | "not_configured";
+
+export type AdminHealth = {
+  api: { status: AdminHealthStatus; message: string };
+  database: { status: AdminHealthStatus; message: string };
+  counts: {
+    users: number;
+    listings: number;
+    categories: number;
+    cities: number;
+    uploads: number;
+  };
+  uploads: { status: AdminHealthStatus; bytes: number | null; message: string };
+  firebaseAuth: { status: AdminHealthStatus; message: string };
+  recentErrors: { status: AdminHealthStatus; items: string[]; message: string };
 };
 
 export type AdminStats = {
@@ -98,6 +166,7 @@ export type AdminStats = {
   reports: {
     open: number;
   };
+  topCities: Array<{ city: string; listingCount: number }>;
   recentAuditActions: Array<Pick<AdminAuditLog, "id" | "actorId" | "action" | "targetType" | "targetId" | "createdAt">>;
 };
 

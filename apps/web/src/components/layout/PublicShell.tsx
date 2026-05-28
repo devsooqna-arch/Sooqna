@@ -7,6 +7,7 @@ import { PublicNavActions } from "@/components/layout/PublicNavActions";
 import { SearchBar } from "@/components/layout/SearchBar";
 import { ScrollToTopButton } from "@/components/layout/ScrollToTopButton";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { AdminNavLink } from "@/components/layout/AdminNavLink";
 
 export function PublicShell({
   children,
@@ -57,6 +58,8 @@ export function PublicShell({
             <Suspense>
               <SearchBar />
             </Suspense>
+
+            <AdminNavLink />
           </div>
         </div>
 

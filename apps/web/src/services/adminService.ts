@@ -1,15 +1,20 @@
 import { apiFetch } from "@/services/apiClient";
 import type {
   AdminAccountStatus,
+  AdminAnalytics,
   AdminAuditLog,
   AdminCategory,
+  AdminCity,
+  AdminHealth,
   AdminListResponse,
   AdminListing,
+  AdminModerationLog,
   AdminReport,
   AdminReportStatus,
   AdminRole,
   AdminStats,
   AdminUser,
+  AdminUserDetails,
 } from "@/types/admin";
 import type { ListingStatus } from "@/types/listing";
 
@@ -29,6 +34,13 @@ export async function getAdminStats(): Promise<AdminStats> {
   return response.data;
 }
 
+export async function getAdminAnalytics(): Promise<AdminAnalytics> {
+  const response = await apiFetch<{ success: true; data: AdminAnalytics }>("/admin/analytics", {
+    authenticated: true,
+  });
+  return response.data;
+}
+
 export async function getAdminListings(params: {
   limit?: number;
   offset?: number;
@@ -37,12 +49,34 @@ export async function getAdminListings(params: {
   city?: string;
   search?: string;
   featured?: boolean;
+  dateFrom?: string;
+  dateTo?: string;
 }): Promise<AdminListResponse<AdminListing>> {
   const response = await apiFetch<{ success: true; data: AdminListing[]; pagination: AdminListResponse<AdminListing>["pagination"] }>(
     `/admin/listings${queryString(params)}`,
     { authenticated: true }
   );
   return { data: response.data, pagination: response.pagination };
+}
+
+export async function runAdminBulkListingAction(input: {
+  ids: string[];
+  action: "publish" | "reject" | "archive";
+  reason?: string;
+}): Promise<{ updatedCount: number }> {
+  const response = await apiFetch<{ success: true; data: { updatedCount: number } }>("/admin/moderation/listings/bulk", {
+    method: "POST",
+    authenticated: true,
+    body: JSON.stringify(input),
+  });
+  return response.data;
+}
+
+export async function getAdminListingModerationHistory(listingId: string): Promise<AdminModerationLog[]> {
+  const response = await apiFetch<{ success: true; data: AdminModerationLog[] }>(`/admin/moderation/listings/${listingId}/history`, {
+    authenticated: true,
+  });
+  return response.data;
 }
 
 export async function runAdminListingAction(
@@ -67,12 +101,21 @@ export async function getAdminUsers(params: {
   role?: AdminRole | "";
   status?: AdminAccountStatus | "";
   search?: string;
+  dateFrom?: string;
+  dateTo?: string;
 }): Promise<AdminListResponse<AdminUser>> {
   const response = await apiFetch<{ success: true; data: AdminUser[]; pagination: AdminListResponse<AdminUser>["pagination"] }>(
     `/admin/users${queryString(params)}`,
     { authenticated: true }
   );
   return { data: response.data, pagination: response.pagination };
+}
+
+export async function getAdminUserDetails(firebaseUid: string): Promise<AdminUserDetails> {
+  const response = await apiFetch<{ success: true; data: AdminUserDetails }>(`/admin/users/${firebaseUid}/details`, {
+    authenticated: true,
+  });
+  return response.data;
 }
 
 export async function updateAdminUser(
@@ -148,6 +191,40 @@ export async function updateAdminCategory(
   return response.data;
 }
 
+export async function getAdminCities(): Promise<AdminCity[]> {
+  const response = await apiFetch<{ success: true; data: AdminCity[] }>("/admin/cities", {
+    authenticated: true,
+  });
+  return response.data;
+}
+
+export async function createAdminCity(input: {
+  id: string;
+  slug: string;
+  nameAr: string;
+  nameEn: string;
+  sortOrder?: number;
+}): Promise<AdminCity> {
+  const response = await apiFetch<{ success: true; data: AdminCity }>("/admin/cities", {
+    method: "POST",
+    authenticated: true,
+    body: JSON.stringify(input),
+  });
+  return response.data;
+}
+
+export async function updateAdminCity(
+  id: string,
+  patch: Partial<Pick<AdminCity, "nameAr" | "nameEn" | "slug" | "isActive" | "sortOrder">>
+): Promise<AdminCity> {
+  const response = await apiFetch<{ success: true; data: AdminCity }>(`/admin/cities/${id}`, {
+    method: "PATCH",
+    authenticated: true,
+    body: JSON.stringify(patch),
+  });
+  return response.data;
+}
+
 export async function getAdminAuditLogs(params: {
   limit?: number;
   offset?: number;
@@ -160,4 +237,11 @@ export async function getAdminAuditLogs(params: {
     { authenticated: true }
   );
   return { data: response.data, pagination: response.pagination };
+}
+
+export async function getAdminHealth(): Promise<AdminHealth> {
+  const response = await apiFetch<{ success: true; data: AdminHealth }>("/admin/health", {
+    authenticated: true,
+  });
+  return response.data;
 }

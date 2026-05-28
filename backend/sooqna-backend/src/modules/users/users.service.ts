@@ -13,6 +13,7 @@ export class UsersService {
     input?: Partial<Pick<UserProfile, "fullName" | "photoURL">>
   ): UserProfile {
     const now = nowIso();
+    const lastLoginAt = typeof authUser.auth_time === "number" ? new Date(authUser.auth_time * 1000).toISOString() : now;
     return {
       uid: authUser.uid,
       id: existing?.id ?? authUser.uid,
@@ -22,6 +23,7 @@ export class UsersService {
       role: existing?.role ?? "BUYER",
       accountStatus: existing?.accountStatus ?? "active",
       isEmailVerified: authUser.email_verified ?? false,
+      lastLoginAt,
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,
     };
@@ -73,6 +75,7 @@ export class UsersService {
         ...existing,
         email: authUser.email ?? existing.email,
         isEmailVerified: authUser.email_verified ?? false,
+        lastLoginAt: typeof authUser.auth_time === "number" ? new Date(authUser.auth_time * 1000).toISOString() : nowIso(),
         updatedAt: nowIso(),
       };
       return this.upsertOrThrow(nextProfile);

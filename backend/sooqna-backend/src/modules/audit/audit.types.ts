@@ -23,10 +23,13 @@ export type AuditAction =
   | "admin.listing.sold"
   | "admin.listing.feature"
   | "admin.listing.unfeature"
+  | "admin.listing.bulk"
   | "admin.user.update"
   | "admin.report.update"
   | "admin.category.create"
   | "admin.category.update"
+  | "admin.city.create"
+  | "admin.city.update"
   | "security.content_blocked";
 
 export interface AuditLogEntry {

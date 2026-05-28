@@ -3,12 +3,10 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense, useCallback, useRef } from "react";
 import { getCategories } from "@/services/categoryService";
+import { getCities } from "@/services/cityService";
 import type { Category } from "@/types/category";
-
-import { SYRIAN_GOVERNORATES } from "@/lib/locations";
+import type { City } from "@/types/city";
 import { useAnimatedPresence } from "@/hooks/useAnimatedPresence";
-
-const CITY_OPTIONS = SYRIAN_GOVERNORATES.map((g) => ({ value: g.value, label: g.labelAr }));
 
 function SearchBarFallback() {
   return (
@@ -142,6 +140,7 @@ function SearchBarInner() {
   const [category, setCategory] = useState(categoryParam);
   const [city, setCity] = useState(cityParam);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -153,6 +152,23 @@ function SearchBarInner() {
       .catch(() => {
         if (!mounted) return;
         setCategories([]);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    void getCities()
+      .then((items) => {
+        if (!mounted) return;
+        setCities(items);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setCities([]);
       });
 
     return () => {
@@ -243,7 +259,10 @@ function SearchBarInner() {
         <ModernDropdown
           value={city}
           placeholder="كل المدن"
-          options={CITY_OPTIONS}
+          options={cities.map((item) => ({
+            value: (item.slug || item.id).toLowerCase(),
+            label: item.nameAr || item.nameEn || (item.slug || item.id).toLowerCase(),
+          }))}
           onChange={(nextCity) => {
             setCity(nextCity);
             applyFiltersImmediately(query, category, nextCity);

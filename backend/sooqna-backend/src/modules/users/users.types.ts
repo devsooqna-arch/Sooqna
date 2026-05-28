@@ -20,6 +20,7 @@ export interface UserProfile {
   totalReviews?: number;
   totalListings?: number;
   totalSold?: number;
+  lastLoginAt?: string;
   createdAt: string;
   updatedAt: string;
 }
