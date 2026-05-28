@@ -5,7 +5,7 @@
     "dev": "next dev",
     "validate:env": "node ./scripts/validate-production-env.mjs",
     "validate:redirects": "node ./scripts/validate-wp-redirects.mjs",
-    "build": "npm run validate:env && npm run validate:redirects && next build && npm run assert:css && npm run assert:branding",
+    "build": "node ./scripts/guard-no-next-dev.mjs && npm run validate:env && npm run validate:redirects && next build && npm run assert:css && npm run assert:branding",
     "assert:css": "node ./scripts/assert-css-build.mjs",
     "assert:branding": "node ./scripts/assert-branding-assets.mjs",
     "start": "next start",

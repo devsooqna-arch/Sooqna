@@ -147,7 +147,14 @@ export type AdminHealth = {
     uploads: number;
   };
   uploads: { status: AdminHealthStatus; bytes: number | null; message: string };
-  firebaseAuth: { status: AdminHealthStatus; message: string };
+  firebaseAuth: {
+    status: AdminHealthStatus;
+    message: string;
+    projectId: string | null;
+    credentialMode: "service-account-file" | "service-account-env" | "application-default" | "not_configured";
+    authUserCount: number | null;
+    dbUserCount: number;
+  };
   recentErrors: { status: AdminHealthStatus; items: string[]; message: string };
 };
 

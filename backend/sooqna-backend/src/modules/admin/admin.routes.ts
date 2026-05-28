@@ -4,6 +4,8 @@ import { Router, type Request, type Response } from "express";
 import { Prisma, Role } from "@prisma/client";
 import { prisma } from "../../config/prisma";
 import { env } from "../../config/env";
+import { adminAuth } from "../../config/firebaseAdmin";
+import { resolveFirebaseAdminCredentialMode } from "../../config/firebaseAdminCredentialMode";
 import { verifyFirebaseToken } from "../../middleware/verifyFirebaseToken";
 import { requireActiveUser, requireCurrentUser } from "../../middleware/authContext";
 import { checkRole } from "../../middleware/checkRole";
@@ -66,6 +68,48 @@ function cleanMetadata(input?: Record<string, unknown>): Record<string, unknown>
     output[key] = value;
   }
   return output;
+}
+
+function firebaseCredentialMode(): "service-account-file" | "service-account-env" | "application-default" | "not_configured" {
+  try {
+    return resolveFirebaseAdminCredentialMode(
+      {
+        projectId: env.firebaseProjectId,
+        clientEmail: env.firebaseClientEmail,
+        privateKey: env.firebasePrivateKey,
+        serviceAccountPath: env.firebaseServiceAccountPath,
+      },
+      {
+        allowApplicationDefaultCredentials: env.firebaseUseApplicationDefaultCredentials || env.nodeEnv !== "production",
+      }
+    );
+  } catch {
+    return "not_configured";
+  }
+}
+
+async function firebaseAuthUserCount(): Promise<{ status: "healthy" | "warning" | "not_configured"; count: number | null; message: string }> {
+  const credentialMode = firebaseCredentialMode();
+  if (!env.firebaseProjectId) {
+    return { status: "not_configured", count: null, message: "Firebase project id is not configured." };
+  }
+  try {
+    const firstPage = await adminAuth.listUsers(1);
+    return {
+      status: "healthy",
+      count: firstPage.pageToken ? null : firstPage.users.length,
+      message: firstPage.pageToken ? "Firebase Auth is reachable. More than one user exists." : "Firebase Auth is reachable.",
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return {
+      status: credentialMode === "application-default" ? "not_configured" : "warning",
+      count: null,
+      message: credentialMode === "application-default"
+        ? "Firebase Admin credentials are not available in this local environment."
+        : message.slice(0, 180),
+    };
+  }
 }
 
 function dateQuery(req: Request, key: string): Date | undefined {
@@ -342,7 +386,8 @@ adminRouter.get("/analytics", async (_req, res) => {
 
 adminRouter.get("/health", async (_req, res) => {
   const uploadsDirectory = path.resolve(process.cwd(), "uploads");
-  const [users, listings, categories, cities, uploads, uploadsBytes, dbOk] = await Promise.all([
+  const credentialMode = firebaseCredentialMode();
+  const [users, listings, categories, cities, uploads, uploadsBytes, dbOk, firebaseAuthCount] = await Promise.all([
     prisma.user.count(),
     prisma.listing.count({ where: { deletedAt: null } }),
     prisma.category.count(),
@@ -350,6 +395,7 @@ adminRouter.get("/health", async (_req, res) => {
     prisma.upload.count(),
     directorySizeBytes(uploadsDirectory),
     prisma.$queryRawUnsafe("SELECT 1").then(() => true).catch(() => false),
+    firebaseAuthUserCount(),
   ]);
 
   res.json({
@@ -361,9 +407,14 @@ adminRouter.get("/health", async (_req, res) => {
       uploads: uploadsBytes === null
         ? { status: "not_configured", bytes: null, message: "Uploads directory was not found." }
         : { status: "healthy", bytes: uploadsBytes, message: "Uploads directory is readable." },
-      firebaseAuth: env.firebaseProjectId
-        ? { status: "healthy", message: "Firebase project is configured." }
-        : { status: "not_configured", message: "Firebase project id is not configured for this environment." },
+      firebaseAuth: {
+        status: firebaseAuthCount.status,
+        message: firebaseAuthCount.message,
+        projectId: env.firebaseProjectId || null,
+        credentialMode,
+        authUserCount: firebaseAuthCount.count,
+        dbUserCount: users,
+      },
       recentErrors: { status: "not_configured", items: [], message: "Application error log aggregation is not configured yet." },
     },
   });

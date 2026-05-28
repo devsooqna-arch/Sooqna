@@ -805,11 +805,32 @@ function SystemHealthPanel() {
           <MetricCard label="الملفات" value={health.counts.uploads} />
         </div>
       </DataSection>
+      <DataSection title="تزامن Firebase/Auth">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <MetricCard label="Firebase project" value={health.firebaseAuth.projectId ?? "-"} />
+          <MetricCard label="Credential mode" value={credentialModeLabel(health.firebaseAuth.credentialMode)} />
+          <MetricCard label="Users في DB" value={health.firebaseAuth.dbUserCount} />
+          <MetricCard label="Users في Firebase Auth" value={health.firebaseAuth.authUserCount ?? "غير متاح"} />
+        </div>
+        <div className="mt-3">
+          <HealthCard title="Auth Sync" status={health.firebaseAuth.status} message={health.firebaseAuth.message} />
+        </div>
+      </DataSection>
       <DataSection title="الأخطاء الحديثة">
         <HealthCard title="Errors" status={health.recentErrors.status} message={health.recentErrors.message} />
       </DataSection>
     </section>
   );
+}
+
+function credentialModeLabel(mode: AdminHealth["firebaseAuth"]["credentialMode"]) {
+  const labels: Record<AdminHealth["firebaseAuth"]["credentialMode"], string> = {
+    "service-account-file": "Service account file",
+    "service-account-env": "Service account env",
+    "application-default": "Application default",
+    not_configured: "غير مفعّل",
+  };
+  return labels[mode];
 }
 
 function AuditPanel() {
