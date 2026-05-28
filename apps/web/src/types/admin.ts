@@ -117,6 +117,36 @@ export type AdminAnalytics = {
   latestActivities: Array<Pick<AdminAuditLog, "id" | "actorId" | "action" | "targetType" | "targetId" | "createdAt">>;
 };
 
+export type AdminModerationSla = {
+  pendingCount: number;
+  oldestPendingAgeHours: number;
+  averageDecisionHours: number | null;
+  pendingAgeBuckets: Array<{ label: string; count: number }>;
+};
+
+export type AdminTopListingMetric = "views" | "favorites" | "messages";
+
+export type AdminTopListing = {
+  id: string;
+  title: string;
+  status: ListingStatus;
+  categoryId: string;
+  locationCity: string;
+  viewsCount: number;
+  favoritesCount: number;
+  messagesCount: number;
+  createdAt: string;
+};
+
+export type AdminUserActivity = {
+  activeUsers7d: number;
+  activeUsers30d: number;
+  usersWithListings7d: number;
+  usersWithMessages7d: number;
+  usersWithFavorites7d: number;
+  newVsActive: Array<{ label: string; count: number }>;
+};
+
 export type AdminModerationLog = {
   id: string;
   listingId: string;

@@ -9,11 +9,15 @@ import type {
   AdminListResponse,
   AdminListing,
   AdminModerationLog,
+  AdminModerationSla,
   AdminReport,
   AdminReportStatus,
   AdminRole,
   AdminStats,
+  AdminTopListing,
+  AdminTopListingMetric,
   AdminUser,
+  AdminUserActivity,
   AdminUserDetails,
 } from "@/types/admin";
 import type { ListingStatus } from "@/types/listing";
@@ -36,6 +40,28 @@ export async function getAdminStats(): Promise<AdminStats> {
 
 export async function getAdminAnalytics(): Promise<AdminAnalytics> {
   const response = await apiFetch<{ success: true; data: AdminAnalytics }>("/admin/analytics", {
+    authenticated: true,
+  });
+  return response.data;
+}
+
+export async function getAdminModerationSla(): Promise<AdminModerationSla> {
+  const response = await apiFetch<{ success: true; data: AdminModerationSla }>("/admin/analytics/moderation-sla", {
+    authenticated: true,
+  });
+  return response.data;
+}
+
+export async function getAdminTopListings(metric: AdminTopListingMetric): Promise<AdminTopListing[]> {
+  const response = await apiFetch<{ success: true; data: AdminTopListing[] }>(
+    `/admin/analytics/top-listings${queryString({ metric })}`,
+    { authenticated: true }
+  );
+  return response.data;
+}
+
+export async function getAdminUserActivity(): Promise<AdminUserActivity> {
+  const response = await apiFetch<{ success: true; data: AdminUserActivity }>("/admin/analytics/user-activity", {
     authenticated: true,
   });
   return response.data;

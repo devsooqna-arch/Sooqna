@@ -11,9 +11,12 @@ import {
   getAdminHealth,
   getAdminListingModerationHistory,
   getAdminListings,
+  getAdminModerationSla,
   getAdminReports,
   getAdminStats,
+  getAdminTopListings,
   getAdminUserDetails,
+  getAdminUserActivity,
   getAdminUsers,
   runAdminBulkListingAction,
   runAdminListingAction,
@@ -32,11 +35,15 @@ import type {
   AdminListResponse,
   AdminListing,
   AdminModerationLog,
+  AdminModerationSla,
   AdminReport,
   AdminReportStatus,
   AdminRole,
   AdminStats,
+  AdminTopListing,
+  AdminTopListingMetric,
   AdminUser,
+  AdminUserActivity,
   AdminUserDetails,
 } from "@/types/admin";
 import type { ListingStatus } from "@/types/listing";
@@ -77,6 +84,11 @@ const LISTING_STATUSES: Array<ListingStatus | ""> = ["", "draft", "pending", "pu
 const USER_ROLES: Array<AdminRole | ""> = ["", "ADMIN", "BUYER", "SELLER"];
 const ACCOUNT_STATUSES: Array<AdminAccountStatus | ""> = ["", "active", "suspended", "deleted"];
 const REPORT_STATUSES: Array<AdminReportStatus | ""> = ["", "open", "in_review", "resolved", "rejected"];
+const TOP_LISTING_METRICS: Array<{ id: AdminTopListingMetric; label: string }> = [
+  { id: "views", label: "المشاهدات" },
+  { id: "favorites", label: "المفضلة" },
+  { id: "messages", label: "الرسائل" },
+];
 
 export function AdminDashboard() {
   const [tab, setTab] = useState<Tab>("overview");
@@ -203,20 +215,27 @@ function OverviewPanel() {
 function AnalyticsPanel() {
   const [state, setState] = useState<LoadState>("loading");
   const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null);
+  const [sla, setSla] = useState<AdminModerationSla | null>(null);
+  const [topListings, setTopListings] = useState<AdminTopListing[]>([]);
+  const [userActivity, setUserActivity] = useState<AdminUserActivity | null>(null);
+  const [topMetric, setTopMetric] = useState<AdminTopListingMetric>("views");
   const [error, setError] = useState("");
 
   const load = useCallback(() => {
     setState("loading");
-    void getAdminAnalytics()
-      .then((data) => {
-        setAnalytics(data);
+    void Promise.all([getAdminAnalytics(), getAdminModerationSla(), getAdminTopListings(topMetric), getAdminUserActivity()])
+      .then(([analyticsData, slaData, topListingData, userActivityData]) => {
+        setAnalytics(analyticsData);
+        setSla(slaData);
+        setTopListings(topListingData);
+        setUserActivity(userActivityData);
         setState("ready");
       })
       .catch((err) => {
         setError(err instanceof Error ? err.message : "تعذر تحميل التحليلات.");
         setState("error");
       });
-  }, []);
+  }, [topMetric]);
 
   useEffect(load, [load]);
 
@@ -230,6 +249,14 @@ function AnalyticsPanel() {
     ["مستخدمون آخر 7 أيام", analytics.kpis.newUsersThisWeek],
     ["إجمالي الإعلانات", analytics.kpis.totalListings],
     ["نسبة النشر", `${analytics.kpis.conversionRate}%`],
+  ];
+  const operationalKpis = [
+    ["قيد المراجعة", sla?.pendingCount ?? 0],
+    ["أقدم انتظار", formatHours(sla?.oldestPendingAgeHours ?? 0)],
+    ["متوسط القرار", sla?.averageDecisionHours === null || sla?.averageDecisionHours === undefined ? "-" : formatHours(sla.averageDecisionHours)],
+    ["نشطون 7 أيام", userActivity?.activeUsers7d ?? 0],
+    ["نشطون 30 يوم", userActivity?.activeUsers30d ?? 0],
+    ["أضافوا إعلانات", userActivity?.usersWithListings7d ?? 0],
   ];
 
   return (
@@ -273,7 +300,63 @@ function AnalyticsPanel() {
         <DataSection title="أكثر التصنيفات نشاطاً">
           <BarChart items={analytics.topCategories.map((item) => ({ label: item.nameAr, value: item.listingCount }))} />
         </DataSection>
+        <DataSection title="تشغيل المراجعة">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {operationalKpis.map(([label, value]) => (
+              <MetricCard key={label} label={String(label)} value={value} />
+            ))}
+          </div>
+        </DataSection>
       </div>
+      <div className="grid gap-4 xl:grid-cols-2">
+        <DataSection title="أعمار الإعلانات قيد المراجعة">
+          <BarChart items={(sla?.pendingAgeBuckets ?? []).map((item) => ({ label: item.label, value: item.count }))} />
+        </DataSection>
+        <DataSection title="نشاط المستخدمين">
+          <BarChart items={(userActivity?.newVsActive ?? []).map((item) => ({ label: item.label, value: item.count }))} />
+          {userActivity ? (
+            <div className="mt-4 grid gap-2 text-sm text-[var(--text-muted)] sm:grid-cols-3">
+              <span>إعلانات: <strong className="text-[var(--text)]">{userActivity.usersWithListings7d}</strong></span>
+              <span>رسائل: <strong className="text-[var(--text)]">{userActivity.usersWithMessages7d}</strong></span>
+              <span>مفضلة: <strong className="text-[var(--text)]">{userActivity.usersWithFavorites7d}</strong></span>
+            </div>
+          ) : null}
+        </DataSection>
+      </div>
+      <DataSection title="أقوى الإعلانات أداءً">
+        <div className="mb-3 flex flex-wrap gap-2">
+          {TOP_LISTING_METRICS.map((metric) => (
+            <button
+              key={metric.id}
+              type="button"
+              onClick={() => setTopMetric(metric.id)}
+              className={`rounded-md border px-3 py-2 text-sm font-semibold ${
+                topMetric === metric.id
+                  ? "border-[var(--brand)] bg-[var(--brand)] text-[var(--brand-contrast)]"
+                  : "border-[var(--border)] bg-[var(--surface)] text-[var(--text)]"
+              }`}
+            >
+              {metric.label}
+            </button>
+          ))}
+        </div>
+        {topListings.length ? (
+          <SimpleTable
+            headers={["العنوان", "الحالة", "المدينة", "مشاهدات", "مفضلة", "رسائل", "الوقت"]}
+            rows={topListings.map((listing) => [
+              listing.title,
+              statusLabel(listing.status),
+              listing.locationCity,
+              listing.viewsCount,
+              listing.favoritesCount,
+              listing.messagesCount,
+              formatDate(listing.createdAt),
+            ])}
+          />
+        ) : (
+          <EmptyState message="لا توجد إعلانات كافية لعرض الأداء." />
+        )}
+      </DataSection>
       <DataSection title="آخر النشاطات">
         {analytics.latestActivities.length ? (
           <SimpleTable
@@ -831,6 +914,14 @@ function credentialModeLabel(mode: AdminHealth["firebaseAuth"]["credentialMode"]
     not_configured: "غير مفعّل",
   };
   return labels[mode];
+}
+
+function formatHours(hours: number) {
+  if (hours < 1) return "أقل من ساعة";
+  if (hours < 24) return `${hours}س`;
+  const days = Math.floor(hours / 24);
+  const rest = hours % 24;
+  return rest ? `${days}ي ${rest}س` : `${days}ي`;
 }
 
 function AuditPanel() {
