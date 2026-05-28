@@ -7,6 +7,8 @@ import { RequireAuthGate } from "@/components/auth/RequireAuthGate";
 import { getBackendMe, type BackendProfile } from "@/services/backendAuthService";
 import { getUserFavoriteListingIds } from "@/services/favoriteService";
 import { getUnreadSummary } from "@/services/messageService";
+import { deleteSavedSearch, getSavedSearches } from "@/services/savedSearchService";
+import type { SavedSearch } from "@/types/savedSearch";
 import { ModernAvatar } from "@/components/ui/ModernAvatar";
 import { getMotionStaggerStyle } from "@/lib/motion";
 import { DashboardStatsBar, type DashboardStats } from "@/components/me/DashboardStatsBar";
@@ -40,6 +42,7 @@ export function AccountDashboard() {
   const { currentUser } = useAuth();
   const [profile, setProfile] = useState<BackendProfile | null>(null);
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
@@ -51,10 +54,12 @@ export function AccountDashboard() {
       getBackendMe(),
       getUserFavoriteListingIds(currentUser.uid).catch(() => [] as string[]),
       getUnreadSummary().catch(() => ({ totalUnread: 0, byConversation: {} })),
+      getSavedSearches().catch(() => [] as SavedSearch[]),
     ])
-      .then(([profileData, favIds, unread]) => {
+      .then(([profileData, favIds, unread, searches]) => {
         if (!mounted) return;
         setProfile(profileData);
+        setSavedSearches(searches);
         setStats({
           activeListings: profileData?.totalListings ?? 0,
           favoritesCount: favIds.length,
@@ -123,9 +128,77 @@ export function AccountDashboard() {
             <DashLinkCard key={card.href} motionIndex={index} {...card} />
           ))}
         </section>
+
+        <SavedSearchesSection searches={savedSearches} onDeleted={setSavedSearches} />
       </div>
     </RequireAuthGate>
   );
+}
+
+function SavedSearchesSection({
+  searches,
+  onDeleted,
+}: {
+  searches: SavedSearch[];
+  onDeleted: (next: SavedSearch[]) => void;
+}) {
+  async function remove(id: string) {
+    await deleteSavedSearch(id);
+    onDeleted(searches.filter((search) => search.id !== id));
+  }
+
+  return (
+    <section className="ui-card rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h3 className="text-lg font-bold text-[var(--text)]">البحوث المحفوظة</h3>
+        <Link href="/listings" className="text-xs text-[var(--brand)] hover:underline">بحث جديد</Link>
+      </div>
+      {searches.length ? (
+        <div className="divide-y divide-[var(--border)]">
+          {searches.map((search) => (
+            <div key={search.id} className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <Link href={savedSearchHref(search)} className="font-semibold text-[var(--text)] hover:text-[var(--brand)]">
+                  {search.name}
+                </Link>
+                <p className="mt-1 text-xs text-[var(--text-muted)]">{formatDate(search.createdAt)}</p>
+              </div>
+              <div className="flex gap-2">
+                <Link href={savedSearchHref(search)} className="ui-btn-primary rounded-full px-4 py-1.5 text-xs">
+                  فتح
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => void remove(search.id)}
+                  className="ui-btn-ghost rounded-full border border-[var(--border)] px-4 py-1.5 text-xs"
+                >
+                  حذف
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="rounded-lg border border-dashed border-[var(--border)] p-4 text-sm text-[var(--text-muted)]">
+          لا توجد بحوث محفوظة بعد. احفظ أي فلتر من صفحة الإعلانات للعودة له بسرعة.
+        </p>
+      )}
+    </section>
+  );
+}
+
+function savedSearchHref(search: SavedSearch) {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(search.query)) {
+    const targetKey = key === "q" ? "search" : key;
+    if (value !== undefined && value !== null && value !== "") params.set(targetKey, String(value));
+  }
+  const query = params.toString();
+  return query ? `/listings?${query}` : "/listings";
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("ar", { dateStyle: "medium" }).format(new Date(value));
 }
 
 function DashLinkCard({ title, description, href, icon, accent, motionIndex = 0 }: DashCard & { motionIndex?: number }) {

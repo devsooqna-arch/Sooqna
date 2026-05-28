@@ -6,7 +6,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { ListingCard } from "@/components/listings/ListingCard";
 import { getListingsFiltered } from "@/services/listingService";
+import { createSavedSearch } from "@/services/savedSearchService";
 import { getCategories } from "@/services/categoryService";
+import { useAuth } from "@/hooks/useAuth";
 import type { Listing, ListingsPageResponse } from "@/types/listing";
 import type { Category } from "@/types/category";
 import { CategoryIcon } from "@/lib/categoryIcons";
@@ -56,6 +58,7 @@ export function ListingsPageSkeleton() {
 function PublicListingsPageInner() {
   const router = useRouter();
   const params = useSearchParams();
+  const { currentUser } = useAuth();
 
   // --- Read filters from URL ---
   const categoryFilter = (params.get("category") ?? "").toLowerCase();
@@ -111,6 +114,10 @@ function PublicListingsPageInner() {
   const [error, setError] = useState<string | null>(null);
   const [expandedSlug, setExpandedSlug] = useState<string | null>(null);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [savePanelOpen, setSavePanelOpen] = useState(false);
+  const [savedSearchName, setSavedSearchName] = useState("");
+  const [savingSearch, setSavingSearch] = useState(false);
+  const [saveSearchMessage, setSaveSearchMessage] = useState("");
   const showSkeleton = useDelayedLoading(loading);
 
   // --- Price filter local state ---
@@ -190,6 +197,35 @@ function PublicListingsPageInner() {
 
   function clearAllFilters() {
     router.replace("/listings");
+  }
+
+  async function saveCurrentSearch() {
+    if (!hasAnyFilter || !currentUser) return;
+    const name = savedSearchName.trim();
+    if (!name) {
+      setSaveSearchMessage("اكتب اسم البحث أولاً.");
+      return;
+    }
+    const query: Record<string, string | number> = {};
+    if (categoryFilter) query.category = categoryFilter;
+    if (cityFilter) query.city = cityFilter;
+    if (searchFilter) query.q = searchFilter;
+    if (sort) query.sort = sort;
+    if (priceMin) query.priceMin = priceMin;
+    if (priceMax) query.priceMax = priceMax;
+
+    setSavingSearch(true);
+    setSaveSearchMessage("");
+    try {
+      await createSavedSearch(name, query);
+      setSaveSearchMessage("تم حفظ البحث.");
+      setSavedSearchName("");
+      setSavePanelOpen(false);
+    } catch (err) {
+      setSaveSearchMessage(err instanceof Error ? err.message : "تعذر حفظ البحث.");
+    } finally {
+      setSavingSearch(false);
+    }
   }
 
   // --- Category name helper ---
@@ -420,22 +456,54 @@ function PublicListingsPageInner() {
           <p className="text-xs text-[var(--text-muted)]">
             {total} إعلان {total > 0 ? `(${startCount}-${endCount})` : ""}
           </p>
-          <select
-            value={sort}
-            onChange={(e) => {
-              const nextSort = e.target.value as SortKey;
-              if (isValidSort(nextSort)) {
-                router.replace(buildListingsHref({ sort: nextSort, page: 1 }));
-              }
-            }}
-            aria-label="ترتيب النتائج"
-            className="ui-pill-input ui-select h-9 border-[var(--border)] py-1.5 text-xs"
-          >
-            {SORT_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
+          <div className="flex flex-wrap items-center gap-2">
+            {hasAnyFilter && currentUser ? (
+              <button
+                type="button"
+                onClick={() => setSavePanelOpen((open) => !open)}
+                className="ui-btn-ghost rounded-full border border-[var(--border)] px-3 py-1.5 text-xs"
+              >
+                حفظ البحث
+              </button>
+            ) : null}
+            <select
+              value={sort}
+              onChange={(e) => {
+                const nextSort = e.target.value as SortKey;
+                if (isValidSort(nextSort)) {
+                  router.replace(buildListingsHref({ sort: nextSort, page: 1 }));
+                }
+              }}
+              aria-label="ترتيب النتائج"
+              className="ui-pill-input ui-select h-9 border-[var(--border)] py-1.5 text-xs"
+            >
+              {SORT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
+
+        {savePanelOpen ? (
+          <div className="motion-alert flex flex-col gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 sm:flex-row sm:items-center">
+            <input
+              value={savedSearchName}
+              onChange={(event) => setSavedSearchName(event.target.value)}
+              placeholder="اسم البحث المحفوظ"
+              maxLength={80}
+              className="ui-pill-input h-9 flex-1 text-sm"
+            />
+            <button
+              type="button"
+              onClick={saveCurrentSearch}
+              disabled={savingSearch}
+              className="ui-btn-primary rounded-full px-4 py-2 text-xs disabled:opacity-60"
+            >
+              {savingSearch ? "جاري الحفظ..." : "حفظ"}
+            </button>
+          </div>
+        ) : null}
+        {saveSearchMessage ? <p className="text-xs text-[var(--text-muted)]">{saveSearchMessage}</p> : null}
 
         {/* Error state */}
         {error ? (

@@ -15,6 +15,7 @@ import { auditRouter } from "../modules/audit/audit.routes";
 import { adminRouter } from "../modules/admin/admin.routes";
 import { contactRouter } from "../modules/contact/contact.routes";
 import { marketRouter } from "../modules/market/market.routes";
+import { savedSearchesRouter } from "../modules/saved-searches/savedSearches.routes";
 import { verifyFirebaseToken } from "../middleware/verifyFirebaseToken";
 import { requireActiveUser, requireCurrentUser } from "../middleware/authContext";
 import { checkRole } from "../middleware/checkRole";
@@ -112,4 +113,5 @@ apiRouter.use("/audit", auditRouter);
 apiRouter.use("/admin", adminRouter);
 apiRouter.use("/contact", contactRouter);
 apiRouter.use("/market", marketRouter);
+apiRouter.use("/saved-searches", savedSearchesRouter);
 
