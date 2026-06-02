@@ -26,8 +26,11 @@ jest.mock("../../config/prisma", () => ({
 }));
 
 import { app } from "../../app";
+import { env } from "../../config/env";
 
-function mockUser() {
+const originalRequireEmailVerified = env.requireEmailVerified;
+
+function mockUser(overrides?: Record<string, unknown>) {
   const user = {
     id: "buyer-db",
     firebaseUid: "buyer-uid",
@@ -47,21 +50,27 @@ function mockUser() {
     totalSold: 0,
     createdAt: new Date("2026-01-01T00:00:00.000Z"),
     updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+    ...overrides,
   };
   mockPrisma.user.findUnique.mockResolvedValue(user);
   mockPrisma.user.upsert.mockResolvedValue(user);
 }
 
 describe("saved searches routes", () => {
+  afterAll(() => {
+    env.requireEmailVerified = originalRequireEmailVerified;
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
-    mockVerifyIdToken.mockResolvedValue({
+    env.requireEmailVerified = true;
+    mockVerifyIdToken.mockImplementation(async (token: string) => ({
       uid: "buyer-uid",
       email: "buyer@example.com",
-      email_verified: true,
+      email_verified: token !== "unverified-token",
       name: "Buyer",
       picture: "",
-    });
+    }));
   });
 
   it("requires authentication", async () => {
@@ -125,6 +134,19 @@ describe("saved searches routes", () => {
     });
   });
 
+  it("rejects saved search creation for unverified users", async () => {
+    mockUser({ isEmailVerified: false });
+
+    const response = await request(app)
+      .post("/api/saved-searches")
+      .set("Authorization", "Bearer unverified-token")
+      .send({ name: "Cars", query: { category: "cars" } });
+
+    expect(response.status).toBe(403);
+    expect(response.body.code).toBe("EMAIL_NOT_VERIFIED");
+    expect(mockPrisma.savedSearch.create).not.toHaveBeenCalled();
+  });
+
   it("deletes only a saved search owned by the current user", async () => {
     mockUser();
     mockPrisma.savedSearch.findFirst.mockResolvedValueOnce({
@@ -142,5 +164,17 @@ describe("saved searches routes", () => {
     expect(mockPrisma.savedSearch.findFirst).toHaveBeenCalledWith({
       where: { id: "search-3", userId: "buyer-uid" },
     });
+  });
+
+  it("rejects saved search deletion for unverified users", async () => {
+    mockUser({ isEmailVerified: false });
+
+    const response = await request(app)
+      .delete("/api/saved-searches/search-3")
+      .set("Authorization", "Bearer unverified-token");
+
+    expect(response.status).toBe(403);
+    expect(response.body.code).toBe("EMAIL_NOT_VERIFIED");
+    expect(mockPrisma.savedSearch.delete).not.toHaveBeenCalled();
   });
 });

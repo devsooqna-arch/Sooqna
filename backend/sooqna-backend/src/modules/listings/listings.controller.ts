@@ -3,6 +3,7 @@ import { AppError } from "../../shared/errors/appError";
 import { logAuditEvent } from "../audit/audit.service";
 import { PrismaReviewsRepository } from "../reviews/repositories/reviews.repository";
 import { ReviewsService } from "../reviews/reviews.service";
+import { PrismaUploadsRepository } from "../uploads/uploads.repository";
 import { PrismaListingsRepository } from "./repositories/listings.repository";
 import { ListingsService } from "./listings.service";
 import type { ListingCurrency } from "./listings.types";
@@ -10,6 +11,7 @@ import { toPublicListing } from "./listings.types";
 
 const service = new ListingsService(new PrismaListingsRepository());
 const reviewsService = new ReviewsService(new PrismaReviewsRepository());
+const uploadsRepository = new PrismaUploadsRepository();
 
 function requireTrustedUid(req: Request): string {
   const uid = req.currentUser?.firebaseUid;
@@ -280,5 +282,6 @@ export async function attachListingImage(req: Request, res: Response): Promise<v
     url,
     path: imagePath,
   });
+  await uploadsRepository.markAttachedToListing(imagePath, listing.id);
   res.json({ success: true, listing });
 }

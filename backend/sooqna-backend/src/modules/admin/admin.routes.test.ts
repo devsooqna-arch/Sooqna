@@ -304,6 +304,55 @@ describe("admin routes", () => {
     );
   });
 
+  it("allows admins to publish a pending listing through moderation", async () => {
+    mockUser(Role.ADMIN);
+    const publishedAt = new Date("2026-01-02T00:00:00.000Z");
+    mockPrisma.listing.findUnique.mockResolvedValue({ status: "pending" });
+    mockPrisma.listingModerationLog.create.mockResolvedValue({});
+    mockPrisma.listing.update.mockResolvedValue({
+      id: "lst-1",
+      title: "Ready item",
+      ownerId: "seller-1",
+      status: "published",
+      isFeatured: false,
+      isApproved: true,
+      publishedAt,
+      archivedAt: null,
+      soldAt: null,
+      updatedAt: publishedAt,
+    });
+
+    const response = await request(app)
+      .post("/api/admin/listings/lst-1/publish")
+      .set("Authorization", "Bearer admin-token");
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.status).toBe("published");
+    expect(response.body.data.isApproved).toBe(true);
+    expect(mockPrisma.listing.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "lst-1" },
+        data: expect.objectContaining({
+          status: "published",
+          isApproved: true,
+          archivedAt: null,
+        }),
+      })
+    );
+    expect(mockPrisma.listingModerationLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          listingId: "lst-1",
+          adminUserId: "admin-uid",
+          action: "publish",
+          previousStatus: "pending",
+          newStatus: "published",
+        }),
+      })
+    );
+  });
+
   it("allows admins to manage cities", async () => {
     mockUser(Role.ADMIN);
     const createdAt = new Date("2026-01-01T00:00:00.000Z");

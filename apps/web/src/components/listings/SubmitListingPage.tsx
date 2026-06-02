@@ -312,7 +312,7 @@ export function SubmitListingPage() {
       setPublishState(`جارٍ رفع ${images.length} صور...`);
       await uploadImagesForListing(result.listingId);
 
-      setPublishState("جارٍ نشر الإعلان...");
+      setPublishState("جارٍ إرسال الإعلان للمراجعة...");
       await publishListing(result.listingId);
 
       setPublishState(null);
@@ -348,14 +348,14 @@ export function SubmitListingPage() {
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
-        <h2 className="text-lg font-bold text-emerald-900">تم نشر إعلانك بنجاح!</h2>
-        <p className="mt-2 text-sm text-emerald-800">إعلانك متاح الآن في البحث والصفحة الرئيسية.</p>
+        <h2 className="text-lg font-bold text-emerald-900">تم إرسال إعلانك للمراجعة</h2>
+        <p className="mt-2 text-sm text-emerald-800">سيظهر الإعلان في البحث بعد موافقة فريق الإدارة.</p>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Link
-            href={`/listings/${createdListingId}`}
+            href="/my-listings"
             className="ui-btn-primary rounded-full px-6 py-2.5 text-sm font-semibold"
           >
-            عرض الإعلان
+            متابعة حالة الإعلان
           </Link>
           <Link
             href="/my-listings"

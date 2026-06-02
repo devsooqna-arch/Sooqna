@@ -204,7 +204,7 @@ export function EditListingPageView({ listingId }: { listingId: string }) {
               الحالة الحالية: {listing?.status ?? "-"}
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
-              <button type="button" onClick={() => void onLifecycleAction("publish")} disabled={saving || deleting || statusActionBusy} className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 disabled:opacity-60">نشر</button>
+              <button type="button" onClick={() => void onLifecycleAction("publish")} disabled={saving || deleting || statusActionBusy} className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 disabled:opacity-60">إرسال للمراجعة</button>
               <button type="button" onClick={() => void onLifecycleAction("unpublish")} disabled={saving || deleting || statusActionBusy} className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 disabled:opacity-60">إلغاء النشر</button>
               <button type="button" onClick={() => void onLifecycleAction("renew")} disabled={saving || deleting || statusActionBusy} className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 disabled:opacity-60">تجديد</button>
               <button type="button" onClick={() => void onLifecycleAction("expire")} disabled={saving || deleting || statusActionBusy} className="rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 disabled:opacity-60">إنهاء الصلاحية</button>

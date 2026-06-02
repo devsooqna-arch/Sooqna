@@ -78,20 +78,11 @@ export const attachListingImageBodySchema = z
 
 export const createConversationBodySchema = z
   .object({
-    participantIds: z.array(z.string().trim().min(1)).min(1).optional(),
-    participants: z.record(
-      z.string(),
-      z.object({
-        fullName: z.string().trim().max(120).optional(),
-        photoURL: z.string().trim().url().max(2048).optional(),
-      })
-    ).optional(),
     listingId: z.string().trim().min(1),
-    listingSnapshot: z.object({
-      title: z.string().trim().min(1).max(200),
-      primaryImageURL: z.string().trim().url().max(2048).optional().default(""),
-    }),
-    createdBy: z.string().trim().optional(), // ignored — taken from auth token on the server
+    participantIds: z.unknown().optional(),
+    participants: z.unknown().optional(),
+    listingSnapshot: z.unknown().optional(),
+    createdBy: z.unknown().optional(),
   })
   .strict();
 

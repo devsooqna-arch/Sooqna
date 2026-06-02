@@ -36,8 +36,14 @@ jobs:
       - name: Generate Prisma client
         run: npm run prisma:generate
 
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+
       - name: Typecheck
         run: npm run typecheck
+
+      - name: Test
+        run: npm test -- --runInBand
 
       - name: Build
         run: npm run build
@@ -61,6 +67,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Validate WordPress redirect mapping
         run: npm run validate:redirects

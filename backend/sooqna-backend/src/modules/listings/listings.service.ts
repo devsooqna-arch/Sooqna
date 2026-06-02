@@ -340,14 +340,12 @@ export class ListingsService {
     }
 
     const now = new Date();
-    const expiresAt = new Date(now);
-    expiresAt.setDate(expiresAt.getDate() + env.listingDefaultExpiryDays);
-
     return this.repo.updateFields(listing.id, {
-      status: "published",
-      isApproved: true,
-      publishedAt: now,
-      expiresAt,
+      status: "pending",
+      isApproved: false,
+      publishedAt: null,
+      archivedAt: null,
+      expiresAt: null,
       updatedAt: now,
     });
   }

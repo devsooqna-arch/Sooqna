@@ -158,27 +158,9 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
       return;
     }
     setActionError(null);
-    const primaryImg = listing.images.find((img) => img.isPrimary) ?? listing.images[0];
-    const snapshotImage = resolvePublicMediaUrl(primaryImg?.url) ?? primaryImg?.url ?? "";
     try {
       const result = await createConversation({
-        participantIds: [currentUser.uid, listing.ownerId],
-        participants: {
-          [currentUser.uid]: {
-            fullName: currentUser.displayName ?? "",
-            photoURL: currentUser.photoURL ?? "",
-          },
-          [listing.ownerId]: {
-            fullName: listing.ownerSnapshot.fullName ?? "",
-            photoURL: listing.ownerSnapshot.photoURL ?? "",
-          },
-        },
         listingId: listing.id,
-        listingSnapshot: {
-          title: listing.title,
-          primaryImageURL: snapshotImage,
-        },
-        createdBy: currentUser.uid,
       });
       void trackEngagementEvent("contact_intent", {
         listingId: listing.id,

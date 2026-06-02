@@ -89,7 +89,7 @@ export async function createConversation(
     apiFetch<{ success: true; conversation: Conversation }>("/messages/conversations", {
       method: "POST",
       authenticated: true,
-      body: JSON.stringify(input),
+      body: JSON.stringify({ listingId: input.listingId }),
     })
   );
 
@@ -165,4 +165,3 @@ export async function flushPendingMessages(): Promise<number> {
   writePendingMessages(remaining);
   return flushed;
 }
-

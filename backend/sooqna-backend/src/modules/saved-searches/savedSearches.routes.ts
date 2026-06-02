@@ -3,6 +3,8 @@ import type { Request } from "express";
 import { prisma } from "../../config/prisma";
 import { verifyFirebaseToken } from "../../middleware/verifyFirebaseToken";
 import { requireActiveUser, requireCurrentUser } from "../../middleware/authContext";
+import { requireVerifiedEmail } from "../../middleware/requireVerifiedEmail";
+import { asyncHandler } from "../../middleware/asyncHandler";
 import { AppError } from "../../shared/errors/appError";
 
 const ALLOWED_QUERY_KEYS = new Set(["q", "category", "city", "minPrice", "maxPrice", "priceMin", "priceMax", "condition", "sort"]);
@@ -11,7 +13,7 @@ export const savedSearchesRouter = Router();
 
 savedSearchesRouter.use(verifyFirebaseToken, requireCurrentUser, requireActiveUser);
 
-savedSearchesRouter.get("/", async (req, res) => {
+savedSearchesRouter.get("/", asyncHandler(async (req, res) => {
   const userId = requireUid(req);
   const items = await prisma.savedSearch.findMany({
     where: { userId },
@@ -23,9 +25,9 @@ savedSearchesRouter.get("/", async (req, res) => {
     success: true,
     data: items.map(serializeSavedSearch),
   });
-});
+}));
 
-savedSearchesRouter.post("/", async (req, res) => {
+savedSearchesRouter.post("/", requireVerifiedEmail, asyncHandler(async (req, res) => {
   const userId = requireUid(req);
   const name = typeof req.body?.name === "string" ? req.body.name.trim() : "";
   if (!name || name.length > 80) {
@@ -45,9 +47,9 @@ savedSearchesRouter.post("/", async (req, res) => {
   });
 
   res.status(201).json({ success: true, data: serializeSavedSearch(item) });
-});
+}));
 
-savedSearchesRouter.delete("/:id", async (req, res) => {
+savedSearchesRouter.delete("/:id", requireVerifiedEmail, asyncHandler(async (req, res) => {
   const userId = requireUid(req);
   const existing = await prisma.savedSearch.findFirst({
     where: { id: req.params.id, userId },
@@ -58,7 +60,7 @@ savedSearchesRouter.delete("/:id", async (req, res) => {
 
   await prisma.savedSearch.delete({ where: { id: existing.id } });
   res.json({ success: true, data: { id: existing.id, deleted: true } });
-});
+}));
 
 function requireUid(req: Request): string {
   const uid = req.currentUser?.firebaseUid;

@@ -294,18 +294,27 @@ describe("Phase 2: Listing lifecycle and authorization", () => {
       );
     });
 
-    it("allows publishing listing with images", async () => {
+    it("submits listing with images for moderation instead of publishing directly", async () => {
       const repo = createRepo();
       const draft = makeDraftListing({
         ownerId: "owner-1",
         images: [{ url: "http://test.com/img.jpg", path: "uploads/img.jpg", isPrimary: true, order: 1 }],
       });
       repo.findById.mockResolvedValue(draft);
-      repo.updateFields.mockResolvedValue({ ...draft, status: "published" });
+      repo.updateFields.mockResolvedValue({ ...draft, status: "pending", isApproved: false });
       const service = new ListingsService(repo);
 
       const result = await service.publish("lst_test1", "owner-1");
-      expect(result.status).toBe("published");
+      expect(result.status).toBe("pending");
+      expect(result.isApproved).toBe(false);
+      expect(repo.updateFields).toHaveBeenCalledWith(
+        "lst_test1",
+        expect.objectContaining({
+          status: "pending",
+          isApproved: false,
+          publishedAt: null,
+        })
+      );
     });
   });
 

@@ -7,7 +7,7 @@ import { ReviewsService } from "./reviews.service";
 const service = new ReviewsService(new PrismaReviewsRepository());
 
 function requireUid(req: Request): string {
-  const uid = req.authUser?.uid;
+  const uid = req.currentUser?.firebaseUid ?? req.authUser?.uid;
   if (!uid) {
     throw new AppError(401, "Unauthorized", "UNAUTHORIZED");
   }

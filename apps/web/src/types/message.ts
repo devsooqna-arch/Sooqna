@@ -40,11 +40,11 @@ export interface Message {
 }
 
 export interface CreateConversationInput {
-  participantIds: string[];
-  participants: Record<string, ConversationParticipant>;
   listingId: string;
-  listingSnapshot: ConversationListingSnapshot;
-  createdBy: string;
+  participantIds?: string[];
+  participants?: Record<string, ConversationParticipant>;
+  listingSnapshot?: ConversationListingSnapshot;
+  createdBy?: string;
 }
 
 export interface CreateMessageInput {
