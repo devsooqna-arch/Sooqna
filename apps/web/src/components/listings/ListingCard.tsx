@@ -11,6 +11,7 @@ import { arabicCity, arabicArea } from "@/lib/locationNames";
 import { getMotionStaggerStyle } from "@/lib/motion";
 import { useAuth } from "@/hooks/useAuth";
 import { addToFavorites, removeFromFavorites, getUserFavoriteListingIds } from "@/services/favoriteService";
+import { iconActionLabel } from "@/lib/listingUiLabels";
 
 const PLACEHOLDER = "/images/placeholder-listing.png";
 
@@ -52,6 +53,7 @@ export function ListingCard({
   const listedAgo = formatListedAgo(listing.publishedAt ?? listing.createdAt);
   const imageCount = listing.imageCount ?? listing.images.length;
   const area = listing.location.area ? arabicArea(listing.location.area) : "";
+  const favoriteLabel = iconActionLabel(isFav ? "favorite-remove" : "favorite-add");
 
   async function handleFavoriteClick(e: React.MouseEvent) {
     e.preventDefault();
@@ -111,7 +113,8 @@ export function ListingCard({
         <button
           type="button"
           onClick={handleFavoriteClick}
-          aria-label={isFav ? "إزالة من المفضلة" : "إضافة إلى المفضلة"}
+          aria-label={favoriteLabel}
+          title={favoriteLabel}
           className="absolute left-2 bottom-2 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white transition-colors hover:bg-black/60"
         >
           {isFav ? (

@@ -21,6 +21,8 @@ export interface ListingLocation {
   country: string;
   city: string;
   area: string;
+  latitude?: number | string | null;
+  longitude?: number | string | null;
 }
 
 export interface ListingOwnerSnapshot {

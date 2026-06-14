@@ -19,6 +19,8 @@ import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { resolvePublicMediaUrl } from "@/lib/mediaUrl";
 import { arabicCity, arabicArea } from "@/lib/locationNames";
 import { addRecentlyViewedListingId } from "@/lib/recentlyViewedListings";
+import { buildGoogleMapsHref } from "@/lib/listingMapLinks";
+import { iconActionLabel, listingConditionLabel } from "@/lib/listingUiLabels";
 
 const LISTING_IMG_PLACEHOLDER = "/images/placeholder-listing.png";
 
@@ -243,6 +245,7 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
   const categoryName =
     categories.find((c) => c.id === listing.categoryId || c.slug === listing.categoryId)?.name.ar
     ?? listing.categoryId;
+  const mapHref = buildGoogleMapsHref(listing.location);
 
   const priceDisplay =
     listing.priceType === "contact"
@@ -280,7 +283,8 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
                 type="button"
                 onClick={() => void toggleFavorite()}
                 disabled={favoriteLoading}
-                aria-label="أضف للمفضلة"
+                aria-label={iconActionLabel(favorite ? "favorite-remove" : "favorite-add")}
+                title={iconActionLabel(favorite ? "favorite-remove" : "favorite-add")}
                 className="motion-press absolute left-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow transition-opacity hover:opacity-95 disabled:opacity-50"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill={favorite ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" className={favorite ? "text-red-500" : "text-gray-400"}>
@@ -321,7 +325,7 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
                 {categoryName}
               </span>
               <span className="rounded-full border border-[var(--chip-border)] bg-[var(--surface-muted)] px-3 py-1 text-xs text-[var(--text-muted)]">
-                {listing.condition === "new" ? "جديد" : "مستعمل"}
+                {listingConditionLabel(listing.condition)}
               </span>
             </div>
             <div className="flex items-start justify-between gap-3">
@@ -331,7 +335,8 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
               <button
                 type="button"
                 onClick={() => void handleShare()}
-                title="مشاركة الإعلان"
+                aria-label={iconActionLabel("share")}
+                title={iconActionLabel("share")}
                 className="motion-press mt-1 shrink-0 rounded-full border border-[var(--chip-border)] bg-[var(--chip)] p-2 text-[var(--text-muted)] transition-colors hover:text-[var(--text)]"
               >
                 {shareCopied ? (
@@ -548,6 +553,8 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
             <button
               type="button"
               onClick={() => void startConversation()}
+              aria-label={iconActionLabel("message")}
+              title={iconActionLabel("message")}
               className="ui-btn-primary flex w-full items-center justify-center gap-2 rounded-full px-4 py-3 text-sm"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -555,6 +562,18 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
               </svg>
               راسل البائع
             </button>
+
+            {mapHref ? (
+              <a
+                href={mapHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-full border border-[var(--chip-border)] bg-[var(--chip)] px-4 py-2.5 text-sm font-semibold text-[var(--text-muted)] transition hover:text-[var(--text)]"
+              >
+                <span aria-hidden>📍</span>
+                عرض الموقع على الخريطة
+              </a>
+            ) : null}
 
             {listing.contactPhone?.trim() ? (
               <a
@@ -576,6 +595,8 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
               type="button"
               onClick={() => void toggleFavorite()}
               disabled={favoriteLoading}
+              aria-label={iconActionLabel(favorite ? "favorite-remove" : "favorite-add")}
+              title={iconActionLabel(favorite ? "favorite-remove" : "favorite-add")}
               className={`mt-2 flex w-full items-center justify-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50 ${
                 favorite
                   ? "border-red-200 bg-red-50 text-red-600"
@@ -593,6 +614,8 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
               <button
                 type="button"
                 onClick={() => void handleShare()}
+                aria-label={iconActionLabel("share")}
+                title={iconActionLabel("share")}
                 className="flex w-full items-center justify-center gap-2 rounded-full border border-[var(--chip-border)] bg-[var(--chip)] px-4 py-2.5 text-sm font-semibold text-[var(--text-muted)] transition hover:text-[var(--text)]"
               >
                 {shareCopied ? (
@@ -759,7 +782,7 @@ export function ListingDetailsView({ listingId }: { listingId: string }) {
             <h3 className="mb-3 text-xs font-bold uppercase tracking-wide text-[var(--text-muted)]">معلومات الإعلان</h3>
             <dl className="space-y-2 text-xs">
               <MetaRow label="التصنيف" value={categoryName} />
-              <MetaRow label="الحالة" value={listing.condition === "new" ? "جديد" : "مستعمل"} />
+              <MetaRow label="الحالة" value={listingConditionLabel(listing.condition)} />
               <MetaRow label="المدينة" value={arabicCity(listing.location.city) || "—"} />
               <MetaRow label="المشاهدات" value={String(listing.viewsCount)} />
               <MetaRow label="تاريخ النشر" value={formatDate(listing.publishedAt ?? listing.createdAt)} />

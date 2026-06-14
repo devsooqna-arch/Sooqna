@@ -10,15 +10,7 @@ import { arabicCity } from "@/lib/locationNames";
 import { isEmailNotVerified } from "@/lib/apiError";
 import { EmailVerificationBanner } from "@/components/ui/EmailVerificationBanner";
 import { getMotionStaggerStyle } from "@/lib/motion";
-
-const STATUS_LABELS: Record<ListingStatus, string> = {
-  draft:     "مسودة",
-  pending:   "قيد المراجعة",
-  published: "منشور",
-  rejected:  "مرفوض",
-  sold:      "مباع",
-  archived:  "مؤرشف",
-};
+import { listingStatusLabel } from "@/lib/listingUiLabels";
 
 const STATUS_COLORS: Record<ListingStatus, string> = {
   draft:     "bg-gray-100 text-gray-600",
@@ -117,7 +109,7 @@ export function MyListingsPageView() {
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="text-sm font-bold text-[var(--text)]">{listing.title}</h3>
                   <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${STATUS_COLORS[listing.status]}`}>
-                    {STATUS_LABELS[listing.status]}
+                    {listingStatusLabel(listing.status)}
                   </span>
                   {listing.isFeatured && (
                     <span className="rounded-full bg-[var(--featured)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--featured-text)]">

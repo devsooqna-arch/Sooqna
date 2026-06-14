@@ -6,6 +6,15 @@
     { "source": "/my-account/", "destination": "/me", "permanent": false },
     { "source": "/add-listing/", "destination": "/submit-listing", "permanent": true },
     { "source": "/listings/", "destination": "/listings", "permanent": true },
+    { "source": "/careers/", "destination": "/careers", "permanent": true },
+    { "source": "/press/", "destination": "/press", "permanent": true },
+    { "source": "/apps/", "destination": "/packages", "permanent": true },
+    { "source": "/privacy-policy/", "destination": "/privacy", "permanent": true },
+    { "source": "/safety-tips/", "destination": "/safety", "permanent": true },
+    { "source": "/advertise/", "destination": "/contact", "permanent": true },
+    { "source": "/pricing/", "destination": "/packages", "permanent": true },
+    { "source": "/company-solutions/", "destination": "/contact", "permanent": true },
+    { "source": "/categories/", "destination": "/categories", "permanent": true },
     { "source": "/listing/كاميرا-سوني-a7-iv-مع-عدسة-50mm/", "destination": "/listings", "permanent": false }
   ],
   "patterns": [
