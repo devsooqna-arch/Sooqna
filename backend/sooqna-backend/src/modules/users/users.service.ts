@@ -1,11 +1,24 @@
 import type { DecodedIdToken } from "firebase-admin/auth";
 import { nowIso } from "../../utils/time";
+import { env } from "../../config/env";
 import { AppError } from "../../shared/errors/appError";
 import type { UserProfile } from "./users.types";
 import type { UsersRepository } from "./repositories/users.repository";
 
 export class UsersService {
   constructor(private readonly repo: UsersRepository) {}
+
+  /**
+   * Promote configured bootstrap emails to ADMIN. Only ever promotes — never
+   * demotes — so removing an email from ADMIN_EMAILS does not strip access
+   * (use the admin dashboard to change roles down).
+   */
+  private resolveRole(email: string, currentRole: UserProfile["role"]): UserProfile["role"] {
+    if (email && env.adminEmails.includes(email.trim().toLowerCase())) {
+      return "ADMIN";
+    }
+    return currentRole;
+  }
 
   private buildProfile(
     authUser: DecodedIdToken,
@@ -20,7 +33,7 @@ export class UsersService {
       fullName: input?.fullName ?? existing?.fullName ?? authUser.name ?? "",
       email: authUser.email ?? existing?.email ?? "",
       photoURL: input?.photoURL ?? existing?.photoURL ?? authUser.picture ?? "",
-      role: existing?.role ?? "BUYER",
+      role: this.resolveRole(authUser.email ?? existing?.email ?? "", existing?.role ?? "BUYER"),
       accountStatus: existing?.accountStatus ?? "active",
       isEmailVerified: authUser.email_verified ?? false,
       lastLoginAt,
@@ -74,6 +87,7 @@ export class UsersService {
       const nextProfile = {
         ...existing,
         email: authUser.email ?? existing.email,
+        role: this.resolveRole(authUser.email ?? existing.email, existing.role),
         isEmailVerified: authUser.email_verified ?? false,
         lastLoginAt: typeof authUser.auth_time === "number" ? new Date(authUser.auth_time * 1000).toISOString() : nowIso(),
         updatedAt: nowIso(),

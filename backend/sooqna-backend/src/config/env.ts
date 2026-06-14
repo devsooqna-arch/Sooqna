@@ -93,6 +93,12 @@ export const env = {
     : "http://localhost:3000"),
   corsOrigins,
   trustProxy: parseTrustProxy(process.env.TRUST_PROXY),
+  /**
+   * Emails that should always be promoted to the ADMIN role on login/profile
+   * sync. Used to bootstrap the first admin (no UI exists for the first one).
+   * Comma-separated, case-insensitive.
+   */
+  adminEmails: parseCsv(process.env.ADMIN_EMAILS).map((email) => email.toLowerCase()),
   uploadsPublicBaseUrl: resolveUploadsPublicBaseUrl(),
   firebaseProjectId: requireInProduction(process.env.FIREBASE_PROJECT_ID, "FIREBASE_PROJECT_ID"),
   firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL ?? "",
