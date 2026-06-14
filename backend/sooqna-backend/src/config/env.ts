@@ -57,9 +57,12 @@ const enableCategoriesJsonFallback = parseBoolean(
 );
 const databaseUrl = process.env.DATABASE_URL ?? "";
 const requireDatabase = isProduction || !enableCategoriesJsonFallback;
+// Browsers send the `Origin` header without a trailing slash and without a path
+// (scheme://host[:port] only). Normalize configured origins the same way so an
+// allowlist entry written as "https://site.com/" still matches "https://site.com".
 const corsOrigins = parseCsv(
   process.env.CORS_ORIGIN ?? (isProduction ? undefined : "http://localhost:3000")
-);
+).map((origin) => origin.replace(/\/+$/, ""));
 
 if (!databaseUrl && requireDatabase) {
   throw new Error(
