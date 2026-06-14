@@ -2,6 +2,7 @@ import * as path from "node:path";
 import { env } from "../../../config/env";
 import { prisma } from "../../../config/prisma";
 import { parseIso, toIso } from "../../../shared/utils/dates";
+import { buildListingSearchText, normalizeArabic } from "../../../shared/utils/arabic";
 import { readJsonArrayFile, writeJsonArrayFile } from "../../../utils/fileStore";
 import type { Listing } from "../listings.types";
 
@@ -103,6 +104,7 @@ export class PrismaListingsRepository implements ListingsRepository {
           id: listing.id,
           title: listing.title,
           titleLower: listing.titleLower,
+          searchText: buildListingSearchText(listing.title, listing.description),
           clientRequestId: listing.clientRequestId ?? null,
           description: listing.description,
           price: listing.price,
@@ -181,6 +183,9 @@ export class PrismaListingsRepository implements ListingsRepository {
           ? [
               {
                 OR: [
+                  // Arabic-normalized match (alef/yaa/taa/diacritic-insensitive).
+                  { searchText: { contains: normalizeArabic(search) } },
+                  // Raw fallbacks keep behavior for rows not yet backfilled.
                   { title: { contains: search, mode: "insensitive" as const } },
                   { description: { contains: search, mode: "insensitive" as const } },
                 ],
@@ -225,11 +230,15 @@ export class PrismaListingsRepository implements ListingsRepository {
           filtered = filtered.filter((listing) => listing.location.city.toLowerCase() === city);
         }
         if (search) {
-          filtered = filtered.filter(
-            (listing) =>
+          const nsearch = normalizeArabic(search);
+          filtered = filtered.filter((listing) => {
+            const haystack = normalizeArabic(`${listing.title} ${listing.description}`);
+            return (
+              haystack.includes(nsearch) ||
               listing.title.toLowerCase().includes(search) ||
               listing.description.toLowerCase().includes(search)
-          );
+            );
+          });
         }
         if (typeof priceMin === "number") {
           filtered = filtered.filter((listing) => listing.price >= priceMin);
@@ -372,6 +381,7 @@ export class PrismaListingsRepository implements ListingsRepository {
         data: {
           title: listing.title,
           titleLower: listing.titleLower,
+          searchText: buildListingSearchText(listing.title, listing.description),
           clientRequestId: listing.clientRequestId ?? null,
           description: listing.description,
           price: listing.price,

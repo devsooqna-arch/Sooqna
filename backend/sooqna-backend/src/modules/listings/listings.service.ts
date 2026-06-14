@@ -1,5 +1,6 @@
 import { generateId } from "../../utils/ids";
 import { nowIso } from "../../utils/time";
+import { buildListingSearchText } from "../../shared/utils/arabic";
 import { AppError } from "../../shared/errors/appError";
 import { env } from "../../config/env";
 import { CATEGORY_IDS, CITY_IDS } from "../../shared/constants/domain";
@@ -292,6 +293,12 @@ export class ListingsService {
     }
     if (patch.description !== undefined) {
       fields.description = patch.description;
+    }
+    if (fields.title !== undefined || fields.description !== undefined) {
+      const nextTitle = typeof fields.title === "string" ? fields.title : existing.title;
+      const nextDescription =
+        typeof fields.description === "string" ? fields.description : existing.description;
+      fields.searchText = buildListingSearchText(nextTitle, nextDescription);
     }
     if (patch.price !== undefined && Number.isFinite(patch.price) && patch.price >= 0) {
       fields.price = patch.price;

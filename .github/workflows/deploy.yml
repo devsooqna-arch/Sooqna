@@ -311,6 +311,12 @@ jobs:
               exit "$seed_exit"
             fi
 
+            # Best-effort: backfill normalized Arabic search text for existing
+            # listings. Idempotent and non-fatal — a failure here must never
+            # block a deploy (new/updated listings populate searchText anyway).
+            echo "Backfilling listing searchText (best-effort)..."
+            npm run backfill:search || echo "searchText backfill skipped (non-fatal)."
+
             echo "Checking dist output..."
             ls -lah dist || true
 

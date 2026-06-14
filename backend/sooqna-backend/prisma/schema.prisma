@@ -50,6 +50,7 @@ model Listing {
   id                    String    @id
   title                 String
   titleLower            String
+  searchText            String    @default("")
   clientRequestId       String?
   description           String
   price                 Float
