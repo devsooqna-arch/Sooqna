@@ -130,11 +130,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (email: string, password: string) => {
     debugAuth("login:start", { email });
     const cred = await authService.loginWithEmailAndPassword(email, password);
-    const result = await ensureUserProfile(cred.user);
-    debugAuth("login:ensureUserProfile", {
-      uid: cred.user.uid,
-      created: result.created,
-    });
+    // Backend profile sync is best-effort: Firebase auth has already succeeded, so a
+    // backend/DB hiccup must NOT surface as a login failure (which the UI maps to the
+    // generic "حدث خطأ غير متوقع"). onAuthStateChanged retries the sync independently.
+    try {
+      const result = await ensureUserProfile(cred.user);
+      debugAuth("login:ensureUserProfile", {
+        uid: cred.user.uid,
+        created: result.created,
+      });
+    } catch (err) {
+      debugAuth("login:ensureUserProfile FAILED (non-fatal)", err);
+    }
     return { emailVerified: cred.user.emailVerified };
   }, []);
 

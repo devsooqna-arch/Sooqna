@@ -251,16 +251,22 @@ export class ListingsService {
 
     const isOwnerView = viewerId === listing.ownerId;
     if (!isOwnerView) {
-      const updated = await this.repo.updateFields(listingId, {
-        viewsCount: listing.viewsCount + 1,
-        updatedAt: new Date(),
-      });
-      await trackEngagementEvent({
-        eventType: "view",
-        listingId,
-        actorId: viewerId,
-      });
-      return updated;
+      // View counting and analytics are non-critical: a failure here must not turn a
+      // public listing read into a 500. Fall back to the already-loaded listing.
+      try {
+        const updated = await this.repo.updateFields(listingId, {
+          viewsCount: listing.viewsCount + 1,
+          updatedAt: new Date(),
+        });
+        await trackEngagementEvent({
+          eventType: "view",
+          listingId,
+          actorId: viewerId,
+        });
+        return updated;
+      } catch {
+        return listing;
+      }
     }
 
     return listing;
