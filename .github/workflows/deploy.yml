@@ -257,6 +257,10 @@ jobs:
               echo "FIREBASE_SERVICE_ACCOUNT_PATH=${BACKEND_FIREBASE_SERVICE_ACCOUNT_PATH}"
               echo "FIREBASE_USE_APPLICATION_DEFAULT_CREDENTIALS=${BACKEND_FIREBASE_USE_APPLICATION_DEFAULT_CREDENTIALS:-false}"
               echo "ENABLE_CATEGORIES_JSON_FALLBACK=false"
+              # reCAPTCHA defaults to enabled in production; disable explicitly
+              # since no RECAPTCHA_SECRET_KEY/site key is configured (otherwise
+              # env.ts throws on startup and the category seed/backend boot fail).
+              echo "RECAPTCHA_ENABLED=false"
               echo "DATABASE_URL=${DATABASE_URL}"
               echo "UPLOADS_PUBLIC_BASE_URL=${UPLOADS_PUBLIC_BASE_URL}"
               echo "BACKEND_PUBLIC_ORIGIN=${NEXT_PUBLIC_SITE_URL}"
