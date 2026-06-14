@@ -15,6 +15,8 @@ const nextConfig = {
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "un.flashpointjordan.com" },
+      // Local dev: backend serves uploaded listing images from /uploads.
+      ...(isDevelopment ? [{ protocol: "http", hostname: "localhost", port: "5000" }] : []),
     ],
   },
   pageExtensions: isDevelopment ? ["tsx", "ts", "jsx", "js", "dev.tsx"] : ["tsx", "ts", "jsx", "js"],

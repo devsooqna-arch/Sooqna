@@ -82,6 +82,18 @@ export class ListingsService {
     "الحسكه": "alhasakah",
   };
 
+  /**
+   * Resolve a free-text city input (Arabic name, English name, or slug) to the
+   * canonical city id used for storage and filtering (e.g. "دمشق" → "damascus").
+   * Returns undefined when the value cannot be mapped to a known city.
+   */
+  private resolveCityId(input?: string | null): string | undefined {
+    const key = input?.trim().toLowerCase() ?? "";
+    if (!key) return undefined;
+    const alias = this.cityAliases[key];
+    return alias && CITY_IDS.includes(alias as (typeof CITY_IDS)[number]) ? alias : undefined;
+  }
+
   constructor(private readonly repo: ListingsRepository) {}
 
   private async ensureOwnerUser(owner: CreateListingUserInput): Promise<void> {
@@ -139,7 +151,9 @@ export class ListingsService {
       },
       location: {
         country: input.location?.country ?? "",
-        city: input.location?.city ?? "",
+        // Store the canonical city id (e.g. "damascus") so listings are
+        // filterable; fall back to the trimmed raw value when unknown.
+        city: this.resolveCityId(input.location?.city) ?? input.location?.city?.trim() ?? "",
         area: input.location?.area ?? "",
       },
       images: [],
@@ -478,12 +492,10 @@ export class ListingsService {
 
   normalizeFilters(pagination?: PaginationOptions): PaginationOptions {
     const categoryInput = pagination?.category?.trim().toLowerCase() ?? "";
-    const cityInput = pagination?.city?.trim().toLowerCase() ?? "";
     const category = CATEGORY_IDS.includes(categoryInput as (typeof CATEGORY_IDS)[number])
       ? categoryInput
       : undefined;
-    const cityAlias = this.cityAliases[cityInput];
-    const city = cityAlias && CITY_IDS.includes(cityAlias as (typeof CITY_IDS)[number]) ? cityAlias : undefined;
+    const city = this.resolveCityId(pagination?.city);
     const sort =
       pagination?.sort === "price_asc" || pagination?.sort === "price_desc" || pagination?.sort === "newest"
         ? pagination.sort

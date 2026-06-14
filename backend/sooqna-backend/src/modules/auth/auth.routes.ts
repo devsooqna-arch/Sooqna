@@ -2,7 +2,6 @@ import { Router } from "express";
 import rateLimit from "express-rate-limit";
 import { verifyFirebaseToken } from "../../middleware/verifyFirebaseToken";
 import { validateRequest } from "../../middleware/validateRequest";
-import { adminAuth } from "../../config/firebaseAdmin";
 import { env } from "../../config/env";
 import { sendError, sendSuccess } from "../../shared/contracts/api";
 import { emptyBodySchema, emptyQuerySchema, recaptchaVerifyBodySchema } from "../../shared/validation/schemas";
@@ -53,8 +52,10 @@ authRouter.post(
       return;
     }
 
-    const user = await adminAuth.getUser(req.authUser!.uid);
-    if (user.emailVerified) {
+    // Read the verification state from the decoded ID token instead of calling
+    // adminAuth.getUser(), which requires privileged Admin credentials that are
+    // not always available (e.g. local Application Default Credentials).
+    if (req.authUser?.email_verified) {
       sendSuccess(res, { allowed: false, alreadyVerified: true });
       return;
     }

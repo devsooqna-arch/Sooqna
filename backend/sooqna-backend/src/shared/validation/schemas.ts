@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { LISTING_CURRENCIES } from "../constants/domain";
 
+/** Coerce empty/whitespace-only query strings to undefined (i.e. "no filter"). */
+const emptyToUndefined = (value: unknown) =>
+  typeof value === "string" && value.trim() === "" ? undefined : value;
+
 const idParamSchema = z.object({
   id: z.string().min(1),
 });
@@ -108,9 +112,11 @@ export const listingsQuerySchema = z
   .object({
     limit: z.coerce.number().int().min(1).max(100).optional(),
     offset: z.coerce.number().int().min(0).optional(),
-    category: z.string().trim().min(1).max(120).optional(),
-    city: z.string().trim().min(1).max(120).optional(),
-    search: z.string().trim().max(200).optional(),
+    // Treat empty/whitespace query params (e.g. ?city=) as "no filter" rather
+    // than a validation error, so the "all cities/categories" UI state is valid.
+    category: z.preprocess(emptyToUndefined, z.string().trim().min(1).max(120).optional()),
+    city: z.preprocess(emptyToUndefined, z.string().trim().min(1).max(120).optional()),
+    search: z.preprocess(emptyToUndefined, z.string().trim().max(200).optional()),
     sort: z.enum(["price_asc", "price_desc", "newest"]).optional(),
     priceMin: z.coerce.number().nonnegative().optional(),
     priceMax: z.coerce.number().nonnegative().optional(),

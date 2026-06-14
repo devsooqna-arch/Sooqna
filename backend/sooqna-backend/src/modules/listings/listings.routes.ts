@@ -5,6 +5,7 @@ import { requireActiveUser, requireCurrentUser } from "../../middleware/authCont
 import { requireVerifiedEmail } from "../../middleware/requireVerifiedEmail";
 import { contentFilter } from "../../middleware/contentFilter";
 import { validateRequest } from "../../middleware/validateRequest";
+import { asyncHandler } from "../../middleware/asyncHandler";
 import {
   attachListingImageBodySchema,
   batchListingIdsBodySchema,
@@ -35,10 +36,10 @@ import {
 
 export const listingsRouter = Router();
 
-listingsRouter.get("/", validateRequest({ query: listingsQuerySchema }), listListings);
-listingsRouter.get("/mine", verifyFirebaseToken, requireCurrentUser, requireActiveUser, listMyListings);
-listingsRouter.post("/batch", validateRequest({ body: batchListingIdsBodySchema }), getListingsByIds);
-listingsRouter.get("/price-insights", async (req, res) => {
+listingsRouter.get("/", validateRequest({ query: listingsQuerySchema }), asyncHandler(listListings));
+listingsRouter.get("/mine", verifyFirebaseToken, requireCurrentUser, requireActiveUser, asyncHandler(listMyListings));
+listingsRouter.post("/batch", validateRequest({ body: batchListingIdsBodySchema }), asyncHandler(getListingsByIds));
+listingsRouter.get("/price-insights", asyncHandler(async (req, res) => {
   const categoryId = typeof req.query.categoryId === "string" ? req.query.categoryId.trim() : "";
   const city = typeof req.query.city === "string" ? req.query.city.trim() : "";
   const condition = typeof req.query.condition === "string" ? req.query.condition.trim() : "";
@@ -74,8 +75,8 @@ listingsRouter.get("/price-insights", async (req, res) => {
       confidence,
     },
   });
-});
-listingsRouter.get("/:id", validateRequest({ params: idParamsSchema }), getListingById);
+}));
+listingsRouter.get("/:id", validateRequest({ params: idParamsSchema }), asyncHandler(getListingById));
 
 listingsRouter.post(
   "/",
@@ -85,7 +86,7 @@ listingsRouter.post(
   requireVerifiedEmail,
   contentFilter,
   validateRequest({ body: createListingBodySchema }),
-  createListing
+  asyncHandler(createListing)
 );
 listingsRouter.patch(
   "/:id",
@@ -95,7 +96,7 @@ listingsRouter.patch(
   requireVerifiedEmail,
   contentFilter,
   validateRequest({ params: idParamsSchema, body: patchListingBodySchema }),
-  patchListing
+  asyncHandler(patchListing)
 );
 listingsRouter.post(
   "/:id/publish",
@@ -104,7 +105,7 @@ listingsRouter.post(
   requireActiveUser,
   requireVerifiedEmail,
   validateRequest({ params: idParamsSchema }),
-  publishListing
+  asyncHandler(publishListing)
 );
 listingsRouter.post(
   "/:id/unpublish",
@@ -113,7 +114,7 @@ listingsRouter.post(
   requireActiveUser,
   requireVerifiedEmail,
   validateRequest({ params: idParamsSchema }),
-  unpublishListing
+  asyncHandler(unpublishListing)
 );
 listingsRouter.post(
   "/:id/archive",
@@ -122,7 +123,7 @@ listingsRouter.post(
   requireActiveUser,
   requireVerifiedEmail,
   validateRequest({ params: idParamsSchema }),
-  archiveListing
+  asyncHandler(archiveListing)
 );
 listingsRouter.post(
   "/:id/sold",
@@ -131,7 +132,7 @@ listingsRouter.post(
   requireActiveUser,
   requireVerifiedEmail,
   validateRequest({ params: idParamsSchema }),
-  markListingSold
+  asyncHandler(markListingSold)
 );
 listingsRouter.post(
   "/:id/renew",
@@ -140,7 +141,7 @@ listingsRouter.post(
   requireActiveUser,
   requireVerifiedEmail,
   validateRequest({ params: idParamsSchema, body: renewListingBodySchema }),
-  renewListing
+  asyncHandler(renewListing)
 );
 listingsRouter.post(
   "/:id/expire",
@@ -149,7 +150,7 @@ listingsRouter.post(
   requireActiveUser,
   requireVerifiedEmail,
   validateRequest({ params: idParamsSchema }),
-  expireListing
+  asyncHandler(expireListing)
 );
 listingsRouter.delete(
   "/:id",
@@ -158,7 +159,7 @@ listingsRouter.delete(
   requireActiveUser,
   requireVerifiedEmail,
   validateRequest({ params: idParamsSchema }),
-  deleteListing
+  asyncHandler(deleteListing)
 );
 listingsRouter.post(
   "/:id/feature",
@@ -166,7 +167,7 @@ listingsRouter.post(
   requireCurrentUser,
   requireActiveUser,
   validateRequest({ params: idParamsSchema }),
-  featureListing
+  asyncHandler(featureListing)
 );
 listingsRouter.post(
   "/:id/unfeature",
@@ -174,7 +175,7 @@ listingsRouter.post(
   requireCurrentUser,
   requireActiveUser,
   validateRequest({ params: idParamsSchema }),
-  unfeatureListing
+  asyncHandler(unfeatureListing)
 );
 listingsRouter.post(
   "/:id/images",
@@ -183,5 +184,5 @@ listingsRouter.post(
   requireActiveUser,
   requireVerifiedEmail,
   validateRequest({ params: idParamsSchema, body: attachListingImageBodySchema }),
-  attachListingImage
+  asyncHandler(attachListingImage)
 );
